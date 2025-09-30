@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Bienvenido @ViewBag.Nombre 👋</h4>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-4">
+            Desde aquí podés gestionar todo lo relacionado a tus <strong>mascotas</strong> y <strong>turnos</strong>.
+        </p>
+
+        <div class="row g-4">
+            <!-- 🐶 Mascotas -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">🐶 Mis Mascotas</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="flex-grow-1">Registrar, editar o eliminar tus mascotas.</p>
+                        <a href="/Mascota/Index" class="btn btn-info text-white mt-auto">Ir a Mascotas</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📅 Turnos -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">📅 Turnos</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="flex-grow-1">Solicitá un turno para una de tus mascotas.</p>
+                        <a href="/Turno/Index" class="btn btn-success mt-auto">Ir a Turnos</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⚙️ Configuración -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">⚙️ Configuración</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="flex-grow-1">Actualizar tus datos o cambiar tu contraseña.</p>
+                        <a href="/Cliente/Perfil" class="btn btn-secondary mt-auto">Ir a Perfil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

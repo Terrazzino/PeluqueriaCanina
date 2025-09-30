@@ -1,0 +1,12 @@
+﻿INSTALAMOS LOS SIGUIENTES NUGETS:
+Microsoft.EntityFrameworkCore.SqlServer
+Microsoft.EntityFrameworkCore.Tools
+BCrypt.Net-Next (para hashear contraseñas)
+
+FLUJO DEL MODELO DE SEGURIDAD:
+Vista de Registro (solo clientes).
+Vista de Login (todos los roles).
+Validación de credenciales → hasheo + comparación.
+Redirección según el rol.
+Seguridad básica → no permitir que un Cliente entre a la vista de Admin, etc.
+

@@ -1,0 +1,64 @@
+﻿@model IEnumerable<dynamic>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📋 Listado de Peluqueros</h2>
+        <a asp-action="RegistrarPeluquero" class="btn btn-primary">
+            ➕ Registrar Peluquero
+        </a>
+    </div>
+
+    <div class="card shadow rounded-3">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Mail</th>
+                        <th>Jornadas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.Nombre</td>
+                            <td>@p.Apellido</td>
+                            <td>@p.Mail</td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var j in p.Jornadas)
+                                    {
+                                        @if (j.HoraDeInicio != j.HoraDeFin && j.Activo ==true)
+                                        {
+                                            <li>
+                                                <span class="fw-bold">@j.Dia:</span>
+                                                @j.HoraDeInicio - @j.HoraDeFin
+                                                <span class="badge @(j.Activo ? "bg-success" : "bg-secondary") ms-1">
+                                                    @(j.Activo ? "Activo" : "Inactivo")
+                                                </span>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="EditarPeluquero" asp-route-id="@p.Id" 
+                                   class="btn btn-sm btn-warning me-2">
+                                    ✏️ Editar
+                                </a>
+                                <a asp-action="EliminarPeluquero" asp-route-id="@p.Id" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('¿Seguro que deseas eliminar a este peluquero?');">
+                                    🗑️ Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

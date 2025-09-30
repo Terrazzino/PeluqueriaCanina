@@ -1,0 +1,54 @@
+﻿@model IEnumerable<PeluqueriaCanina.Models.ClasesDeCliente.Mascota>
+
+@{
+    ViewData["Title"] = "Mis Mascotas";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">🐶 Mis Mascotas</h4>
+        <a asp-action="Crear" class="btn btn-light btn-sm">➕ Nueva Mascota</a>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <p class="text-muted">Todavía no registraste ninguna mascota.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Raza</th>
+                            <th>Fecha de Nacimiento</th>
+                            <th>Peso (kg)</th>
+                            <th>Edad</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var mascota in Model)
+                        {
+                            var edad = DateTime.Today.Year - mascota.FechaDeNacimiento.Year;
+                            if (mascota.FechaDeNacimiento.Date > DateTime.Today.AddYears(-edad)) edad--;
+
+                            <tr>
+                                <td>@mascota.Nombre</td>
+                                <td>@mascota.Raza</td>
+                                <td>@mascota.FechaDeNacimiento.ToShortDateString()</td>
+                                <td>@mascota.Peso</td>
+                                <td>@edad años</td>
+                                <td class="text-center">
+                                    <a asp-action="Editar" asp-route-id="@mascota.Id" class="btn btn-warning btn-sm">✏️</a>
+                                    <a asp-action="Eliminar" asp-route-id="@mascota.Id" class="btn btn-danger btn-sm">🗑️</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

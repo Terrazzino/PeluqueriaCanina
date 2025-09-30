@@ -1,0 +1,29 @@
+﻿@using PeluqueriaCanina.Models.ClasesDeAdministrador
+@model Servicio
+@{
+    ViewData["Title"] = "Eliminar Servicio";
+}
+
+<div class="card shadow-sm p-4 mt-4">
+    <h2 class="text-danger mb-4">¿Eliminar este servicio?</h2>
+
+    <div class="mb-3">
+        <p><strong>Nombre:</strong> @Model.NombreDelServicio</p>
+        <p><strong>Descripción:</strong> @Model.Descripcion</p>
+        <p><strong>Precio:</strong> $@Model.Precio</p>
+        <p><strong>Duración:</strong> @Model.Duracion.ToString(@"hh\:mm")</p>
+    </div>
+
+    <form asp-action="Eliminar" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Confirmar
+            </button>
+        </div>
+    </form>
+</div>

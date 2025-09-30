@@ -1,0 +1,16 @@
+﻿@using PeluqueriaCanina.Models.ClasesDeAdministrador
+@model Servicio
+@{
+    ViewData["Title"] = "Editar Servicio";
+}
+
+<div class="card shadow-sm p-4 mt-4">
+    <h2 class="text-primary mb-4">Editar Servicio</h2>
+
+    <form asp-action="Editar" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <!-- mismo contenido que Crear.cshtml -->
+        @Html.Partial("Crear", Model)
+    </form>
+</div>
