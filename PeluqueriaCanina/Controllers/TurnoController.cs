@@ -1,112 +1,146 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
+using PeluqueriaCanina.Models;
 using PeluqueriaCanina.Models.ClasesDeCliente;
-using PeluqueriaCanina.Services;
-using System.Text.Json;
+using PeluqueriaCanina.Models.ClasesDePeluquero;
+using PeluqueriaCanina.Models.ClasesDeTurno;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PeluqueriaCanina.Controllers
 {
-    public class TurnoController:Controller
+    public class TurnoController : Controller
     {
         private readonly ContextoAcqua _contexto;
-        public TurnoController(ContextoAcqua context)
+
+        public TurnoController(ContextoAcqua contexto)
         {
-            _contexto = context;
+            _contexto = contexto;
         }
 
-        public IActionResult Index()
-        {
-            if (HttpContext.Session.GetString("Rol") != "Cliente")
-                return RedirectToAction("Login", "Auth");
-
-            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
-            var turnos = _contexto.Turnos
-                .Include(t => t.Mascota)
-                .Include(t => t.Peluquero)
-                .Where(t => t.Mascota.ClienteId == clienteId)
-                .ToList();
-            return View(turnos);
-        }
-
-        [HttpGet]
+        // GET: Turno/Crear
         public IActionResult Crear()
         {
-            if (HttpContext.Session.GetString("Rol") != "Cliente")
-                return RedirectToAction("Login", "Auth");
-
-            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
-
-            var mascotas = _contexto.Mascotas
-                .Where(m => m.ClienteId == clienteId)
-                .ToList();
-
-            var servicios = _contexto.Servicios.ToList();
-
-            var peluqueros = _contexto.Peluqueros
-                .Include(p=>p.Jornadas)
-                .ToList();
-
-
-            ViewBag.Mascotas = mascotas;
-            ViewBag.Servicios = servicios;
-            ViewBag.Peluqueros = peluqueros;
-
-            var franjas = CalcularDisponibilidad(null, TimeSpan.FromMinutes(30),DateTime.Today, DateTime.Today.AddDays(7));
-
-            var eventos = franjas.Select(f => new
-            {
-                title = f.Libre ? $"Libre - {f.PeluqueroNombre}":$"Ocupado - {f.PeluqueroNombre}",
-                start = DateTime.Today.AddDays((int)f.Dia).Add(f.HoraInicio).ToString("s"),
-                end = DateTime.Today.AddDays((int)f.Dia).Add(f.HoraFin).ToString("s"),
-                color = f.Libre? "#d4edda" : "#f8d7da",
-                borderColor = "#ccc",
-            }).ToList();
-
-            ViewBag.Eventos = eventos;
-
+            ViewBag.Mascotas = _contexto.Mascotas.ToList();
+            ViewBag.Servicios = _contexto.Servicios.ToList();
+            ViewBag.Peluqueros = _contexto.Peluqueros.ToList();
             return View();
         }
 
-        private List<FranjaDisponible> CalcularDisponibilidad(int? peluqueroId, TimeSpan DuracionServicio, DateTime fechaDesde, DateTime fechaHasta)
+        // POST: Turno/Crear
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Crear(Turno turno)
         {
-            var peluqueros = peluqueroId.HasValue
-                ? _contexto.Peluqueros.Where(p => p.Id == peluqueroId.Value).Include(p => p.Jornadas).ToList()
-                : _contexto.Peluqueros.Include(p => p.Jornadas).ToList();
-            var franjasDisponibles = new List<FranjaDisponible>();
-
-            foreach(var p in peluqueros)
+            if (ModelState.IsValid)
             {
-                foreach (var jornada in p.Jornadas)
-                {
-                    var turnosOcupados = _contexto.Turnos
-                        .Where(t => t.PeluqueroId == p.Id &&
-                        t.FechaHora.Date == fechaDesde.Date &&
-                        t.Estado != EstadoTurno.Cancelled)
-                        .ToList();
+                _contexto.Add(turno);
+                await _contexto.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
 
-                    var inicio = jornada.HoraDeInicio;
-                    var inicioDT = fechaDesde + inicio;
-                    while(inicio + DuracionServicio <= jornada.HoraDeFin)
+            ViewBag.Mascotas = _contexto.Mascotas.ToList();
+            ViewBag.Servicios = _contexto.Servicios.ToList();
+            ViewBag.Peluqueros = _contexto.Peluqueros.ToList();
+            return View(turno);
+        }
+
+        // 🔥 Unificado: disponibilidad dinámica para FullCalendar
+        [HttpGet]
+        public async Task<IActionResult> GetDisponibilidad(int? servicioId, int? peluqueroId, DateTime? start, DateTime? end)
+        {
+            if (!start.HasValue || !end.HasValue)
+                return Json(new List<object>());
+
+            var servicio = servicioId.HasValue ? await _contexto.Servicios.FindAsync(servicioId) : null;
+            int duracion = servicio?.Duracion.Minutes ?? 30;
+
+            // Traemos turnos ocupados del peluquero (todos los servicios)
+            var turnosOcupados = await _contexto.Turnos
+                .Where(t => (peluqueroId != null ? t.PeluqueroId == peluqueroId : true)
+                            && t.Estado != EstadoTurno.Cancelled
+                            && t.FechaHora >= start && t.FechaHora < end)
+                .ToListAsync();
+
+            var eventos = new List<object>();
+
+            List<Jornada> jornadas = new();
+            if (peluqueroId != null)
+            {
+                jornadas = await _contexto.Jornadas
+                    .Where(j => j.PeluqueroId == peluqueroId && j.Activo)
+                    .ToListAsync();
+            }
+            else
+            {
+                jornadas = await _contexto.Jornadas
+                    .Where(j => j.Activo)
+                    .ToListAsync();
+            }
+            for (DateTime fecha = start.Value.Date; fecha <= end.Value.Date; fecha = fecha.AddDays(1))
+            {
+                var dia = MapearDia(fecha.DayOfWeek);
+                if (dia == null) continue;
+
+                var jornadasDelDia = jornadas.Where(j => j.Dia == dia).ToList();
+                if (!jornadasDelDia.Any()) continue;
+
+                foreach (var jornada in jornadasDelDia)
+                {
+                    var horaInicio = jornada.HoraDeInicio;
+                    var horaFin = jornada.HoraDeFin;
+
+                    for (var hora = horaInicio; hora < horaFin; hora = hora.Add(TimeSpan.FromMinutes(duracion)))
                     {
-                        var fin = inicio + DuracionServicio;
-                        var finDT = inicioDT + DuracionServicio;
-                        var libre = !turnosOcupados.Any(t => t.HoraInicio<finDT && t.HoraFin > inicioDT);
-                        franjasDisponibles.Add(new FranjaDisponible
+                        var inicio = fecha + hora;
+                        var fin = inicio.AddMinutes(duracion);
+
+                        bool ocupado = turnosOcupados.Any(t =>
+                        (inicio < t.FechaHora.AddMinutes(t.Duracion.Minutes)) &&
+                        (t.FechaHora < fin));
+
+                        eventos.Add(new
                         {
-                            PeluqueroId = p.Id,
-                            PeluqueroNombre = $"{p.Nombre} {p.Apellido}",
-                            Dia = jornada.Dia,
-                            HoraInicio = inicio,
-                            HoraFin = fin,
-                            Libre = libre
+                            title = ocupado ? "Ocupado":"Disponible",
+                            start = inicio.ToString("s"),
+                            end = fin.ToString("s"),
+                            allDay=false,
+                            backgroundColor = ocupado ? "#dc3545":"#28a745",
+                            editable = false
                         });
-                        inicio = inicio.Add(TimeSpan.FromMinutes(30));
                     }
                 }
             }
-            return franjasDisponibles;
+            return Json(eventos);
         }
+
+        // GET: Turno
+        public async Task<IActionResult> Index()
+        {
+            var turnos = await _contexto.Turnos
+                .Include(t => t.Mascota)
+                .Include(t => t.Servicio)
+                .Include(t => t.Peluquero)
+                .ToListAsync();
+            return View(turnos);
+        }
+
+        private DiasLaborales? MapearDia(DayOfWeek dow)
+        {
+            return dow switch
+            {
+                DayOfWeek.Monday=>DiasLaborales.Lunes,
+                DayOfWeek.Tuesday=> DiasLaborales.Martes,
+                DayOfWeek.Wednesday=>DiasLaborales.Miercoles,
+                DayOfWeek.Thursday=>DiasLaborales.Jueves,
+                DayOfWeek.Friday=>DiasLaborales.Viernes,
+                DayOfWeek.Saturday=> DiasLaborales.Sabado,
+                _ => null
+            };
+        }
+
     }
 }

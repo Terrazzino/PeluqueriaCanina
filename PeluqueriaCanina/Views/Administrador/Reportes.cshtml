@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Reportes - Servicios más elegidos";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">📊 Servicios más seleccionados</h4>
+        </div>
+        <div class="card-body text-center">
+            <canvas id="graficoServicios" style="max-height:400px"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const servicios = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Servicios));
+        const cantidades = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Cantidades));
+
+        const ctx = document.getElementById('graficoServicios').getContext('2d');
+        const grafico = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: servicios,
+                datasets: [{
+                    label: 'Servicios más elegidos',
+                    data: cantidades,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const servicio = servicios[index];
+                        window.location.href = `/Administrador/DetalleServicio?servicio=${encodeURIComponent(servicio)}`;
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}

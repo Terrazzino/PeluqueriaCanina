@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Detalle de " + ViewBag.Peluquero;
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark text-center">
+            <h4 class="mb-0">💈 Reporte de @ViewBag.Peluquero (@ViewBag.Servicio)</h4>
+        </div>
+        <div class="card-body text-center">
+            <canvas id="graficoTurnos" style="max-height:400px"></canvas>
+
+            <div class="mt-4">
+                <h5>💵 Total Recaudado: <span class="fw-bold text-success">$@ViewBag.Recaudado</span></h5>
+            </div>
+        </div>
+
+        <div class="card-footer text-center">
+            <a asp-action="DetalleServicio" asp-route-servicio="@ViewBag.Servicio" class="btn btn-secondary">⬅ Volver al servicio</a>
+            <a asp-action="Reportes" class="btn btn-outline-primary ms-2">🏠 Volver al inicio de reportes</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const datos = {
+            labels: ["Realizados", "Cancelados"],
+            datasets: [{
+                label: "Turnos de @ViewBag.Peluquero",
+                data: [@ViewBag.Realizados, @ViewBag.Cancelados],
+                backgroundColor: [
+                    "rgba(54, 162, 235, 0.7)",
+                    "rgba(255, 99, 132, 0.7)"
+                ],
+                borderColor: "white",
+                borderWidth: 2
+            }]
+        };
+
+        const ctx = document.getElementById('graficoTurnos').getContext('2d');
+        new Chart(ctx, {
+            type: "doughnut",
+            data: datos,
+            options: {
+                plugins: {
+                    legend: { position: "bottom" },
+                    title: {
+                        display: true,
+                        text: "Distribución de Turnos"
+                    }
+                }
+            }
+        });
+    </script>
+}

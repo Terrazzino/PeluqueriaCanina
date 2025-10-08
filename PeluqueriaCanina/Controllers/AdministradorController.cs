@@ -195,5 +195,76 @@ namespace PeluqueriaCanina.Controllers
 
             return RedirectToAction("ListarPeluqueros");
         }
+
+
+
+        //DESARROLLAMOS EL HARDCODEO PARA BASE DE DATOS APLICADAS
+        //EN ESTA SECCIÓN IMPLEMENTAMOS TODO LO REFERIDO A REPORTES
+        //LUEGO IMPLEMENTAREMOS EL CONTEXTO PARA DARLE DINAMISMO
+        //VAMOS A USAR LA LIBRERIA DE CHATR.JS PARA ESTE DESARROLLO
+
+
+        public IActionResult Reportes()
+        {
+            // Datos HARDCODEADOS
+            var servicios = new List<string> { "Baño", "Corte", "Desparasitación", "Peluquería Completa" };
+            var cantidades = new List<int> { 40, 25, 15, 20 };
+
+            ViewBag.Servicios = servicios;
+            ViewBag.Cantidades = cantidades;
+
+            return View();
+        }
+
+        // === Reporte detallado: Peluqueros por servicio ===
+        public IActionResult DetalleServicio(string servicio)
+        {
+            // Simulamos datos distintos según el servicio elegido
+            var peluqueros = new List<string> { "Mariana", "Luis", "Carlos", "Sofía" };
+            var cantidadPorServicio = servicio switch
+            {
+                "Baño" => new List<int> { 10, 8, 15, 7 },
+                "Corte" => new List<int> { 5, 9, 7, 4 },
+                "Desparasitación" => new List<int> { 4, 3, 5, 3 },
+                "Peluquería Completa" => new List<int> { 8, 10, 6, 9 },
+                _ => new List<int> { 0, 0, 0, 0 }
+            };
+
+            ViewBag.Servicio = servicio;
+            ViewBag.Peluqueros = peluqueros;
+            ViewBag.Cantidades = cantidadPorServicio;
+
+            return View();
+        }
+
+        public IActionResult DetallePeluquero(string servicio, string peluquero)
+        {
+            // Datos simulados por peluquero y servicio (HARDCODEADOS)
+            var datos = new Dictionary<string, (int realizados, int cancelados, decimal recaudado)>
+    {
+        { "Mariana", (20, 2, 45000) },
+        { "Luis", (15, 1, 37000) },
+        { "Carlos", (25, 3, 51000) },
+        { "Sofía", (18, 4, 42000) }
+    };
+
+            if (!datos.ContainsKey(peluquero))
+            {
+                ViewBag.Error = "No se encontraron datos del peluquero.";
+                return View();
+            }
+
+            var (realizados, cancelados, recaudado) = datos[peluquero];
+
+            ViewBag.Servicio = servicio;
+            ViewBag.Peluquero = peluquero;
+            ViewBag.Realizados = realizados;
+            ViewBag.Cancelados = cancelados;
+            ViewBag.Recaudado = recaudado;
+
+            return View();
+        }
+
+
     }
 }

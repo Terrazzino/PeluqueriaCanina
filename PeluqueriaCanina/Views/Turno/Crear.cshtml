@@ -1,71 +1,110 @@
-﻿@{
+﻿@model PeluqueriaCanina.Models.ClasesDeTurno.Turno
+
+@{
     ViewData["Title"] = "Reservar Turno";
-    Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <h2>Reservar Turno</h2>
-
-    <form method="post" asp-action="Crear">
-        <div class="row mb-3">
-            <div class="col-md-4">
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">📅 Reservar Turno</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Crear" method="post">
+            <div class="form-group">
                 <label>Mascota</label>
-                <select class="form-select" name="MascotaId" required>
+                <select asp-for="MascotaId" class="form-control" required>
                     <option value="">Seleccione una mascota</option>
-                    @foreach (var m in ViewBag.Mascotas as List<PeluqueriaCanina.Models.ClasesDeCliente.Mascota>)
+                    @foreach (var mascota in ViewBag.Mascotas)
                     {
-                        <option value="@m.Id">@m.Nombre</option>
+                        <option value="@mascota.Id">@mascota.Nombre</option>
                     }
                 </select>
             </div>
-            <div class="col-md-4">
+
+            <div class="form-group mt-2">
                 <label>Servicio</label>
-                <select class="form-select" name="ServicioId" required>
+                <select id="ServicioId" asp-for="ServicioId" class="form-control" required>
                     <option value="">Seleccione un servicio</option>
-                    @foreach (var s in ViewBag.Servicios as List<PeluqueriaCanina.Models.ClasesDeAdministrador.Servicio>)
+                    @foreach (var servicio in ViewBag.Servicios)
                     {
-                        <option value="@s.Id">@s.NombreDelServicio (@s.Duracion.TotalMinutes min)</option>
+                        <option value="@servicio.Id">@servicio.NombreDelServicio</option>
                     }
                 </select>
             </div>
-            <div class="col-md-4">
-                <label>Peluquero (opcional)</label>
-                <select class="form-select" name="PeluqueroId">
-                    <option value="">Me da lo mismo</option>
-                    @foreach (var p in ViewBag.Peluqueros as List<PeluqueriaCanina.Models.Users.Peluquero>)
+
+            <div class="form-group mt-2">
+                <label>Peluquero</label>
+                <select id="PeluqueroId" asp-for="PeluqueroId" class="form-control">
+                    <option value="">Cualquiera</option>
+                    @foreach (var peluquero in ViewBag.Peluqueros)
                     {
-                        <option value="@p.Id">@p.Nombre @p.Apellido</option>
+                        <option value="@peluquero.Id">@peluquero.Nombre</option>
                     }
                 </select>
             </div>
-        </div>
 
-        <div id="calendar"></div>
+            <!-- Campo oculto donde guardamos la fecha seleccionada -->
+            <input type="hidden" asp-for="FechaHora" id="FechaHora" />
 
-        <button type="submit" class="btn btn-success mt-3">Reservar Turno</button>
-    </form>
+            <div class="mt-4">
+                <div id="calendar"></div>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">Confirmar Turno</button>
+        </form>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            slotDuration: '00:30:00',
-            allDaySlot: false,
-            nowIndicator: true,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'timeGridWeek'
-            },
-            businessHours: true,
-            events: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Eventos)),
-            eventDisplay: 'block',
-            eventTextColor: 'black',
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                allDaySlot: false,
+                slotDuration: '00:30:00',
+                slotMinTime: "09:00:00",
+                slotMaxTime: "18:00:00",
+                locale: 'es',
+                selectable: true,
+                nowIndicator: true,
+                events: function (fetchInfo, successCallback, failureCallback) {
+                    const servicioId = document.getElementById("ServicioId").value;
+                    const peluqueroId = document.getElementById("PeluqueroId").value;
+
+                    if (!servicioId) {
+                        successCallback([]);
+                        return;
+                    }
+
+                    $.getJSON('@Url.Action("GetDisponibilidad", "Turno")', {
+                        servicioId: servicioId,
+                        peluqueroId: peluqueroId,
+                        start: fetchInfo.startStr,
+                        end: fetchInfo.endStr
+                    }).done(function (data) {
+                        successCallback(data);
+                    });
+                },
+                eventClick: function (info) {
+                    if (info.event.title === "Disponible") {
+                        document.getElementById("FechaHora").value = info.event.startStr;
+                        alert("Turno elegido: " + info.event.start.toLocaleString());
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Recargar eventos al cambiar servicio o peluquero
+            document.getElementById("ServicioId").addEventListener("change", function () {
+                calendar.refetchEvents();
+            });
+            document.getElementById("PeluqueroId").addEventListener("change", function () {
+                calendar.refetchEvents();
+            });
         });
-
-        calendar.render();
-    });
-</script>
+    </script>
+}
