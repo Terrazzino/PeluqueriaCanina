@@ -55,31 +55,26 @@ namespace PeluqueriaCanina.Controllers
             if (!start.HasValue || !end.HasValue)
                 return Json(new List<object>());
 
+            // 🔹 Duración del servicio seleccionado
             var servicio = servicioId.HasValue ? await _contexto.Servicios.FindAsync(servicioId) : null;
-            int duracion = servicio?.Duracion.Minutes ?? 30;
+            int duracionMinutos = servicio?.Duracion.Minutes > 0 ? servicio.Duracion.Minutes : 30;
 
-            // Traemos turnos ocupados del peluquero (todos los servicios)
+            // 🔹 Turnos ocupados dentro del rango visible
             var turnosOcupados = await _contexto.Turnos
-                .Where(t => (peluqueroId != null ? t.PeluqueroId == peluqueroId : true)
-                            && t.Estado != EstadoTurno.Cancelled
-                            && t.FechaHora >= start && t.FechaHora < end)
+                .Where(t =>
+                    (peluqueroId != null ? t.PeluqueroId == peluqueroId : true) &&
+                    t.Estado != EstadoTurno.Cancelled &&
+                    t.FechaHora >= start && t.FechaHora < end)
                 .ToListAsync();
 
             var eventos = new List<object>();
 
-            List<Jornada> jornadas = new();
-            if (peluqueroId != null)
-            {
-                jornadas = await _contexto.Jornadas
-                    .Where(j => j.PeluqueroId == peluqueroId && j.Activo)
-                    .ToListAsync();
-            }
-            else
-            {
-                jornadas = await _contexto.Jornadas
-                    .Where(j => j.Activo)
-                    .ToListAsync();
-            }
+            // 🔹 Jornadas activas (del peluquero o de todos)
+            var jornadas = await _contexto.Jornadas
+                .Where(j => (peluqueroId != null ? j.PeluqueroId == peluqueroId : true) && j.Activo)
+                .ToListAsync();
+
+            // 🔹 Recorremos los días visibles
             for (DateTime fecha = start.Value.Date; fecha <= end.Value.Date; fecha = fecha.AddDays(1))
             {
                 var dia = MapearDia(fecha.DayOfWeek);
@@ -93,29 +88,54 @@ namespace PeluqueriaCanina.Controllers
                     var horaInicio = jornada.HoraDeInicio;
                     var horaFin = jornada.HoraDeFin;
 
-                    for (var hora = horaInicio; hora < horaFin; hora = hora.Add(TimeSpan.FromMinutes(duracion)))
+                    for (var hora = horaInicio; hora < horaFin; hora = hora.Add(TimeSpan.FromMinutes(duracionMinutos)))
                     {
                         var inicio = fecha + hora;
-                        var fin = inicio.AddMinutes(duracion);
+                        var fin = inicio.AddMinutes(duracionMinutos);
 
+                        // ❌ Si el turno se pasa del horario laboral, no se ofrece
+                        if (fin > fecha + horaFin)
+                            break;
+
+                        // ❌ Si se solapa con un turno existente, no se ofrece
                         bool ocupado = turnosOcupados.Any(t =>
-                        (inicio < t.FechaHora.AddMinutes(t.Duracion.Minutes)) &&
-                        (t.FechaHora < fin));
+                            (inicio < t.FechaHora.AddMinutes(t.Duracion.Minutes)) &&
+                            (t.FechaHora < fin));
 
-                        eventos.Add(new
+                        // ✅ Solo agregamos si hay disponibilidad real
+                        if (!ocupado)
                         {
-                            title = ocupado ? "Ocupado":"Disponible",
-                            start = inicio.ToString("s"),
-                            end = fin.ToString("s"),
-                            allDay=false,
-                            backgroundColor = ocupado ? "#dc3545":"#28a745",
-                            editable = false
-                        });
+                            eventos.Add(new
+                            {
+                                title = "Disponible",
+                                start = inicio.ToString("s"),
+                                end = fin.ToString("s"),
+                                allDay = false,
+                                backgroundColor = "#28a745",
+                                borderColor = "#28a745",
+                                editable = false
+                            });
+                        }
+                        else
+                        {
+                            eventos.Add(new
+                            {
+                                title = "Ocupado",
+                                start = inicio.ToString("s"),
+                                end = fin.ToString("s"),
+                                allDay = false,
+                                backgroundColor = "#dc3545",
+                                borderColor = "#dc3545",
+                                editable = false
+                            });
+                        }
                     }
                 }
             }
+
             return Json(eventos);
         }
+
 
         // GET: Turno
         public async Task<IActionResult> Index()
