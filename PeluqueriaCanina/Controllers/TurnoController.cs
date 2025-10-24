@@ -57,7 +57,9 @@ namespace PeluqueriaCanina.Controllers
 
             // 🔹 Duración del servicio seleccionado
             var servicio = servicioId.HasValue ? await _contexto.Servicios.FindAsync(servicioId) : null;
-            int duracionMinutos = servicio?.Duracion.Minutes > 0 ? servicio.Duracion.Minutes : 30;
+            int duracionMinutos = servicio != null && servicio.Duracion.TotalMinutes > 0
+                ? (int)servicio.Duracion.TotalMinutes
+                : 30;
 
             // 🔹 Turnos ocupados dentro del rango visible
             var turnosOcupados = await _contexto.Turnos
