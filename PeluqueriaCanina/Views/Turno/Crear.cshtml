@@ -10,44 +10,61 @@
     </div>
     <div class="card-body">
         <form asp-action="Crear" method="post">
-            <div class="form-group">
-                <label>Mascota</label>
-                <select asp-for="MascotaId" class="form-control" required>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <!-- Mascota -->
+            <div class="mb-3">
+                <label for="mascotaId" class="form-label">Mascota</label>
+                <select id="mascotaId" name="MascotaId" class="form-select" required>
                     <option value="">Seleccione una mascota</option>
-                    @foreach (var mascota in ViewBag.Mascotas)
+                    @{
+                        var mascotas = ViewBag.Mascotas as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                    }
+                    @foreach (var m in mascotas)
                     {
-                        <option value="@mascota.Id">@mascota.Nombre</option>
+                        <option value="@m.Id">@m.Nombre</option>
                     }
                 </select>
             </div>
 
-            <div class="form-group mt-2">
-                <label>Servicio</label>
-                <select id="ServicioId" asp-for="ServicioId" class="form-control" required>
+            <!-- Servicio -->
+            <div class="mb-3">
+                <label for="servicioId" class="form-label">Servicio</label>
+                <select id="servicioId" name="ServicioId" class="form-select" required>
                     <option value="">Seleccione un servicio</option>
-                    @foreach (var servicio in ViewBag.Servicios)
+                    @{
+                        var servicios = ViewBag.Servicios as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                    }
+                    @foreach (var s in servicios)
                     {
-                        <option value="@servicio.Id">@servicio.NombreDelServicio</option>
+                        <option value="@s.Id" data-duracion="@((s.Duracion != null) ? s.Duracion.TotalMinutes : 30)">
+                            @((s.NombreDelServicio ?? s.Nombre) ?? "Servicio")
+                        </option>
                     }
                 </select>
             </div>
 
-            <div class="form-group mt-2">
-                <label>Peluquero</label>
-                <select id="PeluqueroId" asp-for="PeluqueroId" class="form-control">
+            <!-- Peluquero -->
+            <div class="mb-3">
+                <label for="peluqueroId" class="form-label">Peluquero (opcional)</label>
+                <select id="peluqueroId" name="PeluqueroId" class="form-select">
                     <option value="">Cualquiera</option>
-                    @foreach (var peluquero in ViewBag.Peluqueros)
+                    @{
+                        var peluqueros = ViewBag.Peluqueros as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                    }
+                    @foreach (var p in peluqueros)
                     {
-                        <option value="@peluquero.Id">@peluquero.Nombre</option>
+                        <option value="@p.Id">@p.Nombre @((p.Apellido ?? ""))</option>
                     }
                 </select>
             </div>
 
-            <!-- Campo oculto donde guardamos la fecha seleccionada -->
-            <input type="hidden" asp-for="FechaHora" id="FechaHora" />
+            <input type="hidden" id="FechaHora" name="FechaHora" />
 
             <div class="mt-4">
-                <div id="calendar"></div>
+                <div id="calendar" style="min-height:400px;border:1px solid #ddd;"></div>
             </div>
 
             <button type="submit" class="btn btn-success mt-3">Confirmar Turno</button>
@@ -60,7 +77,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
-
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
                 allDaySlot: false,
@@ -70,14 +86,10 @@
                 locale: 'es',
                 selectable: true,
                 nowIndicator: true,
-                events: function (fetchInfo, successCallback, failureCallback) {
-                    const servicioId = document.getElementById("ServicioId").value;
-                    const peluqueroId = document.getElementById("PeluqueroId").value;
-
-                    if (!servicioId) {
-                        successCallback([]);
-                        return;
-                    }
+                events: function (fetchInfo, successCallback) {
+                    const servicioId = document.getElementById("servicioId").value;
+                    const peluqueroId = document.getElementById("peluqueroId").value;
+                    if (!servicioId) { successCallback([]); return; }
 
                     $.getJSON('@Url.Action("GetDisponibilidad", "Turno")', {
                         servicioId: servicioId,
@@ -86,25 +98,41 @@
                         end: fetchInfo.endStr
                     }).done(function (data) {
                         successCallback(data);
+                    }).fail(function () {
+                        successCallback([]);
                     });
                 },
                 eventClick: function (info) {
                     if (info.event.title === "Disponible") {
                         document.getElementById("FechaHora").value = info.event.startStr;
-                        alert("Turno elegido: " + info.event.start.toLocaleString());
+                        // marcar seleccionado visualmente
+                        calendar.getEvents().forEach(e => {
+                            if (e.title === "Disponible") e.setProp("backgroundColor", "#28a745");
+                        });
+                        info.event.setProp("backgroundColor", "#007bff");
                     }
                 }
             });
 
             calendar.render();
 
-            // Recargar eventos al cambiar servicio o peluquero
-            document.getElementById("ServicioId").addEventListener("change", function () {
+            document.getElementById("servicioId").addEventListener("change", function () {
                 calendar.refetchEvents();
             });
-            document.getElementById("PeluqueroId").addEventListener("change", function () {
+            document.getElementById("peluqueroId").addEventListener("change", function () {
                 calendar.refetchEvents();
             });
         });
+        document.querySelector("form").addEventListener("submit", function (e) {
+            const mascota = document.getElementById("mascotaId").value;
+            const servicio = document.getElementById("servicioId").value;
+            const fechaHora = document.getElementById("FechaHora").value;
+
+            if (!mascota || !servicio || !fechaHora) {
+                e.preventDefault();
+                alert("Debe seleccionar una mascota, un servicio y un horario antes de confirmar el turno.");
+            }
+        });
+
     </script>
 }
