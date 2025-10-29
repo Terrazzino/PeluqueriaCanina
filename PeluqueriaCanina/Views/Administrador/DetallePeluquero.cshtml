@@ -12,7 +12,15 @@
             <canvas id="graficoTurnos" style="max-height:400px"></canvas>
 
             <div class="mt-4">
-                <h5>💵 Total Recaudado: <span class="fw-bold text-success">$@ViewBag.Recaudado</span></h5>
+                @{
+                    var recaudado = Convert.ToDecimal(ViewBag.Recaudado);
+                    string claseColor = recaudado < 40000
+                    ? "text-danger fw-bold"        // rojo
+                    : recaudado < 50000
+                    ? "text-warning fw-bold"    // amarillo
+                    : "text-success fw-bold";   // verde
+                }
+                <h5>💵 Total Recaudado: <span class=" @claseColor">$@ViewBag.Recaudado</span></h5>
             </div>
         </div>
 
