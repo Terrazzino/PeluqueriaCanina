@@ -91,6 +91,8 @@ namespace PeluqueriaCanina.Controllers
             // 5️.Completar datos del turno
             turno.Estado = EstadoTurno.PendingPayment;
             turno.Duracion = turno.Servicio.Duracion;
+            turno.FechaHora = turno.FechaHora.ToLocalTime();
+            turno.Precio = turno.Servicio.Precio;
 
             // 6️.Guardar
             _contexto.Turnos.Add(turno);
@@ -102,20 +104,19 @@ namespace PeluqueriaCanina.Controllers
 
 
 
-        //Unificado: disponibilidad dinámica para FullCalendar
         [HttpGet]
         public async Task<IActionResult> GetDisponibilidad(int? servicioId, int? peluqueroId, DateTime? start, DateTime? end)
         {
             if (!start.HasValue || !end.HasValue)
                 return Json(new List<object>());
 
-            //Duración del servicio seleccionado
+            // 1️⃣ Duración del servicio seleccionado
             var servicio = servicioId.HasValue ? await _contexto.Servicios.FindAsync(servicioId) : null;
             int duracionMinutos = servicio != null && servicio.Duracion.TotalMinutes > 0
                 ? (int)servicio.Duracion.TotalMinutes
                 : 30;
 
-            //Turnos ocupados dentro del rango visible
+            // 2️⃣ Turnos ocupados del peluquero
             var turnosOcupados = await _contexto.Turnos
                 .Where(t =>
                     (peluqueroId != null ? t.PeluqueroId == peluqueroId : true) &&
@@ -123,14 +124,14 @@ namespace PeluqueriaCanina.Controllers
                     t.FechaHora >= start && t.FechaHora < end)
                 .ToListAsync();
 
-            var eventos = new List<object>();
-
-            //Jornadas activas (del peluquero o de todos)
+            // 3️⃣ Jornadas activas
             var jornadas = await _contexto.Jornadas
                 .Where(j => (peluqueroId != null ? j.PeluqueroId == peluqueroId : true) && j.Activo)
                 .ToListAsync();
 
-            //Recorremos los días visibles
+            var eventos = new List<object>();
+
+            // 4️⃣ Recorremos los días visibles
             for (DateTime fecha = start.Value.Date; fecha <= end.Value.Date; fecha = fecha.AddDays(1))
             {
                 var dia = MapearDia(fecha.DayOfWeek);
@@ -144,6 +145,7 @@ namespace PeluqueriaCanina.Controllers
                     var horaInicio = jornada.HoraDeInicio;
                     var horaFin = jornada.HoraDeFin;
 
+                    // 5️⃣ Generamos bloques del tamaño exacto del servicio
                     for (var hora = horaInicio; hora < horaFin; hora = hora.Add(TimeSpan.FromMinutes(duracionMinutos)))
                     {
                         var inicio = fecha + hora;
@@ -153,12 +155,15 @@ namespace PeluqueriaCanina.Controllers
                         if (fin > fecha + horaFin)
                             break;
 
-                        // ❌ Si se solapa con un turno existente, no se ofrece
+                        // ❌ Si se solapa con algún turno existente, se marca ocupado
                         bool ocupado = turnosOcupados.Any(t =>
-                            (inicio < t.FechaHora.AddMinutes(t.Duracion.Minutes)) &&
-                            (t.FechaHora < fin));
+                        {
+                            var turnoFin = t.FechaHora.Add(t.Duracion);
+                            // Se solapan si se tocan aunque sea parcialmente
+                            return inicio < turnoFin && fin > t.FechaHora;
+                        });
 
-                        // ✅ Solo agregamos si hay disponibilidad real
+                        // ✅ Solo se agrega si hay disponibilidad total
                         if (!ocupado)
                         {
                             eventos.Add(new
@@ -191,6 +196,8 @@ namespace PeluqueriaCanina.Controllers
 
             return Json(eventos);
         }
+
+
 
 
         // GET: Turno
