@@ -5,7 +5,8 @@
 <div class="container mt-5">
     <div class="card shadow-sm">
         <div class="card-header bg-warning text-dark text-center">
-            <h4 class="mb-0">💈 Reporte de @ViewBag.Peluquero (@ViewBag.Servicio)</h4>
+            @using System.Web
+            <h4 class="mb-4">💈 Reporte de @ViewBag.Peluquero (@Html.Raw(HttpUtility.HtmlDecode(ViewBag.Servicio)))</h4>
         </div>
         <div class="card-body text-center">
             <canvas id="graficoTurnos" style="max-height:400px"></canvas>

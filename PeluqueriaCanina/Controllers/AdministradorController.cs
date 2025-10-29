@@ -206,9 +206,13 @@ namespace PeluqueriaCanina.Controllers
 
         public IActionResult Reportes()
         {
-            // Datos HARDCODEADOS
-            var servicios = new List<string> { "Baño", "Corte", "Desparasitación", "Peluquería Completa" };
-            var cantidades = new List<int> { 40, 25, 15, 20 };
+            var servicios = _contexto.ReporteServicios
+                .Select(s => s.NombreServicio)
+                .ToList();
+
+            var cantidades = _contexto.ReporteServicios
+                .Select(s => s.Cantidad)
+                .ToList();
 
             ViewBag.Servicios = servicios;
             ViewBag.Cantidades = cantidades;
@@ -216,51 +220,35 @@ namespace PeluqueriaCanina.Controllers
             return View();
         }
 
-        // === Reporte detallado: Peluqueros por servicio ===
         public IActionResult DetalleServicio(string servicio)
         {
-            // Simulamos datos distintos según el servicio elegido
-            var peluqueros = new List<string> { "Mariana", "Luis", "Carlos", "Sofía" };
-            var cantidadPorServicio = servicio switch
-            {
-                "Baño" => new List<int> { 10, 8, 15, 7 },
-                "Corte" => new List<int> { 5, 9, 7, 4 },
-                "Desparasitación" => new List<int> { 4, 3, 5, 3 },
-                "Peluquería Completa" => new List<int> { 8, 10, 6, 9 },
-                _ => new List<int> { 0, 0, 0, 0 }
-            };
+            var datos = _contexto.ReportePeluquerosPorServicio
+                .Where(r => r.NombreServicio == servicio)
+                .ToList();
 
             ViewBag.Servicio = servicio;
-            ViewBag.Peluqueros = peluqueros;
-            ViewBag.Cantidades = cantidadPorServicio;
+            ViewBag.Peluqueros = datos.Select(d => d.NombrePeluquero).ToList();
+            ViewBag.Cantidades = datos.Select(d => d.Cantidad).ToList();
 
             return View();
         }
 
         public IActionResult DetallePeluquero(string servicio, string peluquero)
         {
-            // Datos simulados por peluquero y servicio (HARDCODEADOS)
-            var datos = new Dictionary<string, (int realizados, int cancelados, decimal recaudado)>
-    {
-        { "Mariana", (20, 2, 45000) },
-        { "Luis", (15, 1, 37000) },
-        { "Carlos", (25, 3, 51000) },
-        { "Sofía", (18, 4, 42000) }
-    };
+            var datos = _contexto.ReporteDetallePeluquero
+                .FirstOrDefault(r => r.NombrePeluquero == peluquero);
 
-            if (!datos.ContainsKey(peluquero))
+            if (datos == null)
             {
                 ViewBag.Error = "No se encontraron datos del peluquero.";
                 return View();
             }
 
-            var (realizados, cancelados, recaudado) = datos[peluquero];
-
             ViewBag.Servicio = servicio;
             ViewBag.Peluquero = peluquero;
-            ViewBag.Realizados = realizados;
-            ViewBag.Cancelados = cancelados;
-            ViewBag.Recaudado = recaudado;
+            ViewBag.Realizados = datos.Realizados;
+            ViewBag.Cancelados = datos.Cancelados;
+            ViewBag.Recaudado = datos.Recaudado;
 
             return View();
         }
