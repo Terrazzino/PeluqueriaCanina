@@ -2,10 +2,9 @@
 {
     public enum EstadoTurno
     {
-        PendingPayment,
-        Confirmed,
-        PendingExecution,
-        Completed,
-        Cancelled
+        Pendiente,
+        Confirmado,
+        Completado,
+        Cancelado
     }
 }

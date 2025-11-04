@@ -21,7 +21,7 @@ namespace PeluqueriaCanina.Models.ClasesDeTurno
         public DateTime FechaHora { get; set; }
         public TimeSpan Duracion { get; set; }
 
-        public EstadoTurno Estado { get; set; } = EstadoTurno.PendingPayment; // más adelante esto será manejado con el patrón State
+        public EstadoTurno Estado { get; set; } = EstadoTurno.Pendiente; // más adelante esto será manejado con el patrón State
 
         public decimal Precio { get; set; }
 

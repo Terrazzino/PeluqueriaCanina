@@ -59,16 +59,16 @@ namespace PeluqueriaCanina.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Mascota>()
-                .HasOne(m => m.Turno)
-                .WithOne(t => t.Mascota)
-                .HasForeignKey<Turno>(t => t.MascotaId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Mascota>()
                 .HasOne(c => c.Cliente)
                 .WithMany(m => m.Mascotas)
                 .HasForeignKey(c => c.ClienteId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Turno>()
+                .HasOne(t => t.Mascota)
+                .WithMany(m => m.Turnos)
+                .HasForeignKey(t => t.MascotaId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Turno>()
                 .HasOne(t => t.Servicio)

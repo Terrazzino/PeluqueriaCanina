@@ -13,7 +13,6 @@ namespace PeluqueriaCanina.Models.ClasesDeCliente
         public double Peso { get; set; }
         public int ClienteId { get; set; }
         public Cliente Cliente { get; set; }
-        public int TurnoId { get; set; }
-        public Turno? Turno { get; set; }
+        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
     }
 }

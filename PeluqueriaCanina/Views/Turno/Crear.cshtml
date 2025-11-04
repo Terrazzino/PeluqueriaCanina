@@ -9,7 +9,7 @@
         <h4 class="mb-0">📅 Reservar Turno</h4>
     </div>
     <div class="card-body">
-        <form asp-action="Crear" method="post">
+        <form id="formTurno" asp-action="Crear" method="post">
             @Html.AntiForgeryToken()
 
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -73,6 +73,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -135,4 +136,63 @@
         });
 
     </script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Interceptamos el submit del formulario
+            $("#formTurno").on("submit", function (e) {
+                e.preventDefault(); // evita el posteo tradicional
+
+                const mascota = $("#mascotaId").val();
+                const servicio = $("#servicioId").val();
+                const fechaHora = $("#FechaHora").val();
+
+                if (!mascota || !servicio || !fechaHora) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Faltan datos",
+                        text: "Debes seleccionar una mascota, un servicio y un horario.",
+                        confirmButtonColor: "#3085d6"
+                    });
+                    return;
+                }
+
+                // Enviar por AJAX
+                $.ajax({
+                    url: "@Url.Action("Crear", "Turno")",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Turno reservado 🎉",
+                                text: response.message,
+                                confirmButtonColor: "#28a745"
+                            }).then(() => {
+                                window.location.href = "/Turno/Index";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "No se pudo reservar el turno",
+                                text: response.message,
+                                confirmButtonColor: "#d33"
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error del servidor",
+                            text: "Ocurrió un problema al intentar guardar el turno.",
+                            confirmButtonColor: "#d33"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
 }

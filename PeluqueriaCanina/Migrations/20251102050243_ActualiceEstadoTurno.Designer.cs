@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PeluqueriaCanina.Data;
 
@@ -11,9 +12,11 @@ using PeluqueriaCanina.Data;
 namespace PeluqueriaCanina.Migrations
 {
     [DbContext(typeof(ContextoAcqua))]
-    partial class ContextoAcquaModelSnapshot : ModelSnapshot
+    [Migration("20251102050243_ActualiceEstadoTurno")]
+    partial class ActualiceEstadoTurno
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,6 +77,9 @@ namespace PeluqueriaCanina.Migrations
                     b.Property<string>("Raza")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TurnoId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -144,7 +150,8 @@ namespace PeluqueriaCanina.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MascotaId");
+                    b.HasIndex("MascotaId")
+                        .IsUnique();
 
                     b.HasIndex("PeluqueroId");
 
@@ -330,8 +337,8 @@ namespace PeluqueriaCanina.Migrations
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDeTurno.Turno", b =>
                 {
                     b.HasOne("PeluqueriaCanina.Models.ClasesDeCliente.Mascota", "Mascota")
-                        .WithMany("Turnos")
-                        .HasForeignKey("MascotaId")
+                        .WithOne("Turno")
+                        .HasForeignKey("PeluqueriaCanina.Models.ClasesDeTurno.Turno", "MascotaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -355,7 +362,7 @@ namespace PeluqueriaCanina.Migrations
 
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDeCliente.Mascota", b =>
                 {
-                    b.Navigation("Turnos");
+                    b.Navigation("Turno");
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Cliente", b =>
