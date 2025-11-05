@@ -78,42 +78,53 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                allDaySlot: false,
-                slotDuration: '00:30:00',
-                slotMinTime: "09:00:00",
-                slotMaxTime: "18:00:00",
-                locale: 'es',
-                selectable: true,
-                nowIndicator: true,
-                events: function (fetchInfo, successCallback) {
-                    const servicioId = document.getElementById("servicioId").value;
-                    const peluqueroId = document.getElementById("peluqueroId").value;
-                    if (!servicioId) { successCallback([]); return; }
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            allDaySlot: false,
+            slotDuration: '00:30:00',
+            slotMinTime: "09:00:00",
+            slotMaxTime: "18:00:00",
+            locale: 'es',
+            selectable: true,
+            nowIndicator: true,
 
-                    $.getJSON('@Url.Action("GetDisponibilidad", "Turno")', {
-                        servicioId: servicioId,
-                        peluqueroId: peluqueroId,
-                        start: fetchInfo.startStr,
-                        end: fetchInfo.endStr
-                    }).done(function (data) {
-                        successCallback(data);
-                    }).fail(function () {
-                        successCallback([]);
+            // ✅ Bloquear días anteriores
+            validRange: {
+                start: new Date()
+            },
+
+            // ✅ Bloquear selección de horas pasadas del mismo día
+            selectAllow: function (info) {
+                return info.start > new Date();
+            },
+
+            events: function (fetchInfo, successCallback) {
+                const servicioId = document.getElementById("servicioId").value;
+                const peluqueroId = document.getElementById("peluqueroId").value;
+
+                if (!servicioId) { successCallback([]); return; }
+
+                $.getJSON('@Url.Action("GetDisponibilidad", "Turno")', {
+                    servicioId: servicioId,
+                    peluqueroId: peluqueroId,
+                    start: fetchInfo.startStr,
+                    end: fetchInfo.endStr
+                }).done(successCallback)
+                  .fail(() => successCallback([]));
+            },
+
+            eventClick: function (info) {
+                if (info.event.title === "Disponible" && info.event.start > new Date()) {
+                    document.getElementById("FechaHora").value = info.event.startStr;
+
+                    calendar.getEvents().forEach(e => {
+                        if (e.title === "Disponible") e.setProp("backgroundColor", "#28a745");
                     });
-                },
-                eventClick: function (info) {
-                    if (info.event.title === "Disponible") {
-                        document.getElementById("FechaHora").value = info.event.startStr;
-                        // marcar seleccionado visualmente
-                        calendar.getEvents().forEach(e => {
-                            if (e.title === "Disponible") e.setProp("backgroundColor", "#28a745");
-                        });
-                        info.event.setProp("backgroundColor", "#007bff");
-                    }
+                    info.event.setProp("backgroundColor", "#007bff");
                 }
-            });
+            }
+        });
+        
 
             calendar.render();
 

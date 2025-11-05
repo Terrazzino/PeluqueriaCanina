@@ -112,52 +112,124 @@ namespace PeluqueriaCanina.Controllers
         }
 
         // POST: Turno/Modificar
+        // ✅ VERSIÓN FINAL CON FIX DE ZONA HORARIA
         [HttpPost]
         public async Task<IActionResult> Modificar(int id, DateTime fechaHora)
         {
-            var turno = await _contexto.Turnos
-                .Include(t => t.Servicio)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (turno == null)
+            try
             {
-                return NotFound(new { ok = false, message = "El turno no existe." });
-            }
+                // ✅ FIX ZONA HORARIA: Convertir a hora local si viene en UTC
+                if (fechaHora.Kind == DateTimeKind.Utc)
+                {
+                    fechaHora = fechaHora.ToLocalTime();
+                }
+                // Si es Unspecified, asumir que ya está en hora local argentina
+                else if (fechaHora.Kind == DateTimeKind.Unspecified)
+                {
+                    fechaHora = DateTime.SpecifyKind(fechaHora, DateTimeKind.Local);
+                }
 
-            // ✅ Duración real del turno a modificar (si es null, la saco del servicio)
-            var duracionTurno = turno.Duracion != TimeSpan.Zero
-                ? turno.Duracion
-                : turno.Servicio?.Duracion ?? TimeSpan.FromMinutes(60);
+                // ✅ Validación de fecha en el pasado
+                if (fechaHora < DateTime.Now)
+                {
+                    return BadRequest(new { ok = false, message = "No podés seleccionar un horario en el pasado." });
+                }
 
-            // ✅ Validar solapamiento sin romper si hay turnos viejos sin duración
-            bool solapa = await _contexto.Turnos
-                .Include(t => t.Servicio)
-                .AnyAsync(t =>
-                    t.PeluqueroId == turno.PeluqueroId &&
-                    t.Id != id &&
-                    t.Estado != EstadoTurno.Cancelado &&
+                var turno = await _contexto.Turnos
+                    .Include(t => t.Servicio)
+                    .Include(t => t.Peluquero)
+                    .FirstOrDefaultAsync(t => t.Id == id);
 
-                    // 🔥 Si t.Duracion es null, usamos la duración del servicio
-                    fechaHora < t.FechaHora.Add(t.Duracion != TimeSpan.Zero
+                if (turno == null)
+                {
+                    return NotFound(new { ok = false, message = "El turno no existe." });
+                }
+
+                // ✅ Validación de estado cancelado
+                if (turno.Estado == EstadoTurno.Cancelado)
+                {
+                    return BadRequest(new { ok = false, message = "No se puede modificar un turno cancelado." });
+                }
+
+                // ✅ Duración real del turno
+                var duracionTurno = turno.Duracion != TimeSpan.Zero
+                    ? turno.Duracion
+                    : turno.Servicio?.Duracion ?? TimeSpan.FromMinutes(60);
+
+                // ✅ Cargar turnos del peluquero para validar solapamiento
+                var turnosDelPeluquero = await _contexto.Turnos
+                    .Include(t => t.Servicio)
+                    .Where(t =>
+                        t.PeluqueroId == turno.PeluqueroId &&
+                        t.Id != id &&
+                        t.Estado != EstadoTurno.Cancelado)
+                    .ToListAsync();
+
+                // ✅ Validar solapamiento en memoria
+                bool solapa = turnosDelPeluquero.Any(t =>
+                {
+                    var duracionExistente = t.Duracion != TimeSpan.Zero
                         ? t.Duracion
-                        : t.Servicio.Duracion) &&
+                        : (t.Servicio?.Duracion ?? TimeSpan.FromMinutes(60));
 
-                    // 🔥 Igual acá
-                    t.FechaHora < fechaHora.Add(duracionTurno)
-                );
+                    var finExistente = t.FechaHora.Add(duracionExistente);
+                    var finNuevo = fechaHora.Add(duracionTurno);
 
-            if (solapa)
-            {
-                return BadRequest(new { ok = false, message = "El turno se superpone con otro existente." });
+                    return fechaHora < finExistente && t.FechaHora < finNuevo;
+                });
+
+                if (solapa)
+                {
+                    return BadRequest(new { ok = false, message = "El turno se superpone con otro existente del mismo peluquero." });
+                }
+
+                // ✅ Validar día de la semana
+                var diaSemana = MapearDia(fechaHora.DayOfWeek);
+                if (diaSemana == null)
+                {
+                    return BadRequest(new { ok = false, message = "No hay atención ese día de la semana." });
+                }
+
+                // ✅ Validar horario laboral
+                var jornadaDelDia = await _contexto.Jornadas
+                    .FirstOrDefaultAsync(j =>
+                        j.PeluqueroId == turno.PeluqueroId &&
+                        j.Dia == diaSemana &&
+                        j.Activo);
+
+                if (jornadaDelDia == null)
+                {
+                    return BadRequest(new { ok = false, message = "El peluquero no trabaja ese día." });
+                }
+
+                var horaInicio = fechaHora.TimeOfDay;
+                var horaFin = horaInicio.Add(duracionTurno);
+
+                if (horaInicio < jornadaDelDia.HoraDeInicio || horaFin > jornadaDelDia.HoraDeFin)
+                {
+                    return BadRequest(new { ok = false, message = "El horario seleccionado está fuera del horario laboral." });
+                }
+
+                // ✅ Actualizar el turno
+                turno.FechaHora = fechaHora;
+
+                _contexto.Turnos.Update(turno);
+                await _contexto.SaveChangesAsync();
+
+                return Ok(new { ok = true, message = "Turno modificado con éxito." });
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en Modificar turno {id}: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
-            // ✅ Actualizar el turno
-            turno.FechaHora = fechaHora;
-
-            _contexto.Turnos.Update(turno);
-            await _contexto.SaveChangesAsync();
-
-            return Ok(new { ok = true, message = "Turno modificado con éxito." });
+                return StatusCode(500, new
+                {
+                    ok = false,
+                    message = "Ocurrió un error al modificar el turno. Por favor, intentá más tarde.",
+                    error = ex.Message
+                });
+            }
         }
 
 

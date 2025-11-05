@@ -77,7 +77,7 @@
                                     </td>
 
                                     <td>
-                                        @if(turno.Estado!= PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
+                                        @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
                                         {
                                             <button class="btn btn-sm btn-danger" onclick="cancelarTurno(@turno.Id)">
                                                 Cancelar
@@ -93,12 +93,17 @@
         </div>
     </div>
 </div>
-@section Scripts{
+@section Scripts {
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-            function cancelarTurno(id) {
+        // ✅ Función para obtener el token antifalsificación
+        function getAntiForgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+
+        function cancelarTurno(id) {
             Swal.fire({
                 title: "¿Cancelar turno?",
                 text: "Esta acción no se puede deshacer.",
@@ -120,6 +125,7 @@
                 }
             });
         }
+
         function modificarTurno(turnoId, peluqueroId, duracionMinutos) {
 
             duracionMinutos = Number(duracionMinutos); // ✅ convertir a número siempre
@@ -135,8 +141,25 @@
                 showCancelButton: true,
                 confirmButtonText: 'Guardar',
                 cancelButtonText: 'Cancelar',
-                didOpen: () => {
+                preConfirm: () => {
+                    // ✅ Validación antes de enviar
+                    if (!window.calendarMod || !window.calendarMod.selectedDate) {
+                        Swal.showValidationMessage('Debés seleccionar un horario disponible');
+                        return false;
+                    }
 
+                    // ✅ Validar que la fecha no sea en el pasado
+                    const selectedDate = new Date(window.calendarMod.selectedDate);
+                    const now = new Date();
+
+                    if (selectedDate < now) {
+                        Swal.showValidationMessage('No podés seleccionar un horario en el pasado');
+                        return false;
+                    }
+
+                    return true;
+                },
+                didOpen: () => {
                     const calendarEl = document.getElementById('calendarMod');
                     const calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: 'timeGridWeek',
@@ -148,6 +171,9 @@
                         locale: 'es',
                         selectable: true,
                         nowIndicator: true,
+                        validRange: {
+                            start: new Date() // ✅ No permite seleccionar fechas pasadas
+                        },
                         events: function(fetchInfo, successCallback) {
                             $.getJSON('/Turno/GetDisponibilidad', {
                                 peluqueroId: peluqueroId,
@@ -156,7 +182,9 @@
                                 duracion: duracionMinutos       // ✅ lo mandamos al backend
                             }).done(function(data) {
                                 successCallback(data);
-                            }).fail(function() {
+                            }).fail(function(xhr, status, error) {
+                                console.error('Error al cargar disponibilidad:', error);
+                                Swal.fire('Error', 'No se pudo cargar la disponibilidad. Intentá de nuevo.', 'error');
                                 successCallback([]);
                             });
                         },
@@ -176,33 +204,71 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    if (!window.calendarMod.selectedDate) {
-                        Swal.fire('Error', 'Debés seleccionar un horario disponible.', 'error');
-                        return;
-                    }
+                    // ✅ Mostrar loading mientras se procesa
+                    Swal.fire({
+                        title: 'Guardando...',
+                        text: 'Por favor esperá',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
 
+                    // ✅ Enviar con manejo de errores mejorado
                     $.ajax({
                         url: '/Turno/Modificar',
                         method: 'POST',
                         data: {
                             id: turnoId,
-                            fechaHora: window.calendarMod.selectedDate
+                            fechaHora: window.calendarMod.selectedDate,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() // ✅ Token anti-falsificación
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: response.message || 'Turno modificado correctamente.',
+                                confirmButtonText: 'OK'
+                            }).then(() => location.reload());
+                        },
+                        error: function(xhr, status, error) {
+                            let errorMessage = 'Ocurrió un problema al modificar el turno';
+
+                            // ✅ Intentar obtener el mensaje del servidor
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            } else if (xhr.responseText) {
+                                try {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.message) {
+                                        errorMessage = response.message;
+                                    }
+                                } catch (e) {
+                                    console.error('Error al parsear respuesta:', e);
+                                }
+                            }
+
+                            // ✅ Mostrar error específico según código HTTP
+                            if (xhr.status === 400) {
+                                errorMessage = errorMessage || 'El turno se superpone con otro existente.';
+                            } else if (xhr.status === 404) {
+                                errorMessage = 'El turno no existe.';
+                            } else if (xhr.status === 500) {
+                                errorMessage = 'Error del servidor. Por favor, intentá más tarde.';
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errorMessage,
+                                confirmButtonText: 'OK'
+                            });
                         }
-                    })
-                    .done(function () {
-                        Swal.fire('Éxito', 'Turno modificado correctamente.', 'success')
-                            .then(() => location.reload());
-                    })
-                    .fail(function () {
-                        Swal.fire('Error', 'Ocurrió un problema al modificar el turno', 'error');
                     });
                 }
             });
         }
-
-
-
-
-
     </script>
 }
