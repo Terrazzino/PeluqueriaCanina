@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Agenda del Peluquero";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">📅 Mi Agenda</h4>
+        <span id="estadoSeleccionado" class="fw-bold"></span>
+    </div>
+    <div class="card-body">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                locale: 'es',
+                slotDuration: '00:30:00',
+                allDaySlot: false,
+                nowIndicator: true,
+                height: "auto",
+
+                events: '@Url.Action("GetTurnos", "Peluquero")',
+
+                eventClick: function (info) {
+                    const turnoId = info.event.id;
+                    const estadoActual = info.event.extendedProps.estado;
+
+                    Swal.fire({
+                        title: `Turno: ${info.event.title}`,
+                        html: `
+                            <p><b>Estado actual:</b> ${estadoActual}</p>
+                            <p>¿Qué acción desea realizar?</p>
+                        `,
+                        showCancelButton: true,
+                        showDenyButton: true,
+                        confirmButtonText: '✅ Completar',
+                        denyButtonText: '📅 Confirmar',
+                        cancelButtonText: '❌ Cancelar',
+                    }).then((result) => {
+                        let nuevoEstado = null;
+                        if (result.isConfirmed) nuevoEstado = "Completado";
+                        else if (result.isDenied) nuevoEstado = "Confirmado";
+                        else if (result.dismiss === Swal.DismissReason.cancel) nuevoEstado = "Cancelado";
+
+                        if (nuevoEstado) {
+                            $.post('@Url.Action("CambiarEstado", "Peluquero")', { turnoId: turnoId, nuevoEstado: nuevoEstado })
+                                .done(() => {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: `Estado cambiado a ${nuevoEstado}`,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                    calendar.refetchEvents();
+                                })
+                                .fail(() => {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Error al actualizar el estado"
+                                    });
+                                });
+                        }
+                    });
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
+}
