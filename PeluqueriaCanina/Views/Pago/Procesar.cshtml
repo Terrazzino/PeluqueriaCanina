@@ -1,0 +1,258 @@
+﻿@model PeluqueriaCanina.Models.ClasesDePago.Pago
+
+@{
+    ViewData["Title"] = "Procesar Pago";
+    var turno = ViewBag.Turno as PeluqueriaCanina.Models.ClasesDeTurno.Turno;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">💳 Procesar Pago</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del Turno -->
+                    <div class="alert alert-info">
+                        <h5>Detalles del Turno</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Mascota:</strong> @turno.Mascota.Nombre</p>
+                                <p class="mb-1"><strong>Servicio:</strong> @turno.Servicio.NombreDelServicio</p>
+                                <p class="mb-1"><strong>Peluquero:</strong> @turno.Peluquero.Nombre @turno.Peluquero.Apellido</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Fecha:</strong> @turno.FechaHora.ToString("dd/MM/yyyy")</p>
+                                <p class="mb-1"><strong>Hora:</strong> @turno.FechaHora.ToString("HH:mm")</p>
+                                <p class="mb-1">
+                                    <strong>Estado:</strong>
+                                    <span class="badge bg-warning">@turno.Estado</span>
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h4 class="text-end mb-0">
+                            <strong>Total a pagar:</strong>
+                            <span class="text-success">$@turno.Precio.ToString("N2")</span>
+                        </h4>
+                    </div>
+
+                    <!-- Formulario de Pago -->
+                    <form id="formPago">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" id="TurnoId" name="TurnoId" value="@turno.Id" />
+                        <input type="hidden" id="Monto" name="Monto" value="@turno.Precio" />
+
+                        <div class="mb-3">
+                            <label for="MetodoPago" class="form-label">
+                                <i class="bi bi-credit-card"></i> Método de Pago *
+                            </label>
+                            <select id="MetodoPago" name="MetodoPago" class="form-select" required>
+                                <option value="">Seleccione un método</option>
+                                <option value="0">💵 Efectivo</option>
+                                <option value="1">💳 Tarjeta de Débito</option>
+                                <option value="2">💳 Tarjeta de Crédito</option>
+                                <option value="3">📱 Mercado Pago</option>
+                                <option value="4">🏦 Transferencia Bancaria</option>
+                            </select>
+                        </div>
+
+                        <!-- Campos adicionales para tarjeta -->
+                        <div id="camposTarjeta" style="display: none;">
+                            <div class="mb-3">
+                                <label for="Ultimos4Digitos" class="form-label">Últimos 4 dígitos de la tarjeta</label>
+                                <input type="text"
+                                       id="Ultimos4Digitos"
+                                       name="Ultimos4Digitos"
+                                       class="form-control"
+                                       maxlength="4"
+                                       pattern="\d{4}"
+                                       placeholder="1234">
+                                <small class="text-muted">Solo para referencia, no guardamos datos completos</small>
+                            </div>
+                        </div>
+
+                        <!-- Campo para número de transacción -->
+                        <div id="campoTransaccion" style="display: none;">
+                            <div class="mb-3">
+                                <label for="NumeroTransaccion" class="form-label">Número de Transacción / Comprobante</label>
+                                <input type="text"
+                                       id="NumeroTransaccion"
+                                       name="NumeroTransaccion"
+                                       class="form-control"
+                                       maxlength="100"
+                                       placeholder="Ej: MP-12345678">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Observaciones" class="form-label">Observaciones (opcional)</label>
+                            <textarea id="Observaciones"
+                                      name="Observaciones"
+                                      class="form-control"
+                                      rows="3"
+                                      maxlength="500"
+                                      placeholder="Agregue cualquier nota adicional"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Confirmar Pago de $@turno.Precio.ToString("N2")
+                            </button>
+                            <a href="/Turno/Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Volver a Mis Turnos
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información de seguridad -->
+            <div class="alert alert-secondary mt-3">
+                <h6><i class="bi bi-shield-check"></i> Información de Seguridad</h6>
+                <ul class="mb-0 small">
+                    <li>No guardamos información completa de tarjetas</li>
+                    <li>Los pagos con tarjeta son procesados de forma segura</li>
+                    <li>Los pagos con Mercado Pago te redirigirán a su plataforma segura</li>
+                    <li>Recibirás un comprobante por email una vez aprobado el pago</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const turnoId = @turno.Id;
+
+        // Mostrar campos adicionales según el método de pago seleccionado
+        document.getElementById('MetodoPago').addEventListener('change', function() {
+            const metodoPago = parseInt(this.value);
+            const camposTarjeta = document.getElementById('camposTarjeta');
+            const campoTransaccion = document.getElementById('campoTransaccion');
+
+            // Ocultar todos los campos adicionales
+            camposTarjeta.style.display = 'none';
+            campoTransaccion.style.display = 'none';
+
+            // Mostrar campos según el método
+            if (metodoPago === 1 || metodoPago === 2) { // Tarjeta Débito o Crédito
+                camposTarjeta.style.display = 'block';
+            } else if (metodoPago === 4) { // Transferencia (no Mercado Pago)
+                campoTransaccion.style.display = 'block';
+            }
+        });
+
+        // Procesar el formulario
+        document.getElementById('formPago').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const metodoPago = parseInt(document.getElementById('MetodoPago').value);
+
+            if (isNaN(metodoPago) || metodoPago < 0) {
+                Swal.fire('Error', 'Debe seleccionar un método de pago', 'error');
+                return;
+            }
+
+            // Si es Mercado Pago (valor 3), redirigir directamente
+            if (metodoPago === 3) {
+                procesarConMercadoPago();
+                return;
+            }
+
+            // Para otros métodos, mostrar confirmación normal
+            Swal.fire({
+                title: '¿Confirmar pago?',
+                html: `Está por realizar un pago de <strong>$@turno.Precio.ToString("N2")</strong>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, confirmar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    procesarPagoNormal();
+                }
+            });
+        });
+
+        // Función para procesar con Mercado Pago
+        function procesarConMercadoPago() {
+            Swal.fire({
+                title: 'Redirigiendo a Mercado Pago...',
+                html: 'Por favor espere mientras creamos tu preferencia de pago',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('/Pago/CrearPreferenciaMercadoPago', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ turnoId: turnoId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok && data.initPoint) {
+                    // Redirigir a Mercado Pago
+                    window.location.href = data.initPoint;
+                } else {
+                    Swal.fire('Error', data.message || 'No se pudo conectar con Mercado Pago', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Ocurrió un error al conectar con Mercado Pago', 'error');
+            });
+        }
+
+        // Función para procesar pago normal (sin Mercado Pago)
+        function procesarPagoNormal() {
+            Swal.fire({
+                title: 'Procesando pago...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const formData = new FormData(document.getElementById('formPago'));
+
+            fetch('/Pago/Procesar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Pago Exitoso!',
+                        text: data.message,
+                        confirmButtonText: 'Ver Comprobante'
+                    }).then(() => {
+                        window.location.href = '/Pago/Comprobante/' + data.pagoId;
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Ocurrió un error al procesar el pago', 'error');
+            });
+        }
+    </script>
+}

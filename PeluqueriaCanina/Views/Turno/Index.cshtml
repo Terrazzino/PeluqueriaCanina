@@ -8,9 +8,14 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">📅 Mis Turnos</h4>
-            <a href="/Turno/Crear" class="btn btn-light btn-sm">
-                ➕ Reservar Turno
-            </a>
+            <div>
+                <a href="/Pago/MisPagos" class="btn btn-light btn-sm me-2">
+                    💳 Mis Pagos
+                </a>
+                <a href="/Turno/Crear" class="btn btn-light btn-sm">
+                    ➕ Reservar Turno
+                </a>
+            </div>
         </div>
         <div class="card-body">
             @if (Model == null || Model.Count == 0)
@@ -32,8 +37,7 @@
                                 <th scope="col">Hora</th>
                                 <th scope="col">Estado</th>
                                 <th scope="col">Precio</th>
-                                <th scope="col">Modificar</th>
-                                <th scope="col">Eliminar</th>
+                                <th scope="col" class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,39 +54,40 @@
                                         {
                                             case "Pendiente":
                                                 <span class="badge bg-warning text-dark">Pendiente</span>
-                                                ;
                                                 break;
                                             case "Confirmado":
                                                 <span class="badge bg-success">Confirmado</span>
-                                                ;
+                                                break;
+                                            case "Completado":
+                                                <span class="badge bg-info">Completado</span>
                                                 break;
                                             case "Cancelado":
                                                 <span class="badge bg-danger">Cancelado</span>
-                                                ;
                                                 break;
                                             default:
                                                 <span class="badge bg-secondary">@turno.Estado</span>
-                                                ;
                                                 break;
                                         }
                                     </td>
-                                    <td>$@turno.Precio</td>
+                                    <td><strong>$@turno.Precio</strong></td>
                                     <td>
-                                        @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
-                                        {
-                                            <button class="btn btn-sm btn-warning" onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId','@turno.Duracion.TotalMinutes')">
-                                                Modificar
-                                            </button>
-                                        }
-                                    </td>
+                                        <div class="btn-group" role="group">
+                                            @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
+                                            {
 
-                                    <td>
-                                        @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
-                                        {
-                                            <button class="btn btn-sm btn-danger" onclick="cancelarTurno(@turno.Id)">
-                                                Cancelar
-                                            </button>
-                                        }
+                                                <button class="btn btn-sm btn-warning" onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId','@turno.Duracion.TotalMinutes')" title="Modificar">
+                                                    ✏️
+                                                </button>
+
+                                                <button class="btn btn-sm btn-danger" onclick="cancelarTurno(@turno.Id)" title="Cancelar">
+                                                    ❌
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -93,16 +98,12 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // ✅ Función para obtener el token antifalsificación
-        function getAntiForgeryToken() {
-            return $('input[name="__RequestVerificationToken"]').val();
-        }
-
         function cancelarTurno(id) {
             Swal.fire({
                 title: "¿Cancelar turno?",
@@ -128,7 +129,7 @@
 
         function modificarTurno(turnoId, peluqueroId, duracionMinutos) {
 
-            duracionMinutos = Number(duracionMinutos); // ✅ convertir a número siempre
+            duracionMinutos = Number(duracionMinutos);
 
             let horas = Math.floor(duracionMinutos / 60);
             let minutos = duracionMinutos % 60;
@@ -142,13 +143,11 @@
                 confirmButtonText: 'Guardar',
                 cancelButtonText: 'Cancelar',
                 preConfirm: () => {
-                    // ✅ Validación antes de enviar
                     if (!window.calendarMod || !window.calendarMod.selectedDate) {
                         Swal.showValidationMessage('Debés seleccionar un horario disponible');
                         return false;
                     }
 
-                    // ✅ Validar que la fecha no sea en el pasado
                     const selectedDate = new Date(window.calendarMod.selectedDate);
                     const now = new Date();
 
@@ -163,8 +162,8 @@
                     const calendarEl = document.getElementById('calendarMod');
                     const calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: 'timeGridWeek',
-                        slotDuration: slotDuration,        // ✅ intervalo según duración real
-                        slotLabelInterval: slotDuration,   // ✅ etiqueta igual al intervalo
+                        slotDuration: slotDuration,
+                        slotLabelInterval: slotDuration,
                         allDaySlot: false,
                         slotMinTime: "09:00:00",
                         slotMaxTime: "18:00:00",
@@ -172,14 +171,14 @@
                         selectable: true,
                         nowIndicator: true,
                         validRange: {
-                            start: new Date() // ✅ No permite seleccionar fechas pasadas
+                            start: new Date()
                         },
                         events: function(fetchInfo, successCallback) {
                             $.getJSON('/Turno/GetDisponibilidad', {
                                 peluqueroId: peluqueroId,
                                 start: fetchInfo.startStr,
                                 end: fetchInfo.endStr,
-                                duracion: duracionMinutos       // ✅ lo mandamos al backend
+                                duracion: duracionMinutos
                             }).done(function(data) {
                                 successCallback(data);
                             }).fail(function(xhr, status, error) {
@@ -204,7 +203,6 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ✅ Mostrar loading mientras se procesa
                     Swal.fire({
                         title: 'Guardando...',
                         text: 'Por favor esperá',
@@ -216,14 +214,13 @@
                         }
                     });
 
-                    // ✅ Enviar con manejo de errores mejorado
                     $.ajax({
                         url: '/Turno/Modificar',
                         method: 'POST',
                         data: {
                             id: turnoId,
                             fechaHora: window.calendarMod.selectedDate,
-                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() // ✅ Token anti-falsificación
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                         },
                         success: function(response) {
                             Swal.fire({
@@ -236,7 +233,6 @@
                         error: function(xhr, status, error) {
                             let errorMessage = 'Ocurrió un problema al modificar el turno';
 
-                            // ✅ Intentar obtener el mensaje del servidor
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
                             } else if (xhr.responseText) {
@@ -250,7 +246,6 @@
                                 }
                             }
 
-                            // ✅ Mostrar error específico según código HTTP
                             if (xhr.status === 400) {
                                 errorMessage = errorMessage || 'El turno se superpone con otro existente.';
                             } else if (xhr.status === 404) {
@@ -271,4 +266,5 @@
             });
         }
     </script>
+}
 }

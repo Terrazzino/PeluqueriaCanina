@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Models.ClasesDeAdministrador;
 using PeluqueriaCanina.Models.ClasesDeCliente;
+using PeluqueriaCanina.Models.ClasesDePago;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.ClasesDeTurno;
 using PeluqueriaCanina.Models.REPORTES;
@@ -20,6 +21,7 @@ namespace PeluqueriaCanina.Data
         public DbSet<Mascota> Mascotas { get; set; }
         public DbSet<Turno> Turnos { get; set; }
         public DbSet<Jornada> Jornadas { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
 
         //REPORTES
         public DbSet<ReporteServicios> ReporteServicios { get; set; }

@@ -1,0 +1,131 @@
+﻿@model List<PeluqueriaCanina.Models.ClasesDePago.Pago>
+
+@{
+    ViewData["Title"] = "Mis Pagos";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">💳 Mis Pagos</h4>
+            <a href="/Turno/Index" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver a Turnos
+            </a>
+        </div>
+        <div class="card-body">
+            @if (Model == null || Model.Count == 0)
+            {
+                <div class="alert alert-info text-center mb-0">
+                    <i class="bi bi-info-circle"></i> Todavía no tenés pagos registrados.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-success">
+                            <tr>
+                                <th scope="col">N° Pago</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Servicio</th>
+                                <th scope="col">Mascota</th>
+                                <th scope="col">Método</th>
+                                <th scope="col">Monto</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pago in Model)
+                            {
+                                <tr>
+                                    <td>#@pago.Id.ToString("D6")</td>
+                                    <td>
+                                        @pago.FechaPago.ToString("dd/MM/yyyy")<br>
+                                        <small class="text-muted">@pago.FechaPago.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>@pago.Turno.Servicio.NombreDelServicio</td>
+                                    <td>@pago.Turno.Mascota.Nombre</td>
+                                    <td>
+                                        @switch (pago.MetodoPago.ToString())
+                                        {
+                                            case "Efectivo":
+                                                <span>💵 Efectivo</span>
+                                                ; break;
+                                            case "TarjetaDebito":
+
+                                                <span>💳 Débito</span>
+                                                ; break;
+                                            case "TarjetaCredito":
+
+                                                <span>💳 Crédito</span>
+                                                ; break;
+                                            case "MercadoPago":
+
+                                                <span>📱 MP</span>
+                                                ; break;
+                                            case "Transferencia":
+
+                                                <span>🏦 Transf.</span>
+                                                ; break;
+                                        }
+                                    </td>
+                                    <td><strong>$@pago.Monto.ToString("N2")</strong></td>
+                                    <td>
+                                        @switch (pago.Estado.ToString())
+                                        {
+                                            case "Aprobado":
+                                                <span class="badge bg-success">Aprobado</span>
+                                                break;
+                                            case "Procesando":
+                                                <span class="badge bg-warning text-dark">Procesando</span>
+                                                break;
+                                            case "Pendiente":
+                                                <span class="badge bg-info">Pendiente</span>
+                                                break;
+                                            case "Rechazado":
+                                                <span class="badge bg-danger">Rechazado</span>
+                                                break;
+                                            case "Reembolsado":
+                                                <span class="badge bg-secondary">Reembolsado</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="/Pago/Comprobante/@pago.Id" class="btn btn-sm btn-outline-primary" title="Ver Comprobante">
+                                            <i class="bi bi-receipt"></i> Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Resumen -->
+                <div class="card bg-light mt-3">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h5 class="text-success">@Model.Count(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Aprobado)</h5>
+                                <p class="text-muted mb-0">Aprobados</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 class="text-warning">@Model.Count(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Procesando)</h5>
+                                <p class="text-muted mb-0">En Proceso</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 class="text-info">@Model.Count(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Pendiente)</h5>
+                                <p class="text-muted mb-0">Pendientes</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 class="text-success">$@Model.Where(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Aprobado).Sum(p => p.Monto).ToString("N2")</h5>
+                                <p class="text-muted mb-0">Total Pagado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

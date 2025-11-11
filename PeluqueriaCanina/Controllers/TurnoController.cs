@@ -92,7 +92,12 @@ namespace PeluqueriaCanina.Controllers
             _contexto.Turnos.Add(turno);
             await _contexto.SaveChangesAsync();
 
-            return Json(new { ok = true, message = "Turno reservado con éxito" });
+            return Json(new
+            {
+                ok = true,
+                message = "Turno creado exitosamente. Procede al pago para confirmar.",
+                turnoId = turno.Id  // ← IMPORTANTE: Agregar esto
+            });
         }
 
 

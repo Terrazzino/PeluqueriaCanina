@@ -13,6 +13,9 @@ builder.Services.AddSession();
 
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
+// Agregar HttpClientFactory para Mercado Pago
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

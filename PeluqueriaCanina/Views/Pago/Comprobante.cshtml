@@ -1,0 +1,181 @@
+﻿@model PeluqueriaCanina.Models.ClasesDePago.Pago
+
+@{
+    ViewData["Title"] = "Comprobante de Pago";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Botones de acción -->
+            <div class="d-flex justify-content-between mb-3">
+                <a href="/Turno/Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver a Mis Turnos
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-primary">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+            </div>
+
+            <!-- Comprobante -->
+            <div class="card shadow-sm" id="comprobante">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="mb-0">🐾 Peluquería Canina</h3>
+                    <p class="mb-0">Comprobante de Pago</p>
+                </div>
+                <div class="card-body">
+                    <!-- Estado del Pago -->
+                    <div class="text-center mb-4">
+                        @switch (Model.Estado.ToString())
+                        {
+                            case "Aprobado":
+                                <div class="alert alert-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <h4 class="mb-0">PAGO APROBADO</h4>
+                                </div>
+                                break;
+                            case "Procesando":
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-clock-fill"></i>
+                                    <h4 class="mb-0">PAGO EN PROCESO</h4>
+                                </div>
+                                break;
+                            case "Pendiente":
+                                <div class="alert alert-info">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    <h4 class="mb-0">PAGO PENDIENTE</h4>
+                                </div>
+                                break;
+                            case "Rechazado":
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    <h4 class="mb-0">PAGO RECHAZADO</h4>
+                                </div>
+                                break;
+                        }
+                    </div>
+
+                    <!-- Información del Pago -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>N° de Pago:</strong> #@Model.Id.ToString("D6")</p>
+                            <p class="mb-2"><strong>Fecha:</strong> @Model.FechaPago.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p class="mb-2">
+                                <strong>Método:</strong>
+                                @switch (Model.MetodoPago.ToString())
+                                {
+                                    case "Efectivo":
+                                        <span>💵 Efectivo</span>
+                                        ; break;
+                                    case "TarjetaDebito":
+
+                                        <span>💳 Tarjeta de Débito</span>
+                                        ; break;
+                                    case "TarjetaCredito":
+
+                                        <span>💳 Tarjeta de Crédito</span>
+                                        ; break;
+                                    case "MercadoPago":
+
+                                        <span>📱 Mercado Pago</span>
+                                        ; break;
+                                    case "Transferencia":
+
+                                        <span>🏦 Transferencia</span>
+                                        ; break;
+                                }
+                            </p>
+                            @if (!string.IsNullOrEmpty(Model.NumeroTransaccion))
+                            {
+                                <p class="mb-2"><strong>N° Transacción:</strong> @Model.NumeroTransaccion</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Ultimos4Digitos))
+                            {
+                                <p class="mb-2"><strong>Tarjeta:</strong> **** **** **** @Model.Ultimos4Digitos</p>
+                            }
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h2 class="text-success mb-0">$@Model.Monto.ToString("N2")</h2>
+                            <p class="text-muted">Monto Pagado</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Información del Turno -->
+                    <h5 class="mb-3">Detalles del Servicio</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Mascota</th>
+                                    <th>Fecha/Hora</th>
+                                    <th>Peluquero</th>
+                                    <th class="text-end">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.Turno.Servicio.NombreDelServicio</td>
+                                    <td>@Model.Turno.Mascota.Nombre</td>
+                                    <td>
+                                        @Model.Turno.FechaHora.ToString("dd/MM/yyyy")<br>
+                                        <small class="text-muted">@Model.Turno.FechaHora.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>@Model.Turno.Peluquero.Nombre @Model.Turno.Peluquero.Apellido</td>
+                                    <td class="text-end">$@Model.Monto.ToString("N2")</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>TOTAL:</strong></td>
+                                    <td class="text-end"><strong>$@Model.Monto.ToString("N2")</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Observaciones))
+                    {
+                        <hr>
+                        <p class="mb-0"><strong>Observaciones:</strong></p>
+                        <p class="text-muted">@Model.Observaciones</p>
+                    }
+
+                    <hr>
+
+                    <!-- Pie de página -->
+                    <div class="text-center text-muted small">
+                        <p class="mb-1">Gracias por confiar en nosotros</p>
+                        <p class="mb-0">Peluquería Canina - Tel: (0341) 123-4567</p>
+                        <p class="mb-0">Email: info@peluqueriacanina.com</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Procesando)
+            {
+                <div class="alert alert-info mt-3">
+                    <h6><i class="bi bi-info-circle"></i> Información</h6>
+                    <p class="mb-0">Tu pago está siendo procesado. Recibirás una notificación una vez que sea aprobado.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        @@media print {
+            .btn, .alert:not(.alert-success):not(.alert-danger) {
+                display: none !important;
+            }
+
+            #comprobante {
+                box-shadow: none !important;
+                border: 1px solid #dee2e6 !important;
+            }
+        }
+    </style>
+}
