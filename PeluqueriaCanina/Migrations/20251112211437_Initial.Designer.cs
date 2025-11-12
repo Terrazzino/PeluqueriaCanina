@@ -12,15 +12,15 @@ using PeluqueriaCanina.Data;
 namespace PeluqueriaCanina.Migrations
 {
     [DbContext(typeof(ContextoAcqua))]
-    [Migration("20251028015146_UpdateTurnoV2")]
-    partial class UpdateTurnoV2
+    [Migration("20251112211437_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -78,14 +78,62 @@ namespace PeluqueriaCanina.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TurnoId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
 
                     b.ToTable("Mascotas");
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDePago.Pago", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaPago")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MetodoPago")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NumeroTransaccion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ProcesadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TurnoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ultimos4Digitos")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TurnoId");
+
+                    b.ToTable("Pagos");
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDePeluquero.Jornada", b =>
@@ -150,14 +198,66 @@ namespace PeluqueriaCanina.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MascotaId")
-                        .IsUnique();
+                    b.HasIndex("MascotaId");
 
                     b.HasIndex("PeluqueroId");
 
                     b.HasIndex("ServicioId");
 
                     b.ToTable("Turnos");
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteDetallePeluquero", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cancelados")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Realizados")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Recaudado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ReportePeluqueroPorServicioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportePeluqueroPorServicioId");
+
+                    b.ToTable("ReporteDetallePeluquero", (string)null);
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NombrePeluquero")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ReporteServicioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReporteServicioId");
+
+                    b.ToTable("ReportePeluqueroPorServicio", (string)null);
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Persona", b =>
@@ -212,6 +312,24 @@ namespace PeluqueriaCanina.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("ReporteServicios", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("NombreServicio")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReporteServicios", (string)null);
+                });
+
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Administrador", b =>
                 {
                     b.HasBaseType("PeluqueriaCanina.Models.Users.Persona");
@@ -253,6 +371,17 @@ namespace PeluqueriaCanina.Migrations
                     b.Navigation("Cliente");
                 });
 
+            modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDePago.Pago", b =>
+                {
+                    b.HasOne("PeluqueriaCanina.Models.ClasesDeTurno.Turno", "Turno")
+                        .WithMany()
+                        .HasForeignKey("TurnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Turno");
+                });
+
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDePeluquero.Jornada", b =>
                 {
                     b.HasOne("PeluqueriaCanina.Models.Users.Peluquero", "Peluquero")
@@ -267,8 +396,8 @@ namespace PeluqueriaCanina.Migrations
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDeTurno.Turno", b =>
                 {
                     b.HasOne("PeluqueriaCanina.Models.ClasesDeCliente.Mascota", "Mascota")
-                        .WithOne("Turno")
-                        .HasForeignKey("PeluqueriaCanina.Models.ClasesDeTurno.Turno", "MascotaId")
+                        .WithMany("Turnos")
+                        .HasForeignKey("MascotaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -290,9 +419,36 @@ namespace PeluqueriaCanina.Migrations
                     b.Navigation("Servicio");
                 });
 
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteDetallePeluquero", b =>
+                {
+                    b.HasOne("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", "ReportePeluqueroPorServicio")
+                        .WithMany("Detalles")
+                        .HasForeignKey("ReportePeluqueroPorServicioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReportePeluqueroPorServicio");
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
+                {
+                    b.HasOne("ReporteServicios", "ReporteServicio")
+                        .WithMany()
+                        .HasForeignKey("ReporteServicioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReporteServicio");
+                });
+
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDeCliente.Mascota", b =>
                 {
-                    b.Navigation("Turno");
+                    b.Navigation("Turnos");
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Cliente", b =>

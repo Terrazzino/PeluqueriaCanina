@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PeluqueriaCanina.Migrations
 {
     /// <inheritdoc />
-    public partial class AcquaInitialice : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,6 +29,19 @@ namespace PeluqueriaCanina.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Personas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReporteServicios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NombreServicio = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReporteServicios", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,8 +93,7 @@ namespace PeluqueriaCanina.Migrations
                     Raza = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaDeNacimiento = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Peso = table.Column<double>(type: "float", nullable: false),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
-                    TurnoId = table.Column<int>(type: "int", nullable: false)
+                    ClienteId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,17 +107,38 @@ namespace PeluqueriaCanina.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ReportePeluqueroPorServicio",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReporteServicioId = table.Column<int>(type: "int", nullable: false),
+                    NombrePeluquero = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Cantidad = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportePeluqueroPorServicio", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReportePeluqueroPorServicio_ReporteServicios_ReporteServicioId",
+                        column: x => x.ReporteServicioId,
+                        principalTable: "ReporteServicios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Turnos",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MascotaId = table.Column<int>(type: "int", nullable: false),
-                    PeluqueroId = table.Column<int>(type: "int", nullable: false),
+                    PeluqueroId = table.Column<int>(type: "int", nullable: true),
                     ServicioId = table.Column<int>(type: "int", nullable: false),
                     FechaHora = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Duracion = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Estado = table.Column<int>(type: "int", nullable: false),
                     Precio = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
@@ -131,6 +164,57 @@ namespace PeluqueriaCanina.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ReporteDetallePeluquero",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReportePeluqueroPorServicioId = table.Column<int>(type: "int", nullable: false),
+                    Realizados = table.Column<int>(type: "int", nullable: false),
+                    Cancelados = table.Column<int>(type: "int", nullable: false),
+                    Recaudado = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReporteDetallePeluquero", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReporteDetallePeluquero_ReportePeluqueroPorServicio_ReportePeluqueroPorServicioId",
+                        column: x => x.ReportePeluqueroPorServicioId,
+                        principalTable: "ReportePeluqueroPorServicio",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pagos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TurnoId = table.Column<int>(type: "int", nullable: false),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MetodoPago = table.Column<int>(type: "int", nullable: false),
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumeroTransaccion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Observaciones = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Ultimos4Digitos = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
+                    ProcesadoPorUsuarioId = table.Column<int>(type: "int", nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaActualizacion = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pagos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pagos_Turnos_TurnoId",
+                        column: x => x.TurnoId,
+                        principalTable: "Turnos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Jornadas_PeluqueroId",
                 table: "Jornadas",
@@ -142,16 +226,30 @@ namespace PeluqueriaCanina.Migrations
                 column: "ClienteId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Pagos_TurnoId",
+                table: "Pagos",
+                column: "TurnoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Personas_Mail",
                 table: "Personas",
                 column: "Mail",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReporteDetallePeluquero_ReportePeluqueroPorServicioId",
+                table: "ReporteDetallePeluquero",
+                column: "ReportePeluqueroPorServicioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportePeluqueroPorServicio_ReporteServicioId",
+                table: "ReportePeluqueroPorServicio",
+                column: "ReporteServicioId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Turnos_MascotaId",
                 table: "Turnos",
-                column: "MascotaId",
-                unique: true);
+                column: "MascotaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Turnos_PeluqueroId",
@@ -171,13 +269,25 @@ namespace PeluqueriaCanina.Migrations
                 name: "Jornadas");
 
             migrationBuilder.DropTable(
+                name: "Pagos");
+
+            migrationBuilder.DropTable(
+                name: "ReporteDetallePeluquero");
+
+            migrationBuilder.DropTable(
                 name: "Turnos");
+
+            migrationBuilder.DropTable(
+                name: "ReportePeluqueroPorServicio");
 
             migrationBuilder.DropTable(
                 name: "Mascotas");
 
             migrationBuilder.DropTable(
                 name: "Servicios");
+
+            migrationBuilder.DropTable(
+                name: "ReporteServicios");
 
             migrationBuilder.DropTable(
                 name: "Personas");

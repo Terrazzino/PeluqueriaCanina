@@ -204,26 +204,40 @@ namespace PeluqueriaCanina.Controllers
         //VAMOS A USAR LA LIBRERIA DE CHATR.JS PARA ESTE DESARROLLO
 
 
+        // === REPORTE PRINCIPAL ===
         public IActionResult Reportes()
         {
-            var servicios = _contexto.ReporteServicios
-                .Select(s => s.NombreServicio)
+            var datos = _contexto.ReporteServicios
+                .Select(s => new
+                {
+                    s.NombreServicio,
+                    Total = _contexto.ReportePeluqueroPorServicio
+                        .Where(p => p.ReporteServicioId == s.Id)
+                        .Sum(p => (int?)p.Cantidad) ?? 0
+                })
                 .ToList();
 
-            var cantidades = _contexto.ReporteServicios
-                .Select(s => s.Cantidad)
-                .ToList();
-
-            ViewBag.Servicios = servicios;
-            ViewBag.Cantidades = cantidades;
+            ViewBag.Servicios = datos.Select(d => d.NombreServicio).ToList();
+            ViewBag.Cantidades = datos.Select(d => d.Total).ToList();
 
             return View();
         }
 
+
+        // === DETALLE DE SERVICIO ===
         public IActionResult DetalleServicio(string servicio)
         {
-            var datos = _contexto.ReportePeluquerosPorServicio
-                .Where(r => r.NombreServicio == servicio)
+            if (string.IsNullOrEmpty(servicio))
+                return RedirectToAction("Reportes");
+
+            var servicioBase = _contexto.ReporteServicios
+                .FirstOrDefault(s => s.NombreServicio == servicio);
+
+            if (servicioBase == null)
+                return RedirectToAction("Reportes");
+
+            var datos = _contexto.ReportePeluqueroPorServicio
+                .Where(p => p.ReporteServicioId == servicioBase.Id)
                 .ToList();
 
             ViewBag.Servicio = servicio;
@@ -233,25 +247,39 @@ namespace PeluqueriaCanina.Controllers
             return View();
         }
 
+
+        // === DETALLE DE PELUQUERO ===
         public IActionResult DetallePeluquero(string servicio, string peluquero)
         {
-            var datos = _contexto.ReporteDetallePeluquero
-                .FirstOrDefault(r => r.NombrePeluquero == peluquero);
+            if (string.IsNullOrEmpty(servicio) || string.IsNullOrEmpty(peluquero))
+                return RedirectToAction("Reportes");
 
-            if (datos == null)
-            {
-                ViewBag.Error = "No se encontraron datos del peluquero.";
-                return View();
-            }
+            var servicioBase = _contexto.ReporteServicios
+                .FirstOrDefault(s => s.NombreServicio == servicio);
 
-            ViewBag.Servicio = servicio;
+            if (servicioBase == null)
+                return RedirectToAction("Reportes");
+
+            var registroPeluquero = _contexto.ReportePeluqueroPorServicio
+                .FirstOrDefault(p => p.NombrePeluquero == peluquero && p.ReporteServicioId == servicioBase.Id);
+
+            if (registroPeluquero == null)
+                return RedirectToAction("DetalleServicio", new { servicio });
+
+            var detalle = _contexto.ReporteDetallePeluquero
+                .FirstOrDefault(d => d.ReportePeluqueroPorServicioId == registroPeluquero.Id);
+
             ViewBag.Peluquero = peluquero;
-            ViewBag.Realizados = datos.Realizados;
-            ViewBag.Cancelados = datos.Cancelados;
-            ViewBag.Recaudado = datos.Recaudado;
+            ViewBag.Servicio = servicio;
+            ViewBag.Recaudado = detalle?.Recaudado ?? 0;
+            ViewBag.Realizados = detalle?.Realizados ?? 0;
+            ViewBag.Cancelados = detalle?.Cancelados ?? 0;
 
             return View();
         }
+
+
+
 
 
     }

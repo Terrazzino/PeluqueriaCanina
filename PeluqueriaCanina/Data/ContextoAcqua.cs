@@ -24,9 +24,11 @@ namespace PeluqueriaCanina.Data
         public DbSet<Pago> Pagos { get; set; }
 
         //REPORTES
+        // REPORTES
         public DbSet<ReporteServicios> ReporteServicios { get; set; }
-        public DbSet<ReportePeluquerosPorServicio> ReportePeluquerosPorServicio { get; set; }
+        public DbSet<ReportePeluquerosPorServicio> ReportePeluqueroPorServicio { get; set; }
         public DbSet<ReporteDetallePeluquero> ReporteDetallePeluquero { get; set; }
+
 
 
         //___________________________________________________________________
@@ -92,6 +94,43 @@ namespace PeluqueriaCanina.Data
             modelBuilder.Entity<Turno>()
                 .Property(t => t.Precio)
                 .HasPrecision(18, 2);
+
+            //--------------------------------------------------------------------------------------------------------
+            //REPORTES
+            //DE PRUEBA PARA
+            //BASE DE DATOS APLICADA
+
+            modelBuilder.Entity<ReporteServicios>(b =>
+            {
+                b.ToTable("ReporteServicios");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.NombreServicio).HasMaxLength(100).IsRequired();
+            });
+
+            modelBuilder.Entity<ReportePeluquerosPorServicio>(b =>
+            {
+                b.ToTable("ReportePeluqueroPorServicio"); // el nombre que usaste en el SQL
+                b.HasKey(x => x.Id);
+                b.Property(x => x.NombrePeluquero).HasMaxLength(100).IsRequired();
+
+                b.HasOne(r => r.ReporteServicio)
+                 .WithMany()
+                 .HasForeignKey(r => r.ReporteServicioId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ReporteDetallePeluquero>(b =>
+            {
+                b.ToTable("ReporteDetallePeluquero");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Recaudado).HasColumnType("decimal(18,2)");
+
+                b.HasOne(d => d.ReportePeluqueroPorServicio)
+                 .WithMany(p => p.Detalles)
+                 .HasForeignKey(d => d.ReportePeluqueroPorServicioId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
 
         }
     }
