@@ -25,9 +25,9 @@ namespace PeluqueriaCanina.Data
 
         //REPORTES
         // REPORTES
-        public DbSet<ReporteServicios> ReporteServicios { get; set; }
-        public DbSet<ReportePeluquerosPorServicio> ReportePeluqueroPorServicio { get; set; }
-        public DbSet<ReporteDetallePeluquero> ReporteDetallePeluquero { get; set; }
+        public DbSet<ReporteServiciosTotales> vw_ReporteServiciosTotales { get; set; }
+        public DbSet<ReportePeluquerosPorServicio> vw_ReportePeluquerosPorServicio { get; set; }
+        public DbSet<ReporteDetallePeluqueroView> vw_ReporteDetallePeluquero { get; set; }
 
 
 
@@ -97,38 +97,24 @@ namespace PeluqueriaCanina.Data
 
             //--------------------------------------------------------------------------------------------------------
             //REPORTES
-            //DE PRUEBA PARA
-            //BASE DE DATOS APLICADA
-
-            modelBuilder.Entity<ReporteServicios>(b =>
+            // --- REPORTES: mapear vistas (sin clave)
+            modelBuilder.Entity<ReporteServiciosTotales>(b =>
             {
-                b.ToTable("ReporteServicios");
-                b.HasKey(x => x.Id);
-                b.Property(x => x.NombreServicio).HasMaxLength(100).IsRequired();
+                b.HasNoKey();
+                b.ToView("vw_ReporteServiciosTotales");
+                // Opcional: si la vista devuelve columnas con otros nombres, mapéalas aquí
             });
 
             modelBuilder.Entity<ReportePeluquerosPorServicio>(b =>
             {
-                b.ToTable("ReportePeluqueroPorServicio"); // el nombre que usaste en el SQL
-                b.HasKey(x => x.Id);
-                b.Property(x => x.NombrePeluquero).HasMaxLength(100).IsRequired();
-
-                b.HasOne(r => r.ReporteServicio)
-                 .WithMany()
-                 .HasForeignKey(r => r.ReporteServicioId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                b.HasNoKey();
+                b.ToView("vw_ReportePeluquerosPorServicio");
             });
 
-            modelBuilder.Entity<ReporteDetallePeluquero>(b =>
+            modelBuilder.Entity<ReporteDetallePeluqueroView>(b =>
             {
-                b.ToTable("ReporteDetallePeluquero");
-                b.HasKey(x => x.Id);
-                b.Property(x => x.Recaudado).HasColumnType("decimal(18,2)");
-
-                b.HasOne(d => d.ReportePeluqueroPorServicio)
-                 .WithMany(p => p.Detalles)
-                 .HasForeignKey(d => d.ReportePeluqueroPorServicioId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                b.HasNoKey();
+                b.ToView("vw_ReporteDetallePeluquero");
             });
 
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PeluqueriaCanina.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,19 +29,6 @@ namespace PeluqueriaCanina.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Personas", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ReporteServicios",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NombreServicio = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReporteServicios", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -107,27 +94,6 @@ namespace PeluqueriaCanina.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ReportePeluqueroPorServicio",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReporteServicioId = table.Column<int>(type: "int", nullable: false),
-                    NombrePeluquero = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Cantidad = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReportePeluqueroPorServicio", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ReportePeluqueroPorServicio_ReporteServicios_ReporteServicioId",
-                        column: x => x.ReporteServicioId,
-                        principalTable: "ReporteServicios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Turnos",
                 columns: table => new
                 {
@@ -162,28 +128,6 @@ namespace PeluqueriaCanina.Migrations
                         principalTable: "Servicios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ReporteDetallePeluquero",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReportePeluqueroPorServicioId = table.Column<int>(type: "int", nullable: false),
-                    Realizados = table.Column<int>(type: "int", nullable: false),
-                    Cancelados = table.Column<int>(type: "int", nullable: false),
-                    Recaudado = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReporteDetallePeluquero", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ReporteDetallePeluquero_ReportePeluqueroPorServicio_ReportePeluqueroPorServicioId",
-                        column: x => x.ReportePeluqueroPorServicioId,
-                        principalTable: "ReportePeluqueroPorServicio",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -237,16 +181,6 @@ namespace PeluqueriaCanina.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReporteDetallePeluquero_ReportePeluqueroPorServicioId",
-                table: "ReporteDetallePeluquero",
-                column: "ReportePeluqueroPorServicioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReportePeluqueroPorServicio_ReporteServicioId",
-                table: "ReportePeluqueroPorServicio",
-                column: "ReporteServicioId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Turnos_MascotaId",
                 table: "Turnos",
                 column: "MascotaId");
@@ -272,22 +206,13 @@ namespace PeluqueriaCanina.Migrations
                 name: "Pagos");
 
             migrationBuilder.DropTable(
-                name: "ReporteDetallePeluquero");
-
-            migrationBuilder.DropTable(
                 name: "Turnos");
-
-            migrationBuilder.DropTable(
-                name: "ReportePeluqueroPorServicio");
 
             migrationBuilder.DropTable(
                 name: "Mascotas");
 
             migrationBuilder.DropTable(
                 name: "Servicios");
-
-            migrationBuilder.DropTable(
-                name: "ReporteServicios");
 
             migrationBuilder.DropTable(
                 name: "Personas");

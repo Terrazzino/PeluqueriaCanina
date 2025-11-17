@@ -204,16 +204,18 @@ namespace PeluqueriaCanina.Migrations
                     b.ToTable("Turnos");
                 });
 
-            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteDetallePeluquero", b =>
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteDetallePeluqueroView", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("Cancelados")
                         .HasColumnType("int");
+
+                    b.Property<string>("NombrePeluquero")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreServicio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Realizados")
                         .HasColumnType("int");
@@ -221,40 +223,44 @@ namespace PeluqueriaCanina.Migrations
                     b.Property<decimal>("Recaudado")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ReportePeluqueroPorServicioId")
-                        .HasColumnType("int");
+                    b.ToTable((string)null);
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReportePeluqueroPorServicioId");
-
-                    b.ToTable("ReporteDetallePeluquero", (string)null);
+                    b.ToView("vw_ReporteDetallePeluquero", (string)null);
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
                     b.Property<string>("NombrePeluquero")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ReporteServicioId")
+                    b.Property<string>("NombreServicio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_ReportePeluquerosPorServicio", (string)null);
+                });
+
+            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteServiciosTotales", b =>
+                {
+                    b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("NombreServicio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("ReporteServicioId");
+                    b.Property<int>("Total")
+                        .HasColumnType("int");
 
-                    b.ToTable("ReportePeluqueroPorServicio", (string)null);
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_ReporteServiciosTotales", (string)null);
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Persona", b =>
@@ -307,24 +313,6 @@ namespace PeluqueriaCanina.Migrations
                     b.HasDiscriminator().HasValue("Persona");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("ReporteServicios", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("NombreServicio")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ReporteServicios", (string)null);
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Administrador", b =>
@@ -416,36 +404,9 @@ namespace PeluqueriaCanina.Migrations
                     b.Navigation("Servicio");
                 });
 
-            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReporteDetallePeluquero", b =>
-                {
-                    b.HasOne("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", "ReportePeluqueroPorServicio")
-                        .WithMany("Detalles")
-                        .HasForeignKey("ReportePeluqueroPorServicioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReportePeluqueroPorServicio");
-                });
-
-            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
-                {
-                    b.HasOne("ReporteServicios", "ReporteServicio")
-                        .WithMany()
-                        .HasForeignKey("ReporteServicioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReporteServicio");
-                });
-
             modelBuilder.Entity("PeluqueriaCanina.Models.ClasesDeCliente.Mascota", b =>
                 {
                     b.Navigation("Turnos");
-                });
-
-            modelBuilder.Entity("PeluqueriaCanina.Models.REPORTES.ReportePeluquerosPorServicio", b =>
-                {
-                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("PeluqueriaCanina.Models.Users.Cliente", b =>

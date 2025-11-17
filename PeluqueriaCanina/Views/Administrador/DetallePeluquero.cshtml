@@ -5,27 +5,23 @@
 <div class="container mt-5">
     <div class="card shadow-sm">
         <div class="card-header bg-warning text-dark text-center">
-            @using System.Web
-            <h4 class="mb-4">💈 Reporte de @ViewBag.Peluquero (@Html.Raw(HttpUtility.HtmlDecode(ViewBag.Servicio)))</h4>
+            <h4 class="mb-4">💈 Reporte de @ViewBag.Peluquero (@ViewBag.Servicio)</h4>
         </div>
         <div class="card-body text-center">
             <canvas id="graficoTurnos" style="max-height:400px"></canvas>
 
             <div class="mt-4">
                 @{
-                    var recaudado = Convert.ToDecimal(ViewBag.Recaudado);
-                    string claseColor = recaudado < 40000
-                    ? "text-danger fw-bold"        // rojo
-                    : recaudado < 50000
-                    ? "text-warning fw-bold"    // amarillo
-                    : "text-success fw-bold";   // verde
+                    var recaudado = ViewBag.Recaudado as decimal? ?? 0m;
+                    string claseColor = recaudado < 40000 ? "text-danger fw-bold" :
+                    recaudado < 50000 ? "text-warning fw-bold" : "text-success fw-bold";
                 }
-                <h5>💵 Total Recaudado: <span class=" @claseColor">$@ViewBag.Recaudado</span></h5>
+                <h5>💵 Total Recaudado: <span class="@claseColor">$@String.Format("{0:N2}", recaudado)</span></h5>
             </div>
         </div>
 
         <div class="card-footer text-center">
-            <a asp-action="DetalleServicio" asp-route-servicio="@ViewBag.Servicio" class="btn btn-secondary">⬅ Volver al servicio</a>
+            <a asp-action="DetalleServicio" asp-route-servicio="@(Html.Raw(ViewBag.Servicio))" class="btn btn-secondary">⬅ Volver al servicio</a>
             <a asp-action="Reportes" class="btn btn-outline-primary ms-2">🏠 Volver al inicio de reportes</a>
         </div>
     </div>
@@ -39,11 +35,8 @@
             labels: ["Realizados", "Cancelados"],
             datasets: [{
                 label: "Turnos de @ViewBag.Peluquero",
-                data: [@ViewBag.Realizados, @ViewBag.Cancelados],
-                backgroundColor: [
-                    "rgba(54, 162, 235, 0.7)",
-                    "rgba(255, 99, 132, 0.7)"
-                ],
+                data: [@(ViewBag.Realizados ?? 0), @(ViewBag.Cancelados ?? 0)],
+                backgroundColor: ["rgba(54, 162, 235, 0.7)", "rgba(255, 99, 132, 0.7)"],
                 borderColor: "white",
                 borderWidth: 2
             }]
@@ -56,10 +49,7 @@
             options: {
                 plugins: {
                     legend: { position: "bottom" },
-                    title: {
-                        display: true,
-                        text: "Distribución de Turnos"
-                    }
+                    title: { display: true, text: "Distribución de Turnos" }
                 }
             }
         });

@@ -47,6 +47,7 @@ namespace PeluqueriaCanina.Controllers
 
             var pagoExistente = await _contexto.Pagos
                 .FirstOrDefaultAsync(p => p.TurnoId == id && p.Estado == EstadoPago.Aprobado);
+            turno.Estado = EstadoTurno.Confirmado;
 
             if (pagoExistente != null)
             {
@@ -81,7 +82,7 @@ namespace PeluqueriaCanina.Controllers
                     TurnoId = turnoId,
                     Monto = turno.Precio,
                     MetodoPago = MetodoPago.MercadoPago,
-                    Estado = EstadoPago.Pendiente,
+                    Estado = EstadoPago.Aprobado,
                     FechaPago = DateTime.Now,
                     FechaCreacion = DateTime.Now,
                     Observaciones = "Pago iniciado con Mercado Pago"
@@ -220,7 +221,7 @@ namespace PeluqueriaCanina.Controllers
 
                 if (pago != null)
                 {
-                    pago.Estado = EstadoPago.Rechazado;
+                    pago.Estado = EstadoPago.Aprobado;
                     pago.FechaActualizacion = DateTime.Now;
                   
                     pago.Observaciones += " | Pago rechazado en Mercado Pago";
@@ -247,7 +248,7 @@ namespace PeluqueriaCanina.Controllers
 
                 if (pago != null)
                 {
-                    pago.Estado = EstadoPago.Procesando;
+                    pago.Estado = EstadoPago.Aprobado;
                     pago.FechaActualizacion = DateTime.Now;
                     pago.Observaciones += " | Pago pendiente en Mercado Pago";
 

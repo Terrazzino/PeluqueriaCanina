@@ -20,16 +20,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const peluqueros = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Peluqueros));
-        const cantidades = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Cantidades));
+        const peluqueros = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Peluqueros ?? new List<string>()));
+        const cantidades = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Cantidades ?? new List<int>()));
+        const servicio = "@Html.Raw(ViewBag.Servicio ?? "")";
 
         const ctx = document.getElementById('graficoPeluqueros').getContext('2d');
-        const grafico = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: peluqueros,
                 datasets: [{
-                    label: 'Cantidad de ' + "@ViewBag.Servicio",
+                    label: 'Cantidad de ' + servicio,
                     data: cantidades,
                     backgroundColor: 'rgba(75, 192, 192, 0.7)',
                     borderColor: 'rgba(75, 192, 192, 1)',
@@ -41,25 +42,14 @@
                     if (elements.length > 0) {
                         const index = elements[0].index;
                         const peluquero = peluqueros[index];
-                        const servicio = "@ViewBag.Servicio";
-                        window.location.href = `/Administrador/DetallePeluquero?servicio=${encodeURIComponent(servicio)}&peluquero=${encodeURIComponent(peluquero)}`;
-
+                        window.location.href = `@Url.Action("DetallePeluquero", "Administrador")?servicio=${encodeURIComponent(servicio)}&peluquero=${encodeURIComponent(peluquero)}`;
                     }
                 },
-
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
                 },
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     </script>
 }
-

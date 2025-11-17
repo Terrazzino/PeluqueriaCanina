@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PeluqueriaCanina.Models.ClasesDePeluquero;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PeluqueriaCanina.Data;
-using PeluqueriaCanina.Models.Users;
+using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
+using PeluqueriaCanina.Models.Users;
+using System.Text;
 
 namespace PeluqueriaCanina.Controllers
 {
@@ -197,24 +198,12 @@ namespace PeluqueriaCanina.Controllers
         }
 
 
-
-        //DESARROLLAMOS EL HARDCODEO PARA BASE DE DATOS APLICADAS
-        //EN ESTA SECCIÓN IMPLEMENTAMOS TODO LO REFERIDO A REPORTES
-        //LUEGO IMPLEMENTAREMOS EL CONTEXTO PARA DARLE DINAMISMO
-        //VAMOS A USAR LA LIBRERIA DE CHATR.JS PARA ESTE DESARROLLO
-
-
         // === REPORTE PRINCIPAL ===
         public IActionResult Reportes()
         {
-            var datos = _contexto.ReporteServicios
-                .Select(s => new
-                {
-                    s.NombreServicio,
-                    Total = _contexto.ReportePeluqueroPorServicio
-                        .Where(p => p.ReporteServicioId == s.Id)
-                        .Sum(p => (int?)p.Cantidad) ?? 0
-                })
+            // Consulta la vista en BD
+            var datos = _contexto.vw_ReporteServiciosTotales
+                .OrderByDescending(x => x.Total)
                 .ToList();
 
             ViewBag.Servicios = datos.Select(d => d.NombreServicio).ToList();
@@ -223,21 +212,18 @@ namespace PeluqueriaCanina.Controllers
             return View();
         }
 
-
         // === DETALLE DE SERVICIO ===
         public IActionResult DetalleServicio(string servicio)
         {
             if (string.IsNullOrEmpty(servicio))
                 return RedirectToAction("Reportes");
 
-            var servicioBase = _contexto.ReporteServicios
-                .FirstOrDefault(s => s.NombreServicio == servicio);
+            // 🔥 IMPORTANTE: Decodificar
+            servicio = System.Web.HttpUtility.UrlDecode(servicio);
+            servicio = System.Web.HttpUtility.HtmlDecode(servicio);
 
-            if (servicioBase == null)
-                return RedirectToAction("Reportes");
-
-            var datos = _contexto.ReportePeluqueroPorServicio
-                .Where(p => p.ReporteServicioId == servicioBase.Id)
+            var datos = _contexto.vw_ReportePeluquerosPorServicio
+                .Where(p => p.NombreServicio == servicio)
                 .ToList();
 
             ViewBag.Servicio = servicio;
@@ -254,32 +240,47 @@ namespace PeluqueriaCanina.Controllers
             if (string.IsNullOrEmpty(servicio) || string.IsNullOrEmpty(peluquero))
                 return RedirectToAction("Reportes");
 
-            var servicioBase = _contexto.ReporteServicios
-                .FirstOrDefault(s => s.NombreServicio == servicio);
+            // 🔥 Decodificar ambos valores
+            servicio = System.Web.HttpUtility.UrlDecode(servicio);
+            servicio = System.Web.HttpUtility.HtmlDecode(servicio);
 
-            if (servicioBase == null)
-                return RedirectToAction("Reportes");
+            peluquero = System.Web.HttpUtility.UrlDecode(peluquero);
+            peluquero = System.Web.HttpUtility.HtmlDecode(peluquero);
 
-            var registroPeluquero = _contexto.ReportePeluqueroPorServicio
-                .FirstOrDefault(p => p.NombrePeluquero == peluquero && p.ReporteServicioId == servicioBase.Id);
+            var detalle = _contexto.vw_ReporteDetallePeluquero
+                .AsEnumerable()
+                .FirstOrDefault(r =>
+                    Normalizar(r.NombreServicio) == Normalizar(servicio) &&
+                    Normalizar(r.NombrePeluquero) == Normalizar(peluquero));
 
-            if (registroPeluquero == null)
-                return RedirectToAction("DetalleServicio", new { servicio });
+            if (detalle == null)
+            {
+                ViewBag.Peluquero = peluquero;
+                ViewBag.Servicio = servicio;
+                ViewBag.Recaudado = 0m;
+                ViewBag.Realizados = 0;
+                ViewBag.Cancelados = 0;
+                return View();
+            }
 
-            var detalle = _contexto.ReporteDetallePeluquero
-                .FirstOrDefault(d => d.ReportePeluqueroPorServicioId == registroPeluquero.Id);
-
-            ViewBag.Peluquero = peluquero;
-            ViewBag.Servicio = servicio;
-            ViewBag.Recaudado = detalle?.Recaudado ?? 0;
-            ViewBag.Realizados = detalle?.Realizados ?? 0;
-            ViewBag.Cancelados = detalle?.Cancelados ?? 0;
+            ViewBag.Peluquero = detalle.NombrePeluquero;
+            ViewBag.Servicio = detalle.NombreServicio;
+            ViewBag.Recaudado = detalle.Recaudado;
+            ViewBag.Realizados = detalle.Realizados;
+            ViewBag.Cancelados = detalle.Cancelados;
 
             return View();
         }
 
 
-
+        private string Normalizar(string texto)
+        {
+            if (texto == null) return "";
+            return texto
+                .Normalize(NormalizationForm.FormKC)
+                .Trim()
+                .ToLower();
+        }
 
 
     }
