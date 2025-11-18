@@ -7,118 +7,122 @@
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0">💳 Procesar Pago</h4>
+        <div class="col-md-10 col-lg-8">
+
+            <!-- Card Principal -->
+            <div class="glass-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h3 class="text-warning mb-0">💳 Procesar Pago</h3>
+
+                    <a href="/Turno/Index" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
                 </div>
-                <div class="card-body">
-                    <!-- Información del Turno -->
-                    <div class="alert alert-info">
-                        <h5>Detalles del Turno</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1"><strong>Mascota:</strong> @turno.Mascota.Nombre</p>
-                                <p class="mb-1"><strong>Servicio:</strong> @turno.Servicio.NombreDelServicio</p>
-                                <p class="mb-1"><strong>Peluquero:</strong> @turno.Peluquero.Nombre @turno.Peluquero.Apellido</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="mb-1"><strong>Fecha:</strong> @turno.FechaHora.ToString("dd/MM/yyyy")</p>
-                                <p class="mb-1"><strong>Hora:</strong> @turno.FechaHora.ToString("HH:mm")</p>
-                                <p class="mb-1">
-                                    <strong>Estado:</strong>
-                                    <span class="badge bg-warning">@turno.Estado</span>
-                                </p>
-                            </div>
+
+                <!-- Información del Turno -->
+                <div class="mb-4 p-3 rounded" style="background: rgba(255,255,255,0.06); border-left: 3px solid #ffc107;">
+                    <h5 class="text-warning">Detalles del Turno</h5>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Mascota:</strong> @turno.Mascota.Nombre</p>
+                            <p class="mb-1"><strong>Servicio:</strong> @turno.Servicio.NombreDelServicio</p>
+                            <p class="mb-1"><strong>Peluquero:</strong> @turno.Peluquero.Nombre @turno.Peluquero.Apellido</p>
                         </div>
-                        <hr>
-                        <h4 class="text-end mb-0">
-                            <strong>Total a pagar:</strong>
-                            <span class="text-success">$@turno.Precio.ToString("N2")</span>
-                        </h4>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Fecha:</strong> @turno.FechaHora.ToString("dd/MM/yyyy")</p>
+                            <p class="mb-1"><strong>Hora:</strong> @turno.FechaHora.ToString("HH:mm")</p>
+                            <p class="mb-1">
+                                <strong>Estado:</strong>
+                                <span class="badge bg-warning text-dark px-3 py-2">@turno.Estado</span>
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Formulario de Pago -->
-                    <form id="formPago">
-                        @Html.AntiForgeryToken()
+                    <hr />
 
-                        <input type="hidden" id="TurnoId" name="TurnoId" value="@turno.Id" />
-                        <input type="hidden" id="Monto" name="Monto" value="@turno.Precio" />
-
-                        <div class="mb-3">
-                            <label for="MetodoPago" class="form-label">
-                                <i class="bi bi-credit-card"></i> Método de Pago *
-                            </label>
-                            <select id="MetodoPago" name="MetodoPago" class="form-select" required>
-                                <option value="">Seleccione un método</option>
-                                <option value="0">💵 Efectivo</option>
-                                <option value="1">💳 Tarjeta de Débito</option>
-                                <option value="2">💳 Tarjeta de Crédito</option>
-                                <option value="3">📱 Mercado Pago</option>
-                                <option value="4">🏦 Transferencia Bancaria</option>
-                            </select>
-                        </div>
-
-                        <!-- Campos adicionales para tarjeta -->
-                        <div id="camposTarjeta" style="display: none;">
-                            <div class="mb-3">
-                                <label for="Ultimos4Digitos" class="form-label">Últimos 4 dígitos de la tarjeta</label>
-                                <input type="text"
-                                       id="Ultimos4Digitos"
-                                       name="Ultimos4Digitos"
-                                       class="form-control"
-                                       maxlength="4"
-                                       pattern="\d{4}"
-                                       placeholder="1234">
-                                <small class="text-muted">Solo para referencia, no guardamos datos completos</small>
-                            </div>
-                        </div>
-
-                        <!-- Campo para número de transacción -->
-                        <div id="campoTransaccion" style="display: none;">
-                            <div class="mb-3">
-                                <label for="NumeroTransaccion" class="form-label">Número de Transacción / Comprobante</label>
-                                <input type="text"
-                                       id="NumeroTransaccion"
-                                       name="NumeroTransaccion"
-                                       class="form-control"
-                                       maxlength="100"
-                                       placeholder="Ej: MP-12345678">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="Observaciones" class="form-label">Observaciones (opcional)</label>
-                            <textarea id="Observaciones"
-                                      name="Observaciones"
-                                      class="form-control"
-                                      rows="3"
-                                      maxlength="500"
-                                      placeholder="Agregue cualquier nota adicional"></textarea>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-check-circle"></i> Confirmar Pago de $@turno.Precio.ToString("N2")
-                            </button>
-                            <a href="/Turno/Index" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Volver a Mis Turnos
-                            </a>
-                        </div>
-                    </form>
+                    <h4 class="text-end mb-0">
+                        <strong>Total:</strong>
+                        <span class="text-success">$@turno.Precio.ToString("N2")</span>
+                    </h4>
                 </div>
+
+                <!-- Formulario -->
+                <form id="formPago">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" id="TurnoId" name="TurnoId" value="@turno.Id" />
+                    <input type="hidden" id="Monto" name="Monto" value="@turno.Precio" />
+
+                    <div class="mb-3">
+                        <label for="MetodoPago" class="form-label text-light">
+                            <i class="bi bi-credit-card"></i> Método de Pago *
+                        </label>
+                        <select id="MetodoPago" name="MetodoPago" class="form-select dark-input" required>
+                            <option value="">Seleccione un método</option>
+                            <option value="0">💵 Efectivo</option>
+                            <option value="1">💳 Tarjeta de Débito</option>
+                            <option value="2">💳 Tarjeta de Crédito</option>
+                            <option value="3">📱 Mercado Pago</option>
+                            <option value="4">🏦 Transferencia Bancaria</option>
+                        </select>
+                    </div>
+
+                    <!-- Campos para tarjeta -->
+                    <div id="camposTarjeta" style="display:none;">
+                        <div class="mb-3">
+                            <label for="Ultimos4Digitos" class="form-label text-light">Últimos 4 dígitos</label>
+                            <input type="text" class="form-control dark-input"
+                                   id="Ultimos4Digitos" name="Ultimos4Digitos"
+                                   maxlength="4" pattern="\d{4}"
+                                   placeholder="1234" />
+                            <small class="text-muted">Solo referencia, no guardamos datos completos</small>
+                        </div>
+                    </div>
+
+                    <!-- Campo para número de transacción -->
+                    <div id="campoTransaccion" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label text-light">Número de Transacción</label>
+                            <input type="text" class="form-control dark-input"
+                                   id="NumeroTransaccion" name="NumeroTransaccion"
+                                   maxlength="100" placeholder="Ej: MP-12345678" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light">Observaciones</label>
+                        <textarea class="form-control dark-input"
+                                  id="Observaciones" name="Observaciones"
+                                  rows="3" maxlength="500"
+                                  placeholder="Notas adicionales"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning text-dark fw-bold btn-lg rounded-pill">
+                            <i class="bi bi-check-circle"></i> Confirmar Pago ($@turno.Precio.ToString("N2"))
+                        </button>
+
+                        <a href="/Turno/Index" class="btn btn-outline-light rounded-pill">
+                            <i class="bi bi-arrow-left"></i> Volver a Mis Turnos
+                        </a>
+                    </div>
+                </form>
+
             </div>
 
-            <!-- Información de seguridad -->
-            <div class="alert alert-secondary mt-3">
-                <h6><i class="bi bi-shield-check"></i> Información de Seguridad</h6>
-                <ul class="mb-0 small">
+            <!-- Seguridad -->
+            <div class="glass-card mt-4 p-3">
+                <h6 class="text-warning"><i class="bi bi-shield-check"></i> Información de Seguridad</h6>
+                <ul class="small text-muted mb-0">
                     <li>No guardamos información completa de tarjetas</li>
-                    <li>Los pagos con tarjeta son procesados de forma segura</li>
-                    <li>Los pagos con Mercado Pago te redirigirán a su plataforma segura</li>
-                    <li>Recibirás un comprobante por email una vez aprobado el pago</li>
+                    <li>Pagos con tarjeta procesados de forma segura</li>
+                    <li>Mercado Pago te redirige a su plataforma</li>
+                    <li>Recibirás un comprobante al aprobarse el pago</li>
                 </ul>
             </div>
+
         </div>
     </div>
 </div>

@@ -1,16 +1,25 @@
-﻿@using PeluqueriaCanina.Models.ClasesDeAdministrador
-@model Servicio
+﻿@model PeluqueriaCanina.Models.ClasesDeAdministrador.Servicio
+
 @{
     ViewData["Title"] = "Editar Servicio";
 }
 
-<div class="card shadow-sm p-4 mt-4">
-    <h2 class="text-primary mb-4">Editar Servicio</h2>
+<div class="glass-card mt-4 fade-in">
+    <h2 class="text-warning mb-4">✏️ Editar Servicio</h2>
 
     <form asp-action="Editar" method="post">
         <input type="hidden" asp-for="Id" />
 
-        <!-- mismo contenido que Crear.cshtml -->
-        @Html.Partial("Crear", Model)
+        @Html.Partial("_FormularioServicio", Model)
+
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index" class="btn btn-outline-light">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+
+            <button type="submit" class="btn btn-success px-4">
+                <i class="bi bi-save"></i> Guardar Cambios
+            </button>
+        </div>
     </form>
 </div>

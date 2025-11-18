@@ -1,91 +1,105 @@
 ﻿@using PeluqueriaCanina.Models.Users
 @model Peluquero
+
 @{
     ViewData["Title"] = "EditarPeluquero";
 }
 
-<div class="card shadow-sm p-4 mt-4">
-    <h2 class="text-primary mb-4">Editar Peluquero</h2>
+<div class="container mt-5">
+    <div class="card bg-dark text-light shadow-lg rounded-4 p-4 border-0">
 
-    <form asp-action="EditarPeluquero" method="post">
-        <input type="hidden" asp-for="Id" />
+        <!-- Título -->
+        <h2 class="fw-bold mb-4 text-center" style="letter-spacing:1px;">
+            ✂ Editar Peluquero
+        </h2>
 
-        <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input asp-for="Nombre" class="form-control" />
-            <span asp-validation-for="Nombre" class="text-danger"></span>
-        </div>
+        <!-- Imagen opcional -->
+        <!-- ⬇⬇⬇ PONÉ ACÁ LA FOTO DEL PELUQUERO SI QUERÉS -->
+        <!-- <img src="RUTA_DE_LA_IMAGEN"
+             class="img-fluid d-block mx-auto rounded-3 mb-4"
+             style="max-height:180px; object-fit:cover;" /> -->
+        <!-- ⬆⬆⬆ FIN IMAGEN -->
 
-        <div class="mb-3">
-            <label class="form-label">Apellido</label>
-            <input asp-for="Apellido" class="form-control" />
-            <span asp-validation-for="Apellido" class="text-danger"></span>
-        </div>
+        <form asp-action="EditarPeluquero" method="post">
 
-        <div class="mb-3">
-            <label class="form-label">Mail</label>
-            <input asp-for="Mail" class="form-control" />
-            <span asp-validation-for="Mail" class="text-danger"></span>
-        </div>
+            <input type="hidden" asp-for="Id" />
 
-        <h4 class="mt-4">Jornadas laborales</h4>
-        <div class="table-responsive mt-2">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Día</th>
-                        <th>Activo</th>
-                        <th>Hora de Inicio</th>
-                        <th>Hora de Fin</th>
-                    </tr>
-                </thead>
-@*                 <tbody>
-                    @for (int i = 0; i < Model.Jornadas.Count; i++)
-                    {
+            <!-- Nombre -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nombre</label>
+                <input asp-for="Nombre" class="form-control bg-secondary text-light border-0" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <!-- Apellido -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Apellido</label>
+                <input asp-for="Apellido" class="form-control bg-secondary text-light border-0" />
+                <span asp-validation-for="Apellido" class="text-danger"></span>
+            </div>
+
+            <!-- Mail -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Mail</label>
+                <input asp-for="Mail" class="form-control bg-secondary text-light border-0" />
+                <span asp-validation-for="Mail" class="text-danger"></span>
+            </div>
+
+            <!-- Jornadas -->
+            <h4 class="mt-4 mb-3 fw-bold">📅 Jornadas laborales</h4>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover rounded-3 overflow-hidden">
+                    <thead class="bg-secondary text-light">
                         <tr>
-                            <td>
-                                @Model.Jornadas[i].Dia
-                                <input type="hidden" name="Jornadas[@i].Id" value="@Model.Jornadas[i].Id" />
-                                <input type="hidden" name="Jornadas[@i].Dia" value="@Model.Jornadas[i].Dia"/>
-                            </td>
-                            <td class="text-center">
-                                <input type="checkbox" name="jornadas[@i].Activo" value="true" @(Model.Jornadas[i].Activo?"checked":"")/>
-                            </td>
-                            <td>
-                                <input type="time" class="form-control" name="Jornadas[@i].HoraDeInicio" value="@Model.Jornadas[i].HoraDeInicio.ToString(@"hh\:mm")"/>
-                            </td>
-                            <td>
-                                <input type="time" class="form-control" name="Jornadas[@i].HoraDeFin" value="@Model.Jornadas[i].HoraDeFin.ToString(@"hh\:mm")"/>
-                            </td>
+                            <th>Día</th>
+                            <th class="text-center">Activo</th>
+                            <th>Hora de Inicio</th>
+                            <th>Hora de Fin</th>
                         </tr>
-                    }
-                </tbody> *@
-                <tbody>
-                    @for (int i = 0; i < Model.Jornadas.Count; i++)
-                    {
-                        <tr>
-                            <td>
-                                @Model.Jornadas[i].Dia
-                                <input type="hidden" asp-for="Jornadas[@i].Id" />
-                                <input type="hidden" asp-for="Jornadas[@i].Dia" />
-                            </td>
-                            <td class="text-center">
-                                <input type="checkbox" asp-for="Jornadas[@i].Activo" class="form-check-input" />
-                            </td>
-                            <td>
-                                <input type="time" asp-for="Jornadas[@i].HoraDeInicio" class="form-control" />
-                            </td>
-                            <td>
-                                <input type="time" asp-for="Jornadas[@i].HoraDeFin" class="form-control" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
+                    </thead>
 
-            </table>
-        </div>
+                    <tbody>
+                        @for (int i = 0; i < Model.Jornadas.Count; i++)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    @Model.Jornadas[i].Dia
+                                    <input type="hidden" asp-for="Jornadas[@i].Id" />
+                                    <input type="hidden" asp-for="Jornadas[@i].Dia" />
+                                </td>
 
-        <button type="submit" class="btn btn-success">Guardar cambios</button>
-        <a asp-action="ListarPeluqueros" class="btn btn-secondary">Cancelar</a>
-    </form>
+                                <td class="text-center">
+                                    <input type="checkbox" asp-for="Jornadas[@i].Activo"
+                                           class="form-check-input" />
+                                </td>
+
+                                <td>
+                                    <input type="time" asp-for="Jornadas[@i].HoraDeInicio"
+                                           class="form-control bg-secondary text-light border-0" />
+                                </td>
+
+                                <td>
+                                    <input type="time" asp-for="Jornadas[@i].HoraDeFin"
+                                           class="form-control bg-secondary text-light border-0" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botones -->
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success rounded-3 px-4 fw-semibold">
+                    Guardar cambios
+                </button>
+
+                <a asp-action="ListarPeluqueros" class="btn btn-outline-light rounded-3 px-4">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+    </div>
 </div>

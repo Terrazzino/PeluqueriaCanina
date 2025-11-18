@@ -2,25 +2,31 @@
     ViewData["Title"] = "Agenda del Peluquero";
 }
 
-<div class="d-flex justify-content-end mt-3">
-    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
-        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-    </a>
-</div>
+<div class="agenda-container fade-in">
 
-<div class="card shadow-sm mt-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">📅 Mi Agenda</h4>
-        <span id="estadoSeleccionado" class="fw-bold"></span>
+    <div class="d-flex justify-content-end mt-3">
+        <a asp-controller="Auth" asp-action="Logout" class="btn btn-logout">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
-    <div class="card-body">
-        <div id="calendar"></div>
+
+    <div class="card custom-card mt-4 shadow-lg border-0">
+        <div class="card-header custom-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">📅 Mi Agenda</h4>
+            <span id="estadoSeleccionado" class="fw-bold"></span>
+        </div>
+
+        <div class="card-body custom-body">
+            <div id="calendar"></div>
+        </div>
     </div>
+
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
@@ -44,6 +50,8 @@
                             <p><b>Estado actual:</b> ${estadoActual}</p>
                             <p>¿Qué acción desea realizar?</p>
                         `,
+                        background: "#1c1c1c",
+                        color: "#fff",
                         showCancelButton: true,
                         showDenyButton: true,
                         confirmButtonText: '✅ Completar',
@@ -62,6 +70,8 @@
                                         icon: "success",
                                         title: `Estado cambiado a ${nuevoEstado}`,
                                         timer: 1500,
+                                        background: "#1c1c1c",
+                                        color: "#fff",
                                         showConfirmButton: false
                                     });
                                     calendar.refetchEvents();
@@ -69,7 +79,9 @@
                                 .fail(() => {
                                     Swal.fire({
                                         icon: "error",
-                                        title: "Error al actualizar el estado"
+                                        title: "Error al actualizar el estado",
+                                        background: "#1c1c1c",
+                                        color: "#fff"
                                     });
                                 });
                         }

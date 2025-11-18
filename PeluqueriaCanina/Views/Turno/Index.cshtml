@@ -20,7 +20,10 @@
                 </a>
             </div>
         </div>
+
         <div class="card-body">
+            @Html.AntiForgeryToken()
+
             @if (Model == null || Model.Count == 0)
             {
                 <div class="alert alert-info text-center mb-0">
@@ -33,14 +36,14 @@
                     <table class="table table-hover align-middle">
                         <thead class="table-success">
                             <tr>
-                                <th scope="col">Mascota</th>
-                                <th scope="col">Peluquero</th>
-                                <th scope="col">Servicio</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col">Hora</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Precio</th>
-                                <th scope="col" class="text-center">Acciones</th>
+                                <th>Mascota</th>
+                                <th>Peluquero</th>
+                                <th>Servicio</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Precio</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,6 +55,7 @@
                                     <td>@turno.Servicio.NombreDelServicio</td>
                                     <td>@turno.FechaHora.ToString("dd/MM/yyyy")</td>
                                     <td>@turno.FechaHora.ToString("HH:mm")</td>
+
                                     <td>
                                         @switch (turno.Estado.ToString())
                                         {
@@ -72,17 +76,20 @@
                                                 break;
                                         }
                                     </td>
+
                                     <td><strong>$@turno.Precio</strong></td>
-                                    <td>
-                                        <div class="btn-group" role="group">
+
+                                    <td class="text-center">
+                                        <div class="btn-group">
                                             @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
                                             {
-
-                                                <button class="btn btn-sm btn-warning" onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId','@turno.Duracion.TotalMinutes')" title="Modificar">
+                                                <button class="btn btn-warning btn-sm"
+                                                        onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId', '@turno.Duracion.TotalMinutes')">
                                                     ✏️
                                                 </button>
 
-                                                <button class="btn btn-sm btn-danger" onclick="cancelarTurno(@turno.Id)" title="Cancelar">
+                                                <button class="btn btn-danger btn-sm"
+                                                        onclick="cancelarTurno(@turno.Id)">
                                                     ❌
                                                 </button>
                                             }
@@ -92,6 +99,7 @@
                                             }
                                         </div>
                                     </td>
+
                                 </tr>
                             }
                         </tbody>
@@ -106,7 +114,30 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+
+        /* ============================================================
+         * 🔥 Función auxiliar para manejar errores AJAX
+         * ============================================================ */
+        function handleAjaxError(xhr) {
+            let msg = "Ocurrió un error inesperado.";
+
+            if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
+            else if (xhr.status === 400) msg = "El turno se superpone con otro existente.";
+            else if (xhr.status === 404) msg = "El turno no existe.";
+            else if (xhr.status === 500) msg = "Error interno del servidor.";
+
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: msg
+            });
+        }
+
+        /* ============================================================
+         * ❌ Cancelar turno
+         * ============================================================ */
         function cancelarTurno(id) {
             Swal.fire({
                 title: "¿Cancelar turno?",
@@ -117,155 +148,134 @@
                 cancelButtonColor: "#6c757d",
                 confirmButtonText: "Sí, cancelar"
             }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post(`/Turno/Cancelar/${id}`, function (response) {
-                        if (response.ok) {
-                            Swal.fire("Cancelado", response.message, "success")
-                                .then(() => location.reload());
-                        } else {
-                            Swal.fire("Error", response.message, "error");
-                        }
-                    });
-                }
+                if (!result.isConfirmed) return;
+
+                $.post(`/Turno/Cancelar/${id}`, function (response) {
+                    if (response.ok) {
+                        Swal.fire("Cancelado", response.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", response.message, "error");
+                    }
+                }).fail(handleAjaxError);
             });
         }
 
+        /* ============================================================
+         * ✏️ Modificar Turno
+         * ============================================================ */
         function modificarTurno(turnoId, peluqueroId, duracionMinutos) {
 
             duracionMinutos = Number(duracionMinutos);
 
-            let horas = Math.floor(duracionMinutos / 60);
-            let minutos = duracionMinutos % 60;
-            let slotDuration = `${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}:00`;
+            const horas = Math.floor(duracionMinutos / 60);
+            const minutos = duracionMinutos % 60;
+            const slotDuration = `${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}:00`;
 
             Swal.fire({
-                title: 'Seleccioná un nuevo horario',
+                title: "Seleccioná un nuevo horario",
                 html: `<div id="calendarMod" style="min-height:400px;border:1px solid #ddd;"></div>`,
-                width: '800px',
+                width: "800px",
                 showCancelButton: true,
-                confirmButtonText: 'Guardar',
-                cancelButtonText: 'Cancelar',
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancelar",
+
                 preConfirm: () => {
-                    if (!window.calendarMod || !window.calendarMod.selectedDate) {
-                        Swal.showValidationMessage('Debés seleccionar un horario disponible');
+                    const selected = window.calendarMod?.selectedStart;
+
+                    if (!selected) {
+                        Swal.showValidationMessage("Debés seleccionar un horario.");
                         return false;
                     }
 
-                    const selectedDate = new Date(window.calendarMod.selectedDate);
-                    const now = new Date();
-
-                    if (selectedDate < now) {
-                        Swal.showValidationMessage('No podés seleccionar un horario en el pasado');
+                    if (selected.getTime() < new Date().getTime()) {
+                        Swal.showValidationMessage("No podés elegir una fecha pasada.");
                         return false;
                     }
 
                     return true;
                 },
+
                 didOpen: () => {
-                    const calendarEl = document.getElementById('calendarMod');
+
+                    const calendarEl = document.getElementById("calendarMod");
+
                     const calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'timeGridWeek',
+                        initialView: "timeGridWeek",
                         slotDuration: slotDuration,
                         slotLabelInterval: slotDuration,
                         allDaySlot: false,
                         slotMinTime: "09:00:00",
                         slotMaxTime: "18:00:00",
-                        locale: 'es',
+                        locale: "es",
                         selectable: true,
                         nowIndicator: true,
-                        validRange: {
-                            start: new Date()
-                        },
+                        validRange: { start: new Date() },
+
                         events: function(fetchInfo, successCallback) {
                             $.getJSON('/Turno/GetDisponibilidad', {
                                 peluqueroId: peluqueroId,
                                 start: fetchInfo.startStr,
                                 end: fetchInfo.endStr,
                                 duracion: duracionMinutos
-                            }).done(function(data) {
-                                successCallback(data);
-                            }).fail(function(xhr, status, error) {
-                                console.error('Error al cargar disponibilidad:', error);
-                                Swal.fire('Error', 'No se pudo cargar la disponibilidad. Intentá de nuevo.', 'error');
+                            })
+                            .done(successCallback)
+                            .fail(() => {
+                                Swal.fire("Error", "No se pudo cargar la disponibilidad.", "error");
                                 successCallback([]);
                             });
                         },
+
                         eventClick: function(info) {
-                            if (info.event.title === "Disponible") {
-                                calendar.selectedDate = info.event.startStr;
-                                calendar.getEvents().forEach(e => {
-                                    if (e.title === "Disponible") e.setProp("backgroundColor", "#28a745");
-                                });
-                                info.event.setProp("backgroundColor", "#007bff");
-                            }
+                            if (info.event.title !== "Disponible") return;
+
+                            calendar.getEvents().forEach(e => {
+                                if (e.title === "Disponible") {
+                                    e.setProp("backgroundColor", "#28a745");
+                                }
+                            });
+
+                            info.event.setProp("backgroundColor", "#007bff");
+
+                            calendar.selectedStart = info.event.start;
                         }
                     });
 
                     calendar.render();
                     window.calendarMod = calendar;
                 }
+
             }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Guardando...',
-                        text: 'Por favor esperá',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
 
-                    $.ajax({
-                        url: '/Turno/Modificar',
-                        method: 'POST',
-                        data: {
-                            id: turnoId,
-                            fechaHora: window.calendarMod.selectedDate,
-                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Éxito',
-                                text: response.message || 'Turno modificado correctamente.',
-                                confirmButtonText: 'OK'
-                            }).then(() => location.reload());
-                        },
-                        error: function(xhr, status, error) {
-                            let errorMessage = 'Ocurrió un problema al modificar el turno';
+                if (!result.isConfirmed) return;
 
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                errorMessage = xhr.responseJSON.message;
-                            } else if (xhr.responseText) {
-                                try {
-                                    const response = JSON.parse(xhr.responseText);
-                                    if (response.message) {
-                                        errorMessage = response.message;
-                                    }
-                                } catch (e) {
-                                    console.error('Error al parsear respuesta:', e);
-                                }
-                            }
+                Swal.fire({
+                    title: "Guardando...",
+                    text: "Por favor esperá",
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading()
+                });
 
-                            if (xhr.status === 400) {
-                                errorMessage = errorMessage || 'El turno se superpone con otro existente.';
-                            } else if (xhr.status === 404) {
-                                errorMessage = 'El turno no existe.';
-                            } else if (xhr.status === 500) {
-                                errorMessage = 'Error del servidor. Por favor, intentá más tarde.';
-                            }
+                $.ajax({
+                    url: "/Turno/Modificar",
+                    method: "POST",
+                    data: {
+                        id: turnoId,
+                        fechaHora: window.calendarMod.selectedStart.toISOString(),
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
 
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: errorMessage,
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    });
-                }
+                    success: function (response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Turno modificado",
+                            text: response.message || "El turno fue actualizado."
+                        }).then(() => location.reload());
+                    },
+
+                    error: handleAjaxError
+                });
             });
         }
     </script>

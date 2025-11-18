@@ -2,26 +2,50 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="d-flex justify-content-end mt-3">
-    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
+<!-- Barra superior -->
+<div class="d-flex justify-content-end p-3">
+    <a asp-controller="Auth" asp-action="Logout"
+       class="btn btn-outline-danger rounded-3 fw-semibold">
         <i class="bi bi-box-arrow-right"></i> Cerrar sesión
     </a>
 </div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg rounded-3">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Bienvenido Administrador</h2>
+<div class="container d-flex justify-content-center align-items-start" style="min-height: 75vh;">
 
-                    <div class="d-grid gap-3">
-                        <a asp-action="ListarPeluqueros" class="btn btn-dark btn-lg">Gestionar Peluqueros</a>
-                        <a asp-controller="Servicio" asp-action="Index" class="btn btn-secondary btn-lg">Gestionar Servicios</a>
-                        <a asp-action="Reportes" class="btn btn-info btn-lg text-white">Ver Reportes</a>
-                    </div>
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 bg-dark text-light rounded-4">
+            <div class="card-body p-4">
+
+                <!-- Imagen o Banner -->
+                <!-- ⬇⬇⬇ OPCIONAL: PONÉ TU IMAGEN ACÁ -->
+                <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid d-block mx-auto mb-3 rounded-3" /> -->
+                <!-- ⬆⬆⬆ FIN IMAGEN -->
+
+                <h2 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">
+                    Bienvenido Administrador
+                </h2>
+
+                <div class="d-grid gap-3 mt-4">
+
+                    <a asp-action="ListarPeluqueros"
+                       class="btn btn-primary btn-lg rounded-3 fw-semibold shadow-sm">
+                        Gestionar Peluqueros
+                    </a>
+
+                    <a asp-controller="Servicio" asp-action="Index"
+                       class="btn btn-secondary btn-lg rounded-3 fw-semibold shadow-sm">
+                        Gestionar Servicios
+                    </a>
+
+                    <a asp-action="Reportes"
+                       class="btn btn-info btn-lg rounded-3 fw-semibold text-white shadow-sm">
+                        Ver Reportes
+                    </a>
+
                 </div>
+
             </div>
         </div>
     </div>
+
 </div>

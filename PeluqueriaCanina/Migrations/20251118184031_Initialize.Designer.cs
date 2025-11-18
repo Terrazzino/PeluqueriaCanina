@@ -12,8 +12,8 @@ using PeluqueriaCanina.Data;
 namespace PeluqueriaCanina.Migrations
 {
     [DbContext(typeof(ContextoAcqua))]
-    [Migration("20251116213818_initial")]
-    partial class initial
+    [Migration("20251118184031_Initialize")]
+    partial class Initialize
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

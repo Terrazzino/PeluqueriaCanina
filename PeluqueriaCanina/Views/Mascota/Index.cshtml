@@ -4,31 +4,41 @@
     ViewData["Title"] = "Mis Mascotas";
 }
 
-<div class="card shadow-sm mt-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">🐶 Mis Mascotas</h4>
-        <div>
-            <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-secondary me-2">
-                ⬅️ Volver al Inicio
+<div class="card shadow-sm mt-4 dark-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">🐾 Mis Mascotas</h4>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-outline-light">
+                ⬅️ Volver
             </a>
-            <a asp-action="Crear" class="btn btn-light btn-sm">➕ Nueva Mascota</a>
+
+            <a asp-action="Crear" class="btn btn-success">
+                ➕ Nueva Mascota
+            </a>
         </div>
     </div>
+
     <div class="card-body">
+
         @if (!Model.Any())
         {
-            <p class="text-muted">Todavía no registraste ninguna mascota.</p>
+            <div class="text-center py-5 text-muted">
+                <h5 class="mb-3">Todavía no registraste ninguna mascota.</h5>
+                <p>Podés agregar una usando el botón “Nueva Mascota”.</p>
+            </div>
         }
         else
         {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+            <div class="table-container">
+                <table class="table table-hover table-dark table-striped align-middle rounded">
+                    <thead>
                         <tr>
+                            <th>Foto</th>
                             <th>Nombre</th>
                             <th>Raza</th>
-                            <th>Fecha de Nacimiento</th>
-                            <th>Peso (kg)</th>
+                            <th>Nacimiento</th>
+                            <th>Peso</th>
                             <th>Edad</th>
                             <th class="text-center">Acciones</th>
                         </tr>
@@ -39,15 +49,34 @@
                             var edad = DateTime.Today.Year - mascota.FechaDeNacimiento.Year;
                             if (mascota.FechaDeNacimiento.Date > DateTime.Today.AddYears(-edad)) edad--;
 
+                            <!-- Placeholder temporal cuando todavía no tenés imagen -->
+@*                             var foto = string.IsNullOrEmpty(mascota.FotoUrl)
+                            ? "/img/pet-default.png"
+                            : mascota.FotoUrl; *@
+
                             <tr>
+                                <td style="width: 80px;">
+                                    <img src=""
+                                         class="rounded-circle shadow-sm"
+                                         style="width: 60px; height: 60px; object-fit: cover;" />
+                                </td>
+
                                 <td>@mascota.Nombre</td>
                                 <td>@mascota.Raza</td>
                                 <td>@mascota.FechaDeNacimiento.ToShortDateString()</td>
-                                <td>@mascota.Peso</td>
+                                <td>@mascota.Peso kg</td>
                                 <td>@edad años</td>
+
                                 <td class="text-center">
-                                    <a asp-action="Editar" asp-route-id="@mascota.Id" class="btn btn-warning btn-sm">✏️</a>
-                                    <a asp-action="Eliminar" asp-route-id="@mascota.Id" class="btn btn-danger btn-sm">🗑️</a>
+                                    <a asp-action="Editar" asp-route-id="@mascota.Id"
+                                       class="btn btn-warning btn-sm me-2">
+                                        ✏️ Editar
+                                    </a>
+
+                                    <a asp-action="Eliminar" asp-route-id="@mascota.Id"
+                                       class="btn btn-danger btn-sm">
+                                        🗑️ Eliminar
+                                    </a>
                                 </td>
                             </tr>
                         }

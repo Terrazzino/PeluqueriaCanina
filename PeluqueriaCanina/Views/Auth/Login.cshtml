@@ -2,39 +2,52 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-lg rounded-3">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Iniciar Sesión</h2>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-4">
 
-                    <form asp-action="Login" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="mail" class="form-control" placeholder="tuemail@mail.com" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
-                            <input type="password" name="contraseña" class="form-control" placeholder="********" required />
-                        </div>
+        <div class="card shadow-lg border-0 bg-dark text-light rounded-4">
+            <div class="card-body p-4">
 
-                        @if (ViewBag.Error != null)
-                        {
-                            <div class="alert alert-danger text-center" role="alert">
-                                @ViewBag.Error
-                            </div>
-                        }
+                <!-- Logo o Imagen Superior -->
+                <!-- ⬇⬇⬇ PONÉ ACÁ LA IMAGEN QUE QUIERAS (logo del sistema o foto temática) -->
+                <!-- <img src="../Multimedia/login.jpg" class="img-fluid d-block mx-auto mb-3" style="max-height:120px;" />  -->
+                <!-- ⬆⬆⬆ FIN IMAGEN -->
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Ingresar</button>
-                        </div>
-                    </form>
+                <h2 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">Iniciar Sesión</h2>
 
-                    <div class="text-center mt-3">
-                        <a asp-action="Register">¿No tenés cuenta? Registrate</a>
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Email</label>
+                        <input type="email" name="mail" class="form-control bg-dark text-light border-secondary rounded-3"
+                               placeholder="tuemail@mail.com" required />
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Contraseña</label>
+                        <input type="password" name="contraseña" class="form-control bg-dark text-light border-secondary rounded-3"
+                               placeholder="********" required />
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center rounded-3" role="alert">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary rounded-3 py-2 fw-semibold">
+                            Ingresar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a asp-action="Register" class="text-info fw-semibold text-decoration-none">
+                        ¿No tenés cuenta? <span class="text-primary">Registrate</span>
+                    </a>
                 </div>
+
             </div>
         </div>
     </div>

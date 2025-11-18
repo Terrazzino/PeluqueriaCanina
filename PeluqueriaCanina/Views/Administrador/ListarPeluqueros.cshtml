@@ -1,69 +1,113 @@
 ﻿@model IEnumerable<dynamic>
 
-<div class="container mt-4">
+<div class="container mt-5">
+
+    <!-- Encabezado con estilo moderno -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">📋 Listado de Peluqueros</h2>
         <div>
-            <a asp-controller="Administrador" asp-action="Dashboard" class="btn btn-secondary me-2">
-                ⬅️ Volver al Inicio
+            <h2 class="text-light fw-bold mb-1">📋 Listado de Peluqueros</h2>
+            <p class="text-secondary mb-0">Gestión del personal y horarios</p>
+        </div>
+
+        <div class="d-flex">
+            <a asp-controller="Administrador" asp-action="Dashboard"
+               class="btn btn-outline-light me-2 shadow-sm">
+                ⬅️ Inicio
             </a>
-            <a asp-action="RegistrarPeluquero" class="btn btn-primary">
+
+            <a asp-action="RegistrarPeluquero"
+               class="btn btn-primary shadow-sm">
                 ➕ Registrar Peluquero
             </a>
         </div>
     </div>
 
-    <div class="card shadow rounded-3">
+    <!-- Card contenedora -->
+    <div class="card shadow-lg bg-dark text-light rounded-4 border-secondary">
         <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark text-center">
+
+            <!-- Tabla con estilo oscuro -->
+            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden">
+                <thead class="table-gradient text-center">
                     <tr>
+                        <th style="width: 60px;">Foto</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
                         <th>Mail</th>
                         <th>Jornadas</th>
-                        <th>Acciones</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var p in Model)
                     {
                         <tr>
-                            <td>@p.Nombre</td>
+
+                            <!-- IMAGEN DEL PELUQUERO -->
+                            <td class="text-center">
+                                <!-- 🔵 Poné acá la URL de la imagen del peluquero -->
+                                <img src="URL_DE_IMAGEN_AQUI"
+                                     class="rounded-circle border border-secondary"
+                                     style="width:45px;height:45px;object-fit:cover;">
+                            </td>
+
+                            <td class="fw-bold">@p.Nombre</td>
                             <td>@p.Apellido</td>
-                            <td>@p.Mail</td>
+                            <td class="text-info">@p.Mail</td>
+
                             <td>
-                                <ul class="list-unstyled mb-0">
+                                <ul class="list-unstyled mb-0 small">
                                     @foreach (var j in p.Jornadas)
                                     {
-                                        @if (j.HoraDeInicio != j.HoraDeFin && j.Activo ==true)
+                                        if (j.HoraDeInicio != j.HoraDeFin && j.Activo == true)
                                         {
-                                            <li>
-                                                <span class="fw-bold">@j.Dia:</span>
-                                                @j.HoraDeInicio - @j.HoraDeFin
-                                                <span class="badge @(j.Activo ? "bg-success" : "bg-secondary") ms-1">
-                                                    @(j.Activo ? "Activo" : "Inactivo")
+                                            <li class="mb-1">
+                                                <span class="fw-bold text-light">@j.Dia:</span>
+                                                <span class="text-secondary">
+                                                    @j.HoraDeInicio - @j.HoraDeFin
                                                 </span>
+                                                <span class="badge bg-success ms-2">Activo</span>
                                             </li>
                                         }
                                     }
                                 </ul>
                             </td>
+
                             <td class="text-center">
-                                <a asp-action="EditarPeluquero" asp-route-id="@p.Id" 
-                                   class="btn btn-sm btn-warning me-2">
+
+                                <a asp-action="EditarPeluquero"
+                                   asp-route-id="@p.Id"
+                                   class="btn btn-sm btn-outline-warning me-2 shadow-sm">
                                     ✏️ Editar
                                 </a>
-                                <a asp-action="EliminarPeluquero" asp-route-id="@p.Id" 
-                                   class="btn btn-sm btn-danger"
+
+                                <a asp-action="EliminarPeluquero"
+                                   asp-route-id="@p.Id"
+                                   class="btn btn-sm btn-outline-danger shadow-sm"
                                    onclick="return confirm('¿Seguro que deseas eliminar a este peluquero?');">
                                     🗑️ Eliminar
                                 </a>
+
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
         </div>
     </div>
 </div>
+
+<style>
+    /* Gradiente sutil del header de tabla */
+    .table-gradient {
+        background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+    }
+
+    /* Hover más moderno */
+    table.table-dark tbody tr:hover {
+        background-color: #2d3238 !important;
+        transition: 0.2s ease-in-out;
+    }
+</style>

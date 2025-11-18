@@ -12,12 +12,12 @@ namespace PeluqueriaCanina.Data
             if (context.Administradores.Any())
                 return;
             var admin = UsuarioFactory.CrearUsuario<Administrador>(
-                nombre: "Leo",
-                apellido: "Fender",
+                nombre: "Paola",
+                apellido: "Comino",
                 dni: "20564788",
-                mail: "gibsonselacome@gmail.com",
+                mail: "acquadicane@gmail.com",
                 fechaDeNacimiento: new DateTime(1909, 8, 10),
-                contraseña: "Fender90",
+                contraseña: "Acqua2025",
                 rol: "Administrador"
                 );
             context.Administradores.Add( admin );

@@ -14,16 +14,67 @@
     @RenderSection("Styles", required: false)
 
     <style>
+        /* ===== MODO OSCURO GLOBAL ===== */
         body {
             margin: 0;
-            background: #f8f9fa;
+            background: #0d1117; /* fondo oscuro elegante */
+            color: #e6edf3;
+            font-family: 'Segoe UI', sans-serif;
         }
+
+        /* Contenido centrado más agradable */
+        main {
+            padding-top: 30px;
+            padding-bottom: 40px;
+        }
+
+        /* Tarjetas tipo “glass” */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 25px;
+        }
+
+        /* Botones más modernos */
+        .btn-dark, .btn-secondary, .btn-info {
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        /* Títulos suaves */
+        h1, h2, h3, h4 {
+            color: #f0f6fc;
+        }
+
+        /* Para evitar fondos blancos de Bootstrap */
+        .card, .modal-content {
+            background-color: #161b22 !important;
+            color: #e6edf3;
+        }
+
+        /* Scrollbar estilizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 10px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #484f58;
+            }
     </style>
 </head>
 <body>
 
-    <!-- Sólo el cuerpo de cada vista -->
-    <main>
+    <!-- Contenido dinámico -->
+    <main class="container">
         @RenderBody()
     </main>
 

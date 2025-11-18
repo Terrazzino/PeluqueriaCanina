@@ -3,17 +3,36 @@
 }
 
 <div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-info text-white">
-            <h4 class="mb-0 text-center">💈 Peluqueros que más realizaron @ViewBag.Servicio</h4>
+
+    <div class="card bg-dark text-light shadow-lg rounded-4 border-0">
+
+        <!-- Header -->
+        <div class="card-header rounded-top-4 p-4 text-center"
+             style="background: linear-gradient(135deg, #17a2b8, #5bc0de);">
+            <h4 class="fw-bold mb-0" style="letter-spacing:1px;">
+                💈 Peluqueros que más realizaron @ViewBag.Servicio
+            </h4>
         </div>
+
+        <!-- Imagen opcional -->
+        <!-- ⬇⬇⬇ PONÉ TU IMAGEN ACA (foto del servicio) -->
+        <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid mx-auto d-block my-3 rounded-3"
+             style="max-height:200px; object-fit:cover;" /> -->
+        <!-- ⬆⬆⬆ FIN IMAGEN -->
+        <!-- Gráfico -->
         <div class="card-body text-center">
             <canvas id="graficoPeluqueros" style="max-height:400px"></canvas>
         </div>
-        <div class="card-footer text-center">
-            <a asp-action="Reportes" class="btn btn-secondary">⬅ Volver al reporte principal</a>
+
+        <!-- Footer -->
+        <div class="card-footer bg-dark text-center rounded-bottom-4">
+            <a asp-action="Reportes" class="btn btn-outline-light rounded-3 px-4">
+                ⬅ Volver al reporte principal
+            </a>
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {
@@ -25,6 +44,7 @@
         const servicio = "@Html.Raw(ViewBag.Servicio ?? "")";
 
         const ctx = document.getElementById('graficoPeluqueros').getContext('2d');
+
         new Chart(ctx, {
             type: 'bar',
             data: {
@@ -42,13 +62,18 @@
                     if (elements.length > 0) {
                         const index = elements[0].index;
                         const peluquero = peluqueros[index];
-                        window.location.href = `@Url.Action("DetallePeluquero", "Administrador")?servicio=${encodeURIComponent(servicio)}&peluquero=${encodeURIComponent(peluquero)}`;
+                        window.location.href =
+                            `@Url.Action("DetallePeluquero", "Administrador")?servicio=${encodeURIComponent(servicio)}&peluquero=${encodeURIComponent(peluquero)}`;
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1, color: 'white' } },
+                    x: { ticks: { color: 'white' } }
                 },
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { titleColor: 'black', bodyColor: 'black' }
+                }
             }
         });
     </script>

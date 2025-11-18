@@ -2,56 +2,85 @@
     ViewData["Title"] = "Registro";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg rounded-3">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Registro de Cliente</h2>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="col-md-8 col-lg-6">
 
-                    <form asp-action="Register" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" name="nombre" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Apellido</label>
-                            <input type="text" name="apellido" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="mail" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">DNI</label>
-                            <input type="text" name="dni" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha de nacimiento</label>
-                            <input type="date" name="fechaDeNacimiento" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
-                            <input type="password" name="contraseña" class="form-control" required />
-                        </div>
+        <div class="card shadow-lg border-0 bg-dark text-light rounded-4">
+            <div class="card-body p-4">
 
-                        @if (ViewBag.Error != null)
-                        {
-                            <div class="alert alert-danger text-center" role="alert">
-                                @ViewBag.Error
-                            </div>
-                        }
+                <!-- Logo o Imagen Superior -->
+                <!-- ⬇⬇⬇ PONÉ ACÁ TU IMAGEN (logo o foto temática) -->
+                <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid d-block mx-auto mb-3" style="max-height:130px;" /> -->
+                <!-- ⬆⬆⬆ FIN IMAGEN -->
 
-                        <div class="d-grid mt-3">
-                            <button type="submit" class="btn btn-success">Registrarse</button>
-                        </div>
-                    </form>
+                <h2 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">Registro de Cliente</h2>
 
-                    <div class="text-center mt-3">
-                        <a asp-action="Login">¿Ya tenés cuenta? Iniciá sesión</a>
+                <form asp-action="Register" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Nombre</label>
+                        <input type="text" name="nombre"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Apellido</label>
+                        <input type="text" name="apellido"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Email</label>
+                        <input type="email" name="mail"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">DNI</label>
+                        <input type="text" name="dni"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Fecha de nacimiento</label>
+                        <input type="date" name="fechaDeNacimiento"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light-50">Contraseña</label>
+                        <input type="password" name="contraseña"
+                               class="form-control bg-dark text-light border-secondary rounded-3"
+                               required />
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center rounded-3" role="alert">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary rounded-3 py-2 fw-semibold">
+                            Registrarse
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a asp-action="Login" class="text-info fw-semibold text-decoration-none">
+                        ¿Ya tenés cuenta? <span class="text-primary">Iniciá sesión</span>
+                    </a>
                 </div>
+
             </div>
         </div>
+
     </div>
 </div>
