@@ -2,6 +2,12 @@
     ViewData["Title"] = "Agenda del Peluquero";
 }
 
+<div class="d-flex justify-content-end mt-3">
+    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </a>
+</div>
+
 <div class="card shadow-sm mt-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0">📅 Mi Agenda</h4>

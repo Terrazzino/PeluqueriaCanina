@@ -3,9 +3,14 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">📋 Listado de Peluqueros</h2>
-        <a asp-action="RegistrarPeluquero" class="btn btn-primary">
-            ➕ Registrar Peluquero
-        </a>
+        <div>
+            <a asp-controller="Administrador" asp-action="Dashboard" class="btn btn-secondary me-2">
+                ⬅️ Volver al Inicio
+            </a>
+            <a asp-action="RegistrarPeluquero" class="btn btn-primary">
+                ➕ Registrar Peluquero
+            </a>
+        </div>
     </div>
 
     <div class="card shadow rounded-3">

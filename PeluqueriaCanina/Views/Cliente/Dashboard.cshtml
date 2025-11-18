@@ -2,6 +2,12 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<div class="d-flex justify-content-end mt-3">
+    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </a>
+</div>
+
 <div class="card shadow-sm mt-4">
     <div class="card-header bg-primary text-white">
         <h4 class="mb-0">Bienvenido @ViewBag.Nombre 👋</h4>
@@ -12,6 +18,7 @@
         </p>
 
         <div class="row g-4">
+
             <!-- 🐶 Mascotas -->
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
@@ -50,6 +57,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

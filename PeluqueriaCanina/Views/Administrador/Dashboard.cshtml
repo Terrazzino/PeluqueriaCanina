@@ -2,6 +2,12 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<div class="d-flex justify-content-end mt-3">
+    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </a>
+</div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
@@ -13,7 +19,6 @@
                         <a asp-action="ListarPeluqueros" class="btn btn-dark btn-lg">Gestionar Peluqueros</a>
                         <a asp-controller="Servicio" asp-action="Index" class="btn btn-secondary btn-lg">Gestionar Servicios</a>
                         <a asp-action="Reportes" class="btn btn-info btn-lg text-white">Ver Reportes</a>
-                        <a asp-controller="Auth" asp-action="Logout" class="btn btn-danger btn-lg">Cerrar Sesión</a>
                     </div>
                 </div>
             </div>

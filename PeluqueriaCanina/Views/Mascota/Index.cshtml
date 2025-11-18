@@ -7,7 +7,12 @@
 <div class="card shadow-sm mt-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0">🐶 Mis Mascotas</h4>
-        <a asp-action="Crear" class="btn btn-light btn-sm">➕ Nueva Mascota</a>
+        <div>
+            <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-secondary me-2">
+                ⬅️ Volver al Inicio
+            </a>
+            <a asp-action="Crear" class="btn btn-light btn-sm">➕ Nueva Mascota</a>
+        </div>
     </div>
     <div class="card-body">
         @if (!Model.Any())
