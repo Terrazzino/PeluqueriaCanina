@@ -26,7 +26,9 @@ namespace PeluqueriaCanina.Controllers
         [HttpGet]
         public IActionResult Crear()
         {
-            ViewBag.Mascotas = _contexto.Mascotas.ToList();
+            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+
+            ViewBag.Mascotas = _contexto.Mascotas.Where(t=>t.ClienteId==clienteId).ToList();
             ViewBag.Servicios = _contexto.Servicios.ToList();
             ViewBag.Peluqueros = _contexto.Peluqueros.ToList();
             return View(new Turno());
@@ -320,8 +322,9 @@ namespace PeluqueriaCanina.Controllers
         // GET: Turno
         public async Task<IActionResult> Index()
         {
+            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
             var turnos = await _contexto.Turnos
-                .Include(t => t.Mascota)
+                .Include(t => t.Mascota).Where(t=>t.Mascota.ClienteId==clienteId)
                 .Include(t => t.Servicio)
                 .Include(t => t.Peluquero)
                 .Where(t=>t.Estado!=EstadoTurno.Cancelado)

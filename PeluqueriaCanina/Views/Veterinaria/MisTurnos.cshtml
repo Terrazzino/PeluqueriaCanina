@@ -1,0 +1,49 @@
+﻿@model List<AcquaDiCane.Models.DTOs.TurnoResponseDto>
+
+@{
+    ViewData["Title"] = "Mis turnos (Veterinaria)";
+}
+
+<h3 class="mb-3">Mis turnos en la veterinaria</h3>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">No tenés turnos reservados en la veterinaria.</div>
+}
+else
+{
+    <table class="table">
+        <thead><tr><th>Mascota</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Mascota.Nombre</td>
+                    <td>@t.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@t.Estado</td>
+                    <td>
+                        @if (t.Estado != "Cancelado")
+                        {
+                            <button class="btn btn-sm btn-danger" onclick="cancelar(@t.Id)">Cancelar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function cancelar(id) {
+            Swal.fire({ title: 'Confirmar', text:'Cancelar turno?', showCancelButton:true }).then(r=>{
+                if(r.isConfirmed){
+                    $.post('/Veterinaria/Cancelar', { id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
+                      .done(()=> location.reload())
+                      .fail(()=> Swal.fire('Error','No se pudo cancelar','error'));
+                }
+            });
+        }
+    </script>
+}

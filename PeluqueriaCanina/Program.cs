@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Services;
 
@@ -13,8 +14,17 @@ builder.Services.AddSession();
 
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
+
 // Agregar HttpClientFactory para Mercado Pago
 builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient("VeterinariaApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7156/"); // <- ajustar
+});
+
+builder.Services.AddTransient<VeterinariaApiClient>();
+
 
 var app = builder.Build();
 

@@ -1,0 +1,113 @@
+﻿@using PeluqueriaCanina.Models.ClasesDeCliente
+@model List<Mascota>
+
+@{
+    ViewData["Title"] = "Reservar Turno Veterinaria";
+}
+
+<div class="glass-card mt-4 p-4">
+    <h3 class="text-white mb-4">🩺 Reservar Turno en Veterinaria</h3>
+
+    <form id="formReservar">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="text-secondary">Seleccioná tu mascota:</label>
+            <select id="selectMascota" name="mascotaId" class="form-select">
+                <option value="">-- Elegir --</option>
+                @foreach (var m in Model)
+                {
+                    <option value="@m.Id">@m.Nombre (@m.Raza)</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="text-secondary">Seleccioná una fecha:</label>
+            <input type="date" id="fecha" class="form-control" />
+        </div>
+
+        <button id="btnBuscar" type="button" class="btn btn-warning text-white w-100 mt-3">Buscar Disponibilidad</button>
+
+        <hr class="mt-4" />
+
+        <div id="horariosContainer"></div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $("#btnBuscar").click(function () {
+            const mascotaId = $("#selectMascota").val();
+            const fecha = $("#fecha").val();
+
+            if (!mascotaId || !fecha) {
+                Swal.fire("Atención", "Seleccioná mascota y fecha", "warning");
+                return;
+            }
+
+            $.get("/Veterinaria/Disponibilidad", { fecha: fecha })
+                .done(function (data) {
+                    if (!data || data.length === 0) {
+                        $("#horariosContainer").html(`<p class="text-danger">No hay horarios disponibles</p>`);
+                        return;
+                    }
+
+                    let html = "<h5 class='text-white mb-3'>Horarios disponibles:</h5><div class='d-flex flex-wrap gap-2'>";
+                    data.forEach(h => {
+                        const hora = new Date(h).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        html += `<button type="button" class="btn btn-sm btn-success horario-btn" data-hora="${h}">${hora}</button>`;
+                    });
+                    html += "</div>";
+                    $("#horariosContainer").html(html);
+
+                    $(".horario-btn").click(function () {
+                        const fechaHora = $(this).data("hora");
+
+                        Swal.fire({
+                            title: "Confirmar turno",
+                            text: "¿Querés reservar este horario?",
+                            showCancelButton: true,
+                            confirmButtonText: "Confirmar"
+                        }).then(result => {
+                            if (result.isConfirmed) {
+
+                                // 🔥 NUEVO POST CORRECTO CON ANTIFORGERY POR HEADER
+                                $.ajax({
+                                    url: "/Veterinaria/ReservarTurno",
+                                    method: "POST",
+                                    data: {
+                                        mascotaId: $("#selectMascota").val(),
+                                        fechaHora: fechaHora
+                                    },
+                                    headers: {
+                                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                                    },
+                                    success: function () {
+                                        Swal.fire({
+                                            icon: "success",
+                                            title: "Turno reservado",
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        }).then(() => location.href = "/Veterinaria/MisTurnos");
+                                    },
+                                    error: function (xhr) {
+                                        let msg = "No se pudo reservar el turno";
+                                        try {
+                                            const json = JSON.parse(xhr.responseText);
+                                            if (json && json.title) msg = json.title;
+                                        } catch { }
+                                        Swal.fire("Error", msg, "error");
+                                    }
+                                });
+
+                            }
+                        });
+                    });
+                })
+                .fail(() => Swal.fire("Error", "No se pudo obtener disponibilidad", "error"));
+        });
+    </script>
+
+}

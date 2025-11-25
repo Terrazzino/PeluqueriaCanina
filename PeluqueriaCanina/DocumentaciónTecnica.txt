@@ -10,3 +10,44 @@ Validación de credenciales → hasheo + comparación.
 Redirección según el rol.
 Seguridad básica → no permitir que un Cliente entre a la vista de Admin, etc.
 
+SCRIPTS PARA VISTAS EN BASE DE DATOS DE REPORTES
+
+CREATE OR ALTER VIEW vw_ReporteServiciosTotales AS
+SELECT
+    s.Id,
+    s.NombreDelServicio AS NombreServicio,
+    COUNT(t.Id) AS Total
+FROM Servicios s
+LEFT JOIN Turnos t 
+    ON t.ServicioId = s.Id 
+    AND t.Estado = 4   -- Completado
+GROUP BY s.Id, s.NombreDelServicio;
+
+CREATE OR ALTER VIEW vw_ReportePeluquerosPorServicio AS
+SELECT
+    s.NombreDelServicio AS NombreServicio,
+    CONCAT(p.Nombre, ' ', p.Apellido) AS NombrePeluquero,
+    COUNT(t.Id) AS Cantidad
+FROM Servicios s
+CROSS JOIN Personas p
+LEFT JOIN Turnos t
+    ON t.ServicioId = s.Id
+    AND t.PeluqueroId = p.Id
+    AND t.Estado = 4  -- Completado
+WHERE p.Discriminator = 'Peluquero'
+GROUP BY s.NombreDelServicio, p.Nombre, p.Apellido;
+
+CREATE OR ALTER VIEW vw_ReporteDetallePeluquero AS
+SELECT
+    s.NombreDelServicio AS NombreServicio,
+    CONCAT(p.Nombre, ' ', p.Apellido) AS NombrePeluquero,
+    SUM(CASE WHEN t.Estado = 4 THEN 1 ELSE 0 END) AS Realizados,   -- Completados
+    SUM(CASE WHEN t.Estado = 3 THEN 1 ELSE 0 END) AS Cancelados,   -- Cancelados
+    SUM(CASE WHEN t.Estado = 4 THEN t.Precio ELSE 0 END) AS Recaudado
+FROM Servicios s
+CROSS JOIN Personas p
+LEFT JOIN Turnos t
+    ON t.ServicioId = s.Id
+    AND t.PeluqueroId = p.Id
+WHERE p.Discriminator = 'Peluquero'
+GROUP BY s.NombreDelServicio, p.Nombre, p.Apellido;

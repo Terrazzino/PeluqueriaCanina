@@ -24,7 +24,6 @@ namespace PeluqueriaCanina.Data
         public DbSet<Pago> Pagos { get; set; }
 
         //REPORTES
-        // REPORTES
         public DbSet<ReporteServiciosTotales> vw_ReporteServiciosTotales { get; set; }
         public DbSet<ReportePeluquerosPorServicio> vw_ReportePeluquerosPorServicio { get; set; }
         public DbSet<ReporteDetallePeluqueroView> vw_ReporteDetallePeluquero { get; set; }
