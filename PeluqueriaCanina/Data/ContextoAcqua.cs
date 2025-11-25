@@ -22,6 +22,8 @@ namespace PeluqueriaCanina.Data
         public DbSet<Turno> Turnos { get; set; }
         public DbSet<Jornada> Jornadas { get; set; }
         public DbSet<Pago> Pagos { get; set; }
+        public DbSet<Valoracion> Valoraciones { get; set; }
+
 
         //REPORTES
         public DbSet<ReporteServiciosTotales> vw_ReporteServiciosTotales { get; set; }
@@ -93,6 +95,29 @@ namespace PeluqueriaCanina.Data
             modelBuilder.Entity<Turno>()
                 .Property(t => t.Precio)
                 .HasPrecision(18, 2);
+
+            // ---- RELACIÓN Valoracion -> Peluquero ----
+            modelBuilder.Entity<Valoracion>()
+                .HasOne(v => v.Peluquero)
+                .WithMany(p => p.Valoraciones)
+                .HasForeignKey(v => v.PeluqueroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---- RELACIÓN Valoracion -> Cliente ----
+            modelBuilder.Entity<Valoracion>()
+                .HasOne(v => v.Cliente)
+                .WithMany(c => c.Valoraciones)
+                .HasForeignKey(v => v.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---- RELACIÓN Valoracion -> Turno ----
+            modelBuilder.Entity<Valoracion>()
+                .HasOne(v => v.Turno)
+                .WithOne(t => t.Valoracion)
+                .HasForeignKey<Valoracion>(v => v.TurnoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
 
             //--------------------------------------------------------------------------------------------------------
             //REPORTES

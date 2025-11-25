@@ -1,0 +1,63 @@
+﻿@model PeluqueriaCanina.Models.ClasesDeCliente.Valoracion
+
+@{
+    ViewData["Title"] = "Valorar servicio";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Valorar el servicio</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Crear" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="TurnoId" />
+            <input type="hidden" asp-for="PeluqueroId" />
+            <input type="hidden" asp-for="ClienteId" />
+
+            <div class="mb-3">
+                <label class="form-label">Tu puntuación</label>
+                <div class="star-rating">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <input type="radio" id="star-@i" name="Puntuacion" value="@i" />
+                        <label for="star-@i" title="@i estrellas">★</label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.Puntuacion, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Comentario (opcional)</label>
+                <textarea asp-for="Comentario" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button class="btn btn-success">Enviar valoración</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+    }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2.2rem;
+            color: #ccc;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+            .star-rating input:checked ~ label,
+            .star-rating label:hover,
+            .star-rating label:hover ~ label {
+                color: gold;
+            }
+</style>

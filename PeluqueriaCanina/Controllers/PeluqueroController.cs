@@ -70,5 +70,19 @@ namespace PeluqueriaCanina.Controllers
 
             return Json(new { ok = true });
         }
+
+        // GET: Peluquero/MisValoraciones
+        public IActionResult MisValoraciones()
+        {
+            int peluqueroId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+
+            var valoraciones = _context.Valoraciones
+                .Where(v => v.PeluqueroId == peluqueroId)
+                .Include(v => v.Cliente)
+                .ToList();
+
+            return View(valoraciones);
+        }
+
     }
 }

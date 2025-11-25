@@ -1,4 +1,5 @@
-﻿@model List<PeluqueriaCanina.Models.ClasesDeTurno.Turno>
+﻿@using PeluqueriaCanina.Models.ClasesDeCliente
+@model List<PeluqueriaCanina.Models.ClasesDeTurno.Turno>
 
 @{
     ViewData["Title"] = "Mis Turnos";
@@ -92,6 +93,21 @@
                                                         onclick="cancelarTurno(@turno.Id)">
                                                     ❌
                                                 </button>
+                                                @if (turno.Estado == EstadoTurno.Completado)
+                                                {
+                                                    if (turno.Valoracion == null)
+                                                    {
+                                                        <a class="btn btn-sm btn-success"
+                                                           href="/Valoraciones/Crear?turnoId=@turno.Id">
+                                                            ⭐ Valorar
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-warning">Valorado: @(new string('★', turno.Valoracion.Puntuacion))</span>
+                                                    }
+                                                }
+
                                             }
                                             else
                                             {

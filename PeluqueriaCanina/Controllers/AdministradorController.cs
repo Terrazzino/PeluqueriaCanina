@@ -6,6 +6,7 @@ using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
 using PeluqueriaCanina.Models.Users;
+using PeluqueriaCanina.Models.VMs;
 using System.Text;
 
 namespace PeluqueriaCanina.Controllers
@@ -280,6 +281,26 @@ namespace PeluqueriaCanina.Controllers
                 .Normalize(NormalizationForm.FormKC)
                 .Trim()
                 .ToLower();
+        }
+
+        public IActionResult RankingPeluqueros()
+        {
+            var data = _contexto.Peluqueros
+                .Select(p => new PeluqueroRankingVM
+                {
+                    PeluqueroId = p.Id,
+                    NombreCompleto = p.Nombre + " " + p.Apellido,
+                    Promedio = _contexto.Valoraciones
+                                .Where(v => v.PeluqueroId == p.Id)
+                                .Select(v => (double?)v.Puntuacion)
+                                .DefaultIfEmpty(0)
+                                .Average() ?? 0,
+                    Cantidad = _contexto.Valoraciones.Count(v => v.PeluqueroId == p.Id)
+                })
+                .OrderByDescending(x => x.Promedio)
+                .ToList();
+
+            return View(data);
         }
 
 

@@ -1,0 +1,32 @@
+﻿@model List<PeluqueriaCanina.Models.VMs.PeluqueroRankingVM>
+
+@{
+    ViewData["Title"] = "Ranking Peluqueros";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Ranking de Peluqueros</h4>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Peluquero</th>
+                    <th>Promedio</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.NombreCompleto</td>
+                        <td>@p.Promedio.ToString("0.0") ★</td>
+                        <td>@p.Cantidad</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

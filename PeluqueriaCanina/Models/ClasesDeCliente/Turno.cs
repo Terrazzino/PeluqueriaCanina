@@ -27,6 +27,11 @@ namespace PeluqueriaCanina.Models.ClasesDeTurno
 
         public DateTime HoraInicio => FechaHora;
         public DateTime HoraFin => FechaHora.Add(Duracion);
+        public Valoracion? Valoracion { get; set; }
+
+
+        public bool FueValorado { get; set; } = false;
+
 
     }
 }
