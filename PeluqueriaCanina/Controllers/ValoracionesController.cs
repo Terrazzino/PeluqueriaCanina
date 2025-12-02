@@ -19,7 +19,8 @@ namespace PeluqueriaCanina.Controllers
         {
             var turno = _contexto.Turnos
                 .Include(t => t.Peluquero)
-                .Include(t => t.Mascota.Cliente)
+                .Include(t => t.Mascota)
+                    .ThenInclude(m => m.Cliente)
                 .FirstOrDefault(t => t.Id == turnoId);
 
             if (turno == null) return NotFound();
@@ -28,11 +29,15 @@ namespace PeluqueriaCanina.Controllers
 
             var model = new Valoracion
             {
-                TurnoId = turnoId
+                TurnoId = turno.Id,
+                PeluqueroId = turno.PeluqueroId,
+                ClienteId = turno.Mascota.ClienteId
             };
 
             return View(model);
         }
+
+
 
         [HttpPost]
         public IActionResult Crear(Valoracion model)
@@ -45,7 +50,7 @@ namespace PeluqueriaCanina.Controllers
             _contexto.Valoraciones.Add(model);
             _contexto.SaveChanges();
 
-            return RedirectToAction("MisTurnos", "Cliente");
+            return RedirectToAction("Index", "Turno");
         }
 
 
