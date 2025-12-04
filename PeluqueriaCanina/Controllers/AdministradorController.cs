@@ -7,6 +7,7 @@ using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
 using PeluqueriaCanina.Models.Users;
 using PeluqueriaCanina.Models.VMs;
+using PeluqueriaCanina.Services;
 using System.Text;
 
 namespace PeluqueriaCanina.Controllers
@@ -15,28 +16,30 @@ namespace PeluqueriaCanina.Controllers
     {
         private readonly ContextoAcqua _contexto;
         private readonly IEmailSender _emailSender;
+        private readonly IUsuarioActualService _usuarioActual;
 
-        public AdministradorController(ContextoAcqua context, IEmailSender emailSender)
+        public AdministradorController(ContextoAcqua context, IEmailSender emailSender, IUsuarioActualService usuarioActual)
         {
             _contexto = context;
             _emailSender = emailSender;
+            _usuarioActual = usuarioActual;
         }
+
+        [PermisoRequerido("AccederDashboardAdministrador")]
         public IActionResult Dashboard()
         {
-            if (HttpContext.Session.GetString("Rol")!="Administrador")
-            {
-                return RedirectToAction("Login", "Auth");
-            }
             return View();
         }
 
         [HttpGet]
+        [PermisoRequerido("RegistrarPeluquero")]
         public IActionResult RegistrarPeluquero()
         {
             return View();
         }
 
         [HttpPost]
+        [PermisoRequerido("RegistrarPeluquero")]
         public async Task<IActionResult> RegistrarPeluquero(string nombre, string apellido, string mail, string dni, DateTime fechaDeNacimiento, List<Jornada> jornadas)
         {
             if (_contexto.Personas.Any(p => p.Mail == mail))
@@ -92,12 +95,9 @@ namespace PeluqueriaCanina.Controllers
             }
         }
 
+        [PermisoRequerido("VerPeluqueros")]
         public IActionResult ListarPeluqueros()
         {
-            if (HttpContext.Session.GetString("Rol")!="Administrador")
-            {
-                return RedirectToAction("Login","Auth");
-            }
             var peluqueros = _contexto.Personas
                 .OfType<Peluquero>()
                 .Select(p => new
@@ -119,6 +119,7 @@ namespace PeluqueriaCanina.Controllers
         }
 
         [HttpGet]
+        [PermisoRequerido("ModificarPeluquero")]
         public IActionResult EditarPeluquero(int id)
         {
             var peluquero = _contexto.Personas
@@ -145,6 +146,7 @@ namespace PeluqueriaCanina.Controllers
         }
 
         [HttpPost]
+        [PermisoRequerido("ModificarPeluquero")]
         public IActionResult EditarPeluquero(Peluquero peluqueroActualizado)
         {
             var peluquero = _contexto.Personas
@@ -184,6 +186,7 @@ namespace PeluqueriaCanina.Controllers
             return RedirectToAction("ListarPeluqueros");
         }
 
+        [PermisoRequerido("EliminarPeluquero")]
         public IActionResult EliminarPeluquero(int id)
         {
             var peluquero = _contexto.Personas
@@ -200,6 +203,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         // === REPORTE PRINCIPAL ===
+        [PermisoRequerido("VerReporte")]
         public IActionResult Reportes()
         {
             // Consulta la vista en BD
@@ -214,6 +218,7 @@ namespace PeluqueriaCanina.Controllers
         }
 
         // === DETALLE DE SERVICIO ===
+        [PermisoRequerido("VerReporte")]
         public IActionResult DetalleServicio(string servicio)
         {
             if (string.IsNullOrEmpty(servicio))
@@ -236,6 +241,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         // === DETALLE DE PELUQUERO ===
+        [PermisoRequerido("VerReporte")]
         public IActionResult DetallePeluquero(string servicio, string peluquero)
         {
             if (string.IsNullOrEmpty(servicio) || string.IsNullOrEmpty(peluquero))
@@ -283,6 +289,7 @@ namespace PeluqueriaCanina.Controllers
                 .ToLower();
         }
 
+        [PermisoRequerido("VerValoracionDePeluqueros")]
         public IActionResult RankingPeluqueros()
         {
             var data = _contexto.Peluqueros
@@ -302,7 +309,5 @@ namespace PeluqueriaCanina.Controllers
 
             return View(data);
         }
-
-
     }
 }

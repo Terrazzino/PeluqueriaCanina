@@ -2,31 +2,34 @@
 using Microsoft.AspNetCore.Mvc;
 using PeluqueriaCanina.Data; // tu contexto de peluqueria
 using PeluqueriaCanina.Models.ClasesDeCliente; // Mascota, Cliente
+using PeluqueriaCanina.Services;
 using System.Globalization;
 
 public class VeterinariaController : Controller
 {
     private readonly VeterinariaApiClient _api;
     private readonly ContextoAcqua _contexto;
+    private readonly IUsuarioActualService _usuarioActual;
 
-    public VeterinariaController(ContextoAcqua contexto, VeterinariaApiClient api)
+    public VeterinariaController(ContextoAcqua contexto, VeterinariaApiClient api, IUsuarioActualService usuarioActual)
     {
         _contexto = contexto;
         _api = api;
+        _usuarioActual = usuarioActual;
     }
 
     // GET: /Veterinaria/Reservar  -> muestra selector mascota + fecha
+    [PermisoRequerido("DashboardVeterinaria")]
     public IActionResult Reservar()
     {
-        var clienteId = HttpContext.Session.GetString("UsuarioId");
-        if (clienteId == null) return RedirectToAction("Login", "Auth");
-
-        var mascotas = _contexto.Mascotas.Where(m => m.ClienteId == int.Parse(clienteId)).ToList();
+        int clienteId = _usuarioActual.Obtener().Id;
+        var mascotas = _contexto.Mascotas.Where(m => m.ClienteId == clienteId).ToList();
         return View(mascotas); // View expects List<Mascota>
     }
 
     // AJAX: Obtener disponibilidad (desde la API)
     [HttpGet]
+    [PermisoRequerido("ReservarTurnoVeterinaria")]
     public async Task<IActionResult> Disponibilidad(DateTime fecha)
     {
         var horarios = await _api.ObtenerDisponibilidad(fecha);
@@ -37,13 +40,13 @@ public class VeterinariaController : Controller
     // POST: ReservarTurno -> la peluquería envía la ficha completa (cliente+mascota+fecha) a la API
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [PermisoRequerido("ReservarTurnoVeterinaria")]
     public async Task<IActionResult> ReservarTurno(int mascotaId, DateTime fechaHora)
     {
-        var clienteId = HttpContext.Session.GetString("UsuarioId");
-        if (clienteId == null) return Unauthorized();
+        int clienteId = _usuarioActual.Obtener().Id;
 
         var mascota = await _contexto.Mascotas.FindAsync(mascotaId);
-        var cliente = await _contexto.Clientes.FindAsync(int.Parse(clienteId));
+        var cliente = await _contexto.Clientes.FindAsync(clienteId);
 
         if (mascota == null || cliente == null) return BadRequest("Datos inválidos");
 
@@ -60,12 +63,12 @@ public class VeterinariaController : Controller
     }
 
     // GET: MisTurnos -> listados desde la API por DNI del cliente
+    [PermisoRequerido("MisTurnosVeterinaria")]
     public async Task<IActionResult> MisTurnos()
     {
-        var clienteId = HttpContext.Session.GetString("UsuarioId");
-        if (clienteId == null) return RedirectToAction("Login", "Auth");
+        int clienteId = _usuarioActual.Obtener().Id;
 
-        var cliente = await _contexto.Clientes.FindAsync(int.Parse(clienteId));
+        var cliente = await _contexto.Clientes.FindAsync(clienteId);
         if (cliente == null) return RedirectToAction("Index", "Home");
 
         var turnos = await _api.ObtenerTurnosPorDni(cliente.Dni);
@@ -75,6 +78,7 @@ public class VeterinariaController : Controller
     // POST Cancelar (desde MisTurnos)
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [PermisoRequerido("CancelarTurnoVeterinaria")]
     public async Task<IActionResult> Cancelar(int id)
     {
         var ok = await _api.CancelarTurno(id);

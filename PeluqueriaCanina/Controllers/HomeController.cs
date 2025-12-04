@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PeluqueriaCanina.Models;
+using PeluqueriaCanina.Models.Users;
 using System.Diagnostics;
 
 namespace PeluqueriaCanina.Controllers

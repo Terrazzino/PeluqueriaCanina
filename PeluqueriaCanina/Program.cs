@@ -25,6 +25,10 @@ builder.Services.AddHttpClient("VeterinariaApi", client =>
 
 builder.Services.AddTransient<VeterinariaApiClient>();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
+
+
 
 var app = builder.Build();
 

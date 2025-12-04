@@ -11,18 +11,21 @@ namespace PeluqueriaCanina.Controllers
         {
             _contexto = contexto;
         }
+        [PermisoRequerido("VerServicios")]
         public IActionResult Index()
         {
             var servicios = _contexto.Servicios.ToList();
             return View(servicios);
         }
         [HttpGet]
+        [PermisoRequerido("RegistrarServicio")]
         public IActionResult Crear()
         {
             return View();
         }
 
         [HttpPost]
+        [PermisoRequerido("RegistrarServicio")]
         public IActionResult Crear(Servicio servicio)
         {
             if (ModelState.IsValid)
@@ -35,6 +38,7 @@ namespace PeluqueriaCanina.Controllers
         }
 
         [HttpGet]
+        [PermisoRequerido("ModificarServicio")]
         public IActionResult Editar(int id)
         {
             var servicio = _contexto.Servicios.Find(id);
@@ -42,6 +46,7 @@ namespace PeluqueriaCanina.Controllers
             return View(servicio);
         }
         [HttpPost]
+        [PermisoRequerido("ModificarServicio")]
         public IActionResult Editar(Servicio servicio)
         {
             if (ModelState.IsValid)
@@ -54,6 +59,7 @@ namespace PeluqueriaCanina.Controllers
         }
 
         [HttpGet]
+        [PermisoRequerido("EliminarServicio")]
         public IActionResult Eliminar(int id)
         {
             var servicio = _contexto.Servicios.Find(id);
@@ -61,6 +67,7 @@ namespace PeluqueriaCanina.Controllers
             return View(servicio);
         }
         [HttpPost, ActionName("Eliminar")]
+        [PermisoRequerido("EliminarServicio")]
         public IActionResult EliminarConfirmado(int id)
         {
             var servicio = _contexto.Servicios.Find(id);

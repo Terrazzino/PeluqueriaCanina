@@ -33,7 +33,7 @@ namespace PeluqueriaCanina.Controllers
                 return View();
             }
             HttpContext.Session.SetString("UsuarioId",usuario.Id.ToString());
-            HttpContext.Session.SetString("Rol",usuario.Rol);
+            usuario.Permisos = PermisoFactory.CrearPermiso(usuario.Rol);
 
             switch (usuario.Rol)
             {

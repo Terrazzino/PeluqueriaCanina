@@ -28,5 +28,11 @@ namespace PeluqueriaCanina.Models.Users
         {
             return BCrypt.Net.BCrypt.Verify(contraseña, ContraseñaHasheada);
         }
+
+        public bool TienePermiso(string accion)
+        {
+            return Permisos?.TienePermiso(accion) ?? false;
+        }
+
     }
 }

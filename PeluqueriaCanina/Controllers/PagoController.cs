@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
-using PeluqueriaCanina.Models.ClasesDePago;
 using PeluqueriaCanina.Models.ClasesDeCliente;
+using PeluqueriaCanina.Models.ClasesDePago;
+using PeluqueriaCanina.Services;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PeluqueriaCanina.Controllers
 {
@@ -17,12 +18,14 @@ namespace PeluqueriaCanina.Controllers
         private readonly ContextoAcqua _contexto;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IUsuarioActualService _usuarioActual;
 
-        public PagoController(ContextoAcqua contexto, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        public PagoController(ContextoAcqua contexto, IConfiguration configuration, IHttpClientFactory httpClientFactory, IUsuarioActualService usuarioActual)
         {
             _contexto = contexto;
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _usuarioActual = usuarioActual;
         }
 
         // GET: Pago/Procesar/5
@@ -331,16 +334,18 @@ namespace PeluqueriaCanina.Controllers
         }
 
         // GET: Pago/MisPagos
+        [PermisoRequerido("MisPagos")]
         public async Task<IActionResult> MisPagos()
         {
+            var clienteId = _usuarioActual.Obtener().Id;
             var pagos = await _contexto.Pagos
                 .Include(p => p.Turno)
                     .ThenInclude(t => t.Mascota)
                 .Include(p => p.Turno)
                     .ThenInclude(t => t.Servicio)
+                .Where(p => p.Turno.Mascota.ClienteId == clienteId)
                 .OrderByDescending(p => p.FechaPago)
                 .ToListAsync();
-
             return View(pagos);
         }
 

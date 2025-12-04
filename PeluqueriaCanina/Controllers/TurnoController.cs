@@ -5,6 +5,7 @@ using PeluqueriaCanina.Models;
 using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.ClasesDeTurno;
+using PeluqueriaCanina.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +16,21 @@ namespace PeluqueriaCanina.Controllers
     public class TurnoController : Controller
     {
         private readonly ContextoAcqua _contexto;
+        private readonly IUsuarioActualService _usuarioActual;
 
-        public TurnoController(ContextoAcqua contexto)
+        public TurnoController(ContextoAcqua contexto, IUsuarioActualService usuarioActual)
         {
             _contexto = contexto;
+            _usuarioActual = usuarioActual;
         }
 
 
         // GET: Turno/Crear
         [HttpGet]
+        [PermisoRequerido("RegistrarTurno")]
         public IActionResult Crear()
         {
-            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+            var clienteId = _usuarioActual.Obtener().Id;
 
             ViewBag.Mascotas = _contexto.Mascotas.Where(t=>t.ClienteId==clienteId).ToList();
             ViewBag.Servicios = _contexto.Servicios.ToList();
@@ -37,6 +41,7 @@ namespace PeluqueriaCanina.Controllers
         // POST: Turno/Crear
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PermisoRequerido("RegistrarTurno")]
         public async Task<IActionResult> Crear(Turno turno)
         {
             var errores = new List<string>();
@@ -106,6 +111,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         [HttpPost]
+        [PermisoRequerido("CancelarTurno")]
         public async Task<IActionResult> Cancelar(int id)
         {
             var turno = await _contexto.Turnos.FindAsync(id);
@@ -121,6 +127,7 @@ namespace PeluqueriaCanina.Controllers
         // POST: Turno/Modificar
         // ✅ VERSIÓN FINAL CON FIX DE ZONA HORARIA
         [HttpPost]
+        [PermisoRequerido("ModificarTurno")]
         public async Task<IActionResult> Modificar(int id, DateTime fechaHora)
         {
             try
@@ -244,6 +251,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         [HttpGet]
+        [PermisoRequerido("VerDisponibilidadTurnos")]
         public async Task<IActionResult> GetDisponibilidad(int? servicioId, int? peluqueroId, DateTime? start, DateTime? end, int? duracion)
         {
             if (!start.HasValue || !end.HasValue)
@@ -320,18 +328,21 @@ namespace PeluqueriaCanina.Controllers
 
 
         // GET: Turno
+        [PermisoRequerido("RegistrarTurno")]
         public async Task<IActionResult> Index()
         {
-            var clienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+            var clienteId = _usuarioActual.Obtener().Id;
             var turnos = await _contexto.Turnos
                 .Include(t => t.Mascota).Where(t=>t.Mascota.ClienteId==clienteId)
                 .Include(t => t.Servicio)
                 .Include(t => t.Peluquero)
+                .Include(t => t.Valoracion)
                 .Where(t=>t.Estado!=EstadoTurno.Cancelado)
                 .ToListAsync();
             return View(turnos);
         }
 
+        [PermisoRequerido("RegistrarTurno")]
         private DiasLaborales? MapearDia(DayOfWeek dow)
         {
             return dow switch
@@ -346,6 +357,7 @@ namespace PeluqueriaCanina.Controllers
             };
         }
 
+        [PermisoRequerido("RegistrarTurno")]
         private async Task<int?> BuscarPeluqueroDisponible(DateTime fechaHora, TimeSpan duracion)
         {
             var peluqueros = await _contexto.Peluqueros.Include(p => p.Turnos).ToListAsync();

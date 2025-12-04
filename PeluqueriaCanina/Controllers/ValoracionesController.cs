@@ -2,19 +2,23 @@
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.ClasesDeCliente;
+using PeluqueriaCanina.Services;
 
 namespace PeluqueriaCanina.Controllers
 {
     public class ValoracionesController : Controller
     {
         private readonly ContextoAcqua _contexto;
+        private readonly IUsuarioActualService _usuarioActual;
 
-        public ValoracionesController(ContextoAcqua contexto)
+        public ValoracionesController(ContextoAcqua contexto, IUsuarioActualService usuarioActual)
         {
             _contexto = contexto;
+            _usuarioActual = usuarioActual;
         }
 
         [HttpGet]
+        [PermisoRequerido("RegistrarPuntuacionPeluquero")]
         public IActionResult Crear(int turnoId)
         {
             var turno = _contexto.Turnos
@@ -40,6 +44,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         [HttpPost]
+        [PermisoRequerido("RegistrarPuntuacionPeluquero")]
         public IActionResult Crear(Valoracion model)
         {
             if (!ModelState.IsValid)
@@ -55,6 +60,7 @@ namespace PeluqueriaCanina.Controllers
 
 
         // ADMINISTRADOR → Lista TODAS las valoraciones
+        [PermisoRequerido("ListarPuntuacionPeluquero")]
         public IActionResult ListadoGeneral()
         {
             var valoraciones = _contexto.Valoraciones

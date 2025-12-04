@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDeTurno;
+using PeluqueriaCanina.Services;
 using System.Linq;
 
 namespace PeluqueriaCanina.Controllers
@@ -10,19 +11,23 @@ namespace PeluqueriaCanina.Controllers
     public class PeluqueroController : Controller
     {
         private readonly ContextoAcqua _context;
+        private readonly IUsuarioActualService _usuarioActual;
 
-        public PeluqueroController(ContextoAcqua context)
+        public PeluqueroController(ContextoAcqua context, IUsuarioActualService usuarioActual)
         {
             _context = context;
+            _usuarioActual = usuarioActual;
         }
 
         // ✅ Muestra el calendario
+        [PermisoRequerido("AccederDashboardPeluquero")]
         public IActionResult Agenda()
         {
             return View();
         }
 
         // ✅ Retorna turnos en formato JSON para el calendario
+        [PermisoRequerido("VerTurnos")]
         public IActionResult GetTurnos(DateTime start, DateTime end)
         {
             var usuarioId = HttpContext.Session.GetString("UsuarioId");
@@ -60,6 +65,7 @@ namespace PeluqueriaCanina.Controllers
 
         // ✅ Cambia el estado de un turno
         [HttpPost]
+        [PermisoRequerido("CambiarEstadoTurno")]
         public IActionResult CambiarEstado(int turnoId, EstadoTurno nuevoEstado)
         {
             var turno = _context.Turnos.Find(turnoId);
@@ -72,9 +78,10 @@ namespace PeluqueriaCanina.Controllers
         }
 
         // GET: Peluquero/MisValoraciones
+        [PermisoRequerido("VerValoracionDePeluqueros")]
         public IActionResult MisValoraciones()
         {
-            int peluqueroId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+            int peluqueroId = _usuarioActual.Obtener().Id;
 
             var valoraciones = _context.Valoraciones
                 .Where(v => v.PeluqueroId == peluqueroId)

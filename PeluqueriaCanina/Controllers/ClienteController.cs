@@ -1,21 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeluqueriaCanina.Data;
+using PeluqueriaCanina.Services;
 
 namespace PeluqueriaCanina.Controllers
 {
     public class ClienteController:Controller
     {
         private readonly ContextoAcqua _context;
-        public ClienteController(ContextoAcqua contexto)
+        private readonly IUsuarioActualService _usuarioActual;
+        public ClienteController(ContextoAcqua contexto, IUsuarioActualService usuarioActual)
         {
             _context = contexto;
+            _usuarioActual = usuarioActual;
         }
+
+        [PermisoRequerido("AccederDashboardCliente")]
         public IActionResult Dashboard()
         {
-            if (HttpContext.Session.GetString("Rol")!="Cliente") return RedirectToAction("Login", "Auth");
-
-            var nombre = HttpContext.Session.GetString("Nombre");
-            ViewBag.Nombre = string.IsNullOrEmpty(nombre) ? "Usuario" : nombre;
+            ViewBag.Nombre = _usuarioActual.Obtener().Nombre;
 
             return View();
         }

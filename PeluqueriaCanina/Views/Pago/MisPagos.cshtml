@@ -137,8 +137,8 @@
 
                     <div class="col-md-3">
                         <h4 class="text-success">
-                            $@Model.Where(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Aprobado)
-                            .Sum(p => p.Monto).ToString("N2")
+                            $@(Model.Where(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Aprobado)
+                            .Sum(p => p.Monto).ToString("N2"))
                         </h4>
                         <p class="text-muted mb-0">Total Pagado</p>
                     </div>
