@@ -5,6 +5,7 @@ using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Users;
 using PeluqueriaCanina.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace PeluqueriaCanina.Controllers
 {
@@ -15,19 +16,22 @@ namespace PeluqueriaCanina.Controllers
         private readonly ClienteEntryStrategy _clienteStrategy;
         private readonly PeluqueroEntryStrategy _peluqueroStrategy;
         private readonly AuditoriaService _auditoriaService;
+        private readonly IEmailSender _emailSender;
 
 
         public AuthController(ContextoAcqua contexto,
         AdminEntryStrategy adminStrategy,
         ClienteEntryStrategy clienteStrategy,
         PeluqueroEntryStrategy peluqueroStrategy,
-        AuditoriaService auditoriaService)
+        AuditoriaService auditoriaService,
+        IEmailSender emailSender)
         {
             _contexto = contexto;
             _adminStrategy = adminStrategy;
             _clienteStrategy = clienteStrategy;
             _peluqueroStrategy = peluqueroStrategy;
             _auditoriaService = auditoriaService;
+            _emailSender = emailSender;
         }
 
         [HttpGet]
@@ -175,6 +179,98 @@ namespace PeluqueriaCanina.Controllers
 
             await HttpContext.SignOutAsync("Cookies");
             return RedirectToAction("Login");
+        }
+
+        //RESTABLECER Y RECUPERAR CONTRASEÑA
+
+        [HttpGet]
+        public IActionResult RecuperarContrasena()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecuperarContrasena(RecuperarContrasenaVM model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            // Buscar usuario por mail
+            var usuario = _contexto.Personas.FirstOrDefault(u => u.Mail == model.Mail);
+            if (usuario == null)
+            {
+                // Para no dar pistas, decimos siempre que se envió
+                return View("RecuperarContrasenaEnviado");
+            }
+
+            // Generar token temporal
+            var token = Guid.NewGuid().ToString();
+
+            // Guardarlo en BD
+            usuario.TokenRecuperacion = token;
+            usuario.TokenExpira = DateTime.Now.AddHours(1);
+            _contexto.Update(usuario);
+            _contexto.SaveChanges();
+
+            // Generar URL dinámicamente usando Request.Scheme y Request.Host
+            var callbackUrl = Url.Action(
+                "RestablecerContrasena",     // Acción
+                "Auth",                      // Controlador
+                new { mail = usuario.Mail, token = token }, // Parámetros
+                protocol: Request.Scheme,    // http o https según corresponda
+                host: Request.Host.ToString() // localhost:7041 o dominio real
+            );
+
+            // Enviar email
+            await _emailSender.SendEmailAsync(
+                usuario.Mail,
+                "Recuperar contraseña",
+                $"Hola {usuario.Nombre},<br/>Para restablecer tu contraseña haz click aquí: " +
+                $"<a href='{callbackUrl}'>Restablecer</a>"
+            );
+
+            return View("RecuperarContrasenaEnviado");
+        }
+
+
+        [HttpGet]
+        public IActionResult RestablecerContrasena(string mail, string token)
+        {
+            if (string.IsNullOrEmpty(mail) || string.IsNullOrEmpty(token))
+                return RedirectToAction("Login");
+
+            var model = new RestablecerContrasenaVM { Mail = mail, Token = token };
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult RestablecerContrasena(RestablecerContrasenaVM model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            if (model.NuevaContrasena != model.ConfirmarContrasena)
+            {
+                ModelState.AddModelError("", "Las contraseñas no coinciden");
+                return View(model);
+            }
+
+            var usuario = _contexto.Personas.FirstOrDefault(u =>
+                u.Mail == model.Mail && u.TokenRecuperacion == model.Token);
+
+            if (usuario == null || usuario.TokenExpira < DateTime.Now)
+            {
+                ModelState.AddModelError("", "Token inválido o expirado");
+                return View(model);
+            }
+
+            // Actualizar contraseña y limpiar token
+            usuario.RegistrarContraseña(model.NuevaContrasena);
+            usuario.TokenRecuperacion = null;
+            usuario.TokenExpira = null;
+
+            _contexto.Update(usuario);
+            _contexto.SaveChanges();
+
+            return RedirectToAction("Login", "Auth");
         }
 
 
