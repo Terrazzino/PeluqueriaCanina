@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PeluqueriaCanina.Models;
 using PeluqueriaCanina.Models.ClasesDeAdministrador;
 using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDePago;
@@ -15,6 +16,7 @@ namespace PeluqueriaCanina.Data
         public ContextoAcqua(DbContextOptions<ContextoAcqua> options) : base(options) { }
 
         public DbSet<Auditoria> Auditorias { get; set; }
+
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Peluquero> Peluqueros { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
@@ -44,13 +46,13 @@ namespace PeluqueriaCanina.Data
             modelBuilder.Entity<Administrador>().HasIndex(a => a.Mail).IsUnique();
 
             // Relaciones
-            modelBuilder.Entity<Peluquero>()
+            modelBuilder.Entity<Persona>()
                 .HasMany(p => p.Jornadas)
                 .WithOne(j => j.Peluquero)
                 .HasForeignKey(j => j.PeluqueroId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Peluquero>()
+            modelBuilder.Entity<Persona>()
                 .HasMany(p => p.Turnos)
                 .WithOne(t => t.Peluquero)
                 .HasForeignKey(t => t.PeluqueroId)
@@ -85,13 +87,13 @@ namespace PeluqueriaCanina.Data
             // Valoraciones
             modelBuilder.Entity<Valoracion>()
                 .HasOne(v => v.Peluquero)
-                .WithMany(p => p.Valoraciones)
+                .WithMany(p => p.ValoracionesRecibidas)
                 .HasForeignKey(v => v.PeluqueroId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Valoracion>()
                 .HasOne(v => v.Cliente)
-                .WithMany(c => c.Valoraciones)
+                .WithMany(c => c.ValoracionesRealizadas)
                 .HasForeignKey(v => v.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
 

@@ -13,7 +13,7 @@ namespace PeluqueriaCanina.Models.ClasesDeTurno
         public Mascota Mascota { get; set; }
 
         public int? PeluqueroId { get; set; }
-        public Peluquero? Peluquero { get; set; }
+        public Persona? Peluquero { get; set; }
 
         public int ServicioId { get; set; }
         public Servicio Servicio { get; set; }

@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PeluqueriaCanina.Models.ClasesDeCliente;
+using PeluqueriaCanina.Models.ClasesDePeluquero;
+using PeluqueriaCanina.Models.ClasesDeTurno;
+using System.ComponentModel.DataAnnotations;
 
 namespace PeluqueriaCanina.Models.Users
 {
@@ -15,5 +18,10 @@ namespace PeluqueriaCanina.Models.Users
         public string Dni { get; set; } = string.Empty;
         [Required]
         public DateTime FechaDeNacimiento { get; set; }
+        public List<Mascota> Mascotas { get; set; } = new List<Mascota>();
+        public List<Valoracion> ValoracionesRealizadas { get; set; } = new();
+        public List<Valoracion> ValoracionesRecibidas { get; set; } = new();
+        public List<Jornada> Jornadas { get; set; } = new List<Jornada>();
+        public List<Turno> Turnos { get; set; } = new List<Turno> { };
     }
 }

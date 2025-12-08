@@ -35,7 +35,7 @@ namespace PeluqueriaCanina.Controllers
             {
                 TurnoId = turno.Id,
                 PeluqueroId = turno.PeluqueroId,
-                ClienteId = turno.Mascota.ClienteId
+                ClienteId = turno.Mascota.ClienteId,
             };
 
             return View(model);

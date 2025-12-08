@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Users;
+using PeluqueriaCanina.Services;
 using System.Security.Claims;
 
 namespace PeluqueriaCanina.Controllers
@@ -13,17 +14,20 @@ namespace PeluqueriaCanina.Controllers
         private readonly AdminEntryStrategy _adminStrategy;
         private readonly ClienteEntryStrategy _clienteStrategy;
         private readonly PeluqueroEntryStrategy _peluqueroStrategy;
+        private readonly AuditoriaService _auditoriaService;
 
 
         public AuthController(ContextoAcqua contexto,
         AdminEntryStrategy adminStrategy,
         ClienteEntryStrategy clienteStrategy,
-        PeluqueroEntryStrategy peluqueroStrategy)
+        PeluqueroEntryStrategy peluqueroStrategy,
+        AuditoriaService auditoriaService)
         {
             _contexto = contexto;
             _adminStrategy = adminStrategy;
             _clienteStrategy = clienteStrategy;
             _peluqueroStrategy = peluqueroStrategy;
+            _auditoriaService = auditoriaService;
         }
 
         [HttpGet]
@@ -72,6 +76,14 @@ namespace PeluqueriaCanina.Controllers
             // 🔥 Si solo tiene un rol → lo enviamos directo por Strategy
             var grupoUnico = usuario.Grupos.FirstOrDefault()?.Nombre;
 
+            _auditoriaService.Registrar(
+                accion: "Login",
+                usuarioId: usuario.Id,
+                detalles: $"El usuario inició sesión."
+            );
+
+
+
             return grupoUnico switch
             {
                 "Administrador" => _adminStrategy.Execute(this, usuario),
@@ -116,6 +128,13 @@ namespace PeluqueriaCanina.Controllers
             _contexto.Personas.Add(nuevoUsuario);
             _contexto.SaveChanges();
 
+            _auditoriaService.Registrar(
+                accion: "Registro de Usuario",
+                usuarioId: nuevoUsuario.Id,
+                detalles: $"Usuario creado como Rol {nuevoUsuario.Rol}"
+            );  
+
+
             return RedirectToAction("Login");
         }
 
@@ -140,9 +159,24 @@ namespace PeluqueriaCanina.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            // 🔥 Recuperar el UsuarioId desde las claims
+            var usuarioIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UsuarioId");
+            int usuarioId = usuarioIdClaim != null ? int.Parse(usuarioIdClaim.Value) : 0;
+
+            // Registrar auditoría solo si había un usuario logueado
+            if (usuarioId > 0)
+            {
+                _auditoriaService.Registrar(
+                    accion: "Logout",
+                    usuarioId: usuarioId,
+                    detalles: "El usuario cerró sesión."
+                );
+            }
+
             await HttpContext.SignOutAsync("Cookies");
             return RedirectToAction("Login");
         }
+
 
     }
 }

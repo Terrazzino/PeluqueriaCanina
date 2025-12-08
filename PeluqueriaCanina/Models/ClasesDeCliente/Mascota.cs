@@ -12,7 +12,7 @@ namespace PeluqueriaCanina.Models.ClasesDeCliente
         public DateTime FechaDeNacimiento { get; set; }
         public double Peso { get; set; }
         public int ClienteId { get; set; }
-        public Cliente Cliente { get; set; }
+        public Persona Cliente { get; set; }
         public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
     }
 }

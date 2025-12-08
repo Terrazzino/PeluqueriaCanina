@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
-using PeluqueriaCanina.Models.ClasesDeAdministrador;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
 using PeluqueriaCanina.Models.Users;
@@ -386,15 +385,6 @@ namespace PeluqueriaCanina.Controllers
 
             // obtener admin actual
             var adminActual = _usuarioActual.Obtener();
-            await _auditoria.RegistrarAsync(new Auditoria
-            {
-                AdministradorId = adminActual?.Id ?? 0,
-                AdministradorNombre = adminActual != null ? $"{adminActual.Nombre} {adminActual.Apellido}" : "Sistema",
-                UsuarioModificadoId = usuario.Id,
-                UsuarioModificadoNombre = $"{usuario.Nombre} {usuario.Apellido}",
-                Accion = "Asignó Grupo",
-                Detalle = $"Se asignó el grupo '{grupo.Nombre}' al usuario {usuario.Mail}"
-            });
 
             return RedirectToAction("EditRoles", new { id = usuarioId });
         }
@@ -417,18 +407,43 @@ namespace PeluqueriaCanina.Controllers
             await _contexto.SaveChangesAsync();
 
             var adminActual = _usuarioActual.Obtener();
-            await _auditoria.RegistrarAsync(new Auditoria
-            {
-                AdministradorId = adminActual?.Id ?? 0,
-                AdministradorNombre = adminActual != null ? $"{adminActual.Nombre} {adminActual.Apellido}" : "Sistema",
-                UsuarioModificadoId = usuario.Id,
-                UsuarioModificadoNombre = $"{usuario.Nombre} {usuario.Apellido}",
-                Accion = "Quitó Grupo",
-                Detalle = $"Se quitó el grupo '{grupo.Nombre}' del usuario {usuario.Mail}"
-            });
 
             return RedirectToAction("EditRoles", new { id = usuarioId });
         }
+
+
+        public IActionResult Auditoria(DateTime? fechaDesde, DateTime? fechaHasta, string usuario, string rol, string accion)
+        {
+            var query = _contexto.Auditorias.AsQueryable();
+
+            // FILTRO POR FECHA DESDE
+            if (fechaDesde.HasValue)
+                query = query.Where(a => a.FechaHora >= fechaDesde.Value);
+
+            // FILTRO POR FECHA HASTA
+            if (fechaHasta.HasValue)
+                query = query.Where(a => a.FechaHora <= fechaHasta.Value);
+
+            // FILTRO POR USUARIO
+            if (!string.IsNullOrEmpty(usuario))
+                query = query.Where(a => a.NombreUsuario.Contains(usuario));
+
+            // FILTRO POR ROL
+            if (!string.IsNullOrEmpty(rol))
+                query = query.Where(a => a.RolUsuario.Contains(rol));
+
+            // FILTRO POR ACCIÓN
+            if (!string.IsNullOrEmpty(accion))
+                query = query.Where(a => a.Accion.Contains(accion));
+
+            var datos = query
+                .OrderByDescending(a => a.FechaHora)
+                .ToList();
+
+            return View(datos);
+        }
+
+
 
 
     }

@@ -9,10 +9,10 @@ public class Valoracion
     public int Id { get; set; }
 
     public int? PeluqueroId { get; set; }
-    public Peluquero? Peluquero { get; set; }      // <- nullable
+    public Persona? Peluquero { get; set; }      // <- nullable
 
     public int ClienteId { get; set; }
-    public Cliente? Cliente { get; set; }         // <- nullable
+    public Persona? Cliente { get; set; }         // <- nullable
 
     public int TurnoId { get; set; }
     public Turno? Turno { get; set; }             // <- nullable

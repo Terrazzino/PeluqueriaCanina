@@ -5,6 +5,7 @@ using PeluqueriaCanina.Models;
 using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.ClasesDeTurno;
+using PeluqueriaCanina.Models.Users;
 using PeluqueriaCanina.Services;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,13 @@ namespace PeluqueriaCanina.Controllers
     {
         private readonly ContextoAcqua _contexto;
         private readonly IUsuarioActualService _usuarioActual;
+        private readonly IAuditoriaService _auditoria;
 
-        public TurnoController(ContextoAcqua contexto, IUsuarioActualService usuarioActual)
+        public TurnoController(ContextoAcqua contexto, IUsuarioActualService usuarioActual, IAuditoriaService auditoria)
         {
             _contexto = contexto;
             _usuarioActual = usuarioActual;
+            _auditoria = auditoria;
         }
 
 
@@ -95,6 +98,13 @@ namespace PeluqueriaCanina.Controllers
             turno.FechaHora = turno.FechaHora.ToLocalTime();
             turno.Precio = turno.Servicio.Precio;
 
+            _auditoria.Registrar(
+                "Reserva de Turno",
+                turno.Mascota.ClienteId,
+                $"Turno reservado para mascota {turno.Mascota.Nombre} el {turno.FechaHora}"
+            );
+
+
             // 6️⃣ Guardar el turno
             _contexto.Turnos.Add(turno);
             await _contexto.SaveChangesAsync();
@@ -121,6 +131,12 @@ namespace PeluqueriaCanina.Controllers
                 return Json(new { ok = false, message = "El turno ya esta cancelado."});
             turno.Estado = EstadoTurno.Cancelado;
             await _contexto.SaveChangesAsync();
+            _auditoria.Registrar(
+                "Cancelación de Turno",
+                turno.Mascota.ClienteId,
+                $"Turno #{turno.Id} cancelado"
+            );
+
             return Json(new { ok = true, message = "Turno cancelado correctamente" });
         }
 
@@ -229,6 +245,13 @@ namespace PeluqueriaCanina.Controllers
 
                 _contexto.Turnos.Update(turno);
                 await _contexto.SaveChangesAsync();
+
+                _auditoria.Registrar(
+                    "Modificación de Turno",
+                    turno.Mascota.ClienteId,
+                    $"Turno #{turno.Id} modificado para {fechaHora}"
+                );
+
 
                 return Ok(new { ok = true, message = "Turno modificado con éxito." });
             }

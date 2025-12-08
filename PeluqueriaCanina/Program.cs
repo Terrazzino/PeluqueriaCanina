@@ -39,11 +39,13 @@ builder.Services.AddTransient<VeterinariaApiClient>();
 
 // Usuario actual
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
 
 builder.Services.AddTransient<AdminEntryStrategy>();
 builder.Services.AddTransient<ClienteEntryStrategy>();
 builder.Services.AddTransient<PeluqueroEntryStrategy>();
+builder.Services.AddScoped<AuditoriaService>();
+builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
+
 
 
 var app = builder.Build();

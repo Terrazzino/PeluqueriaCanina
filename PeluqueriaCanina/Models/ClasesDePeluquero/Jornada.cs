@@ -10,6 +10,6 @@ namespace PeluqueriaCanina.Models.ClasesDePeluquero
         public TimeSpan HoraDeFin {  get; set; }
         public bool Activo {  get; set; }
         public int PeluqueroId { get; set; }
-        public Peluquero Peluquero { get; set; }
+        public Persona Peluquero { get; set; }
     }
 }

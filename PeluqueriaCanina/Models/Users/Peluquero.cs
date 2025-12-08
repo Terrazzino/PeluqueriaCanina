@@ -11,9 +11,6 @@ namespace PeluqueriaCanina.Models.Users
         {
             Rol = "Peluquero";
         }
-        public List<Jornada> Jornadas { get; set; } = new List<Jornada>();
-        public List<Turno> Turnos { get; set; } = new List<Turno> { };
-        public List<Valoracion> Valoraciones { get; set; } = new();
 
     }
 }
