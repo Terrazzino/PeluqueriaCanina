@@ -1,8 +1,8 @@
-﻿namespace PeluqueriaCanina.Models.Permisos
+﻿public abstract class Permiso
 {
-    public abstract class Permiso
-    {
-        public string Nombre { get; set; }
-        public abstract bool TienePermiso(string accion);
-    }
+    public int Id { get; set; }
+    public string Nombre { get; set; }
+
+    public abstract bool TienePermiso(string nombre);
+    public abstract List<string> ListarPermisos();
 }

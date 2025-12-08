@@ -1,5 +1,5 @@
-﻿using PeluqueriaCanina.Data;
-using PeluqueriaCanina.Models.Factories;
+﻿using Microsoft.EntityFrameworkCore;
+using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Users;
 
 namespace PeluqueriaCanina.Services
@@ -17,15 +17,25 @@ namespace PeluqueriaCanina.Services
 
         public Persona Obtener()
         {
-            var idString = _http.HttpContext.Session.GetString("UsuarioId");
-            if (idString == null) return null;
+            var claimValue = _http.HttpContext.User.FindFirst("UsuarioId")?.Value;
 
-            int id = int.Parse(idString);
-            var usuario = _contexto.Personas.FirstOrDefault(u => u.Id == id);
+            if (claimValue == null)
+                return null;
 
-            usuario.Permisos = PermisoFactory.CrearPermiso(usuario.Rol);
+            if (!int.TryParse(claimValue, out int id))
+                return null;
+
+            // Carga el usuario con:
+            // - Grupos
+            // - PermisoCompuesto
+            // - Hijos (Permisos simples)
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                    .ThenInclude(g => g.Permisos)
+                        .ThenInclude(pc => (pc as PermisoCompuesto).Permisos)
+                .FirstOrDefault(u => u.Id == id);
+
             return usuario;
         }
     }
-
 }

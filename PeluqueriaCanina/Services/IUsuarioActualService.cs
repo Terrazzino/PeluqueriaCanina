@@ -6,5 +6,4 @@ namespace PeluqueriaCanina.Services
     {
         Persona Obtener();
     }
-
 }

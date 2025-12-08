@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
 using PeluqueriaCanina.Models.Users;
 using PeluqueriaCanina.Models.VMs;
 using PeluqueriaCanina.Services;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace PeluqueriaCanina.Controllers
 {
-    public class AdministradorController:Controller
+    public class AdministradorController : Controller
     {
         private readonly ContextoAcqua _contexto;
         private readonly IEmailSender _emailSender;
@@ -26,56 +27,77 @@ namespace PeluqueriaCanina.Controllers
         }
 
         [PermisoRequerido("AccederDashboardAdministrador")]
-        public IActionResult Dashboard()
-        {
-            return View();
-        }
+        public IActionResult Dashboard() => View();
 
         [HttpGet]
         [PermisoRequerido("RegistrarPeluquero")]
-        public IActionResult RegistrarPeluquero()
-        {
-            return View();
-        }
+        public IActionResult RegistrarPeluquero() => View();
 
         [HttpPost]
         [PermisoRequerido("RegistrarPeluquero")]
-        public async Task<IActionResult> RegistrarPeluquero(string nombre, string apellido, string mail, string dni, DateTime fechaDeNacimiento, List<Jornada> jornadas)
+        public async Task<IActionResult> RegistrarPeluquero(
+    string nombre,
+    string apellido,
+    string mail,
+    string dni,
+    DateTime fechaDeNacimiento,
+    List<Jornada> jornadas)
         {
             if (_contexto.Personas.Any(p => p.Mail == mail))
             {
-                ViewBag.Error = "El mail ya se encuentra registrado";
+                ModelState.AddModelError("", "El mail ya se encuentra registrado");
                 return View();
             }
 
             var contraseñaRandom = GenerarContraseña();
+
             var nuevoPeluquero = UsuarioFactory.CrearUsuario<Peluquero>(
                 nombre,
                 apellido,
                 mail,
                 dni,
                 fechaDeNacimiento,
-                contraseñaRandom,
-                "Peluquero"
+                contraseñaRandom
             );
 
+            // ASIGNAR JORNADAS
             nuevoPeluquero.Jornadas = jornadas
                 .Where(j => j.HoraDeInicio != TimeSpan.Zero && j.HoraDeFin != TimeSpan.Zero && j.Activo)
                 .ToList();
 
-            _contexto.Personas.Add(nuevoPeluquero);
-            _contexto.SaveChanges();
+            // BUSCAR GRUPO "Peluquero"
+            var grupoPeluquero = _contexto.Grupos.FirstOrDefault(g => g.Nombre == "Peluquero");
 
+            if (grupoPeluquero == null)
+            {
+                ModelState.AddModelError("", "No existe el grupo 'Peluquero'. Debes crearlo antes.");
+                return View();
+            }
+
+            // ASIGNAR GRUPO AL NUEVO PELUQUERO
+            nuevoPeluquero.Grupos.Add(grupoPeluquero);
+
+            // GUARDAR
+            _contexto.Personas.Add(nuevoPeluquero);
+            await _contexto.SaveChangesAsync();
+
+            // ENVIAR MAIL
             await EnviarMailConContraseña(mail, contraseñaRandom, nombre);
 
             return RedirectToAction("Dashboard");
         }
 
+
         private string GenerarContraseña()
         {
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, 8).Select(s => s[random.Next(s.Length)]).ToArray());
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var data = new byte[8];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(data);
+            var result = new char[8];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = chars[data[i] % chars.Length];
+            return new string(result);
         }
 
         private async Task EnviarMailConContraseña(string mail, string contraseña, string nombre)
@@ -91,7 +113,6 @@ namespace PeluqueriaCanina.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al enviar mail: {ex.Message}");
-                // También podrías guardarlo en un log o base de datos
             }
         }
 
@@ -100,20 +121,7 @@ namespace PeluqueriaCanina.Controllers
         {
             var peluqueros = _contexto.Personas
                 .OfType<Peluquero>()
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Nombre,
-                    p.Apellido,
-                    p.Mail,
-                    Jornadas = p.Jornadas.Select(j => new
-                    {
-                        j.Dia,
-                        j.HoraDeInicio,
-                        j.HoraDeFin,
-                        j.Activo
-                    })
-                })
+                .Include(p => p.Jornadas)
                 .ToList();
             return View(peluqueros);
         }
@@ -124,13 +132,14 @@ namespace PeluqueriaCanina.Controllers
         {
             var peluquero = _contexto.Personas
                 .OfType<Peluquero>()
-                .Include(p=>p.Jornadas)
+                .Include(p => p.Jornadas)
                 .FirstOrDefault(p => p.Id == id);
+
             if (peluquero == null) return NotFound();
-            var dias = Enum.GetValues(typeof(DiasLaborales)).Cast<DiasLaborales>();
-            foreach(var dia in dias)
+
+            foreach (DiasLaborales dia in Enum.GetValues(typeof(DiasLaborales)))
             {
-                if (!peluquero.Jornadas.Any(j=>j.Dia==dia))
+                if (!peluquero.Jornadas.Any(j => j.Dia == dia))
                 {
                     peluquero.Jornadas.Add(new Jornada
                     {
@@ -141,17 +150,18 @@ namespace PeluqueriaCanina.Controllers
                     });
                 }
             }
-            peluquero.Jornadas = peluquero.Jornadas.OrderBy(j=>j.Dia).ToList();
+
+            peluquero.Jornadas = peluquero.Jornadas.OrderBy(j => j.Dia).ToList();
             return View(peluquero);
         }
 
         [HttpPost]
         [PermisoRequerido("ModificarPeluquero")]
-        public IActionResult EditarPeluquero(Peluquero peluqueroActualizado)
+        public async Task<IActionResult> EditarPeluquero(Peluquero peluqueroActualizado)
         {
             var peluquero = _contexto.Personas
                 .OfType<Peluquero>()
-                .Include(p=>p.Jornadas)
+                .Include(p => p.Jornadas)
                 .FirstOrDefault(p => p.Id == peluqueroActualizado.Id);
 
             if (peluquero == null) return NotFound();
@@ -162,7 +172,7 @@ namespace PeluqueriaCanina.Controllers
 
             foreach (var jornadaEditada in peluqueroActualizado.Jornadas)
             {
-                var jornada = peluquero.Jornadas.FirstOrDefault(j=>j.Id==jornadaEditada.Id && j.Id!=0);
+                var jornada = peluquero.Jornadas.FirstOrDefault(j => j.Id == jornadaEditada.Id && j.Id != 0);
                 if (jornada != null)
                 {
                     jornada.Activo = jornadaEditada.Activo;
@@ -182,25 +192,20 @@ namespace PeluqueriaCanina.Controllers
             }
 
             _contexto.Update(peluquero);
-            _contexto.SaveChanges();
+            await _contexto.SaveChangesAsync();
             return RedirectToAction("ListarPeluqueros");
         }
 
         [PermisoRequerido("EliminarPeluquero")]
-        public IActionResult EliminarPeluquero(int id)
+        public async Task<IActionResult> EliminarPeluquero(int id)
         {
-            var peluquero = _contexto.Personas
-                .OfType<Peluquero>()
-                .FirstOrDefault(p => p.Id == id);
-
+            var peluquero = _contexto.Personas.OfType<Peluquero>().FirstOrDefault(p => p.Id == id);
             if (peluquero == null) return NotFound();
 
             _contexto.Remove(peluquero);
-            _contexto.SaveChanges();
-
+            await _contexto.SaveChangesAsync();
             return RedirectToAction("ListarPeluqueros");
         }
-
 
         // === REPORTE PRINCIPAL ===
         [PermisoRequerido("VerReporte")]

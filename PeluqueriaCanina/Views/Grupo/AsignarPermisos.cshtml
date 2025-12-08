@@ -1,0 +1,25 @@
+﻿@model AsignarPermisosViewModel
+
+<h2>Permisos de @Model.NombreGrupo</h2>
+
+<form method="post" asp-action="AsignarPermisos">
+    <input type="hidden" name="id" value="@Model.GrupoId" />
+
+    <div class="list-group col-md-6">
+
+        @foreach (var permiso in Model.PermisosDisponibles)
+        {
+            <label class="list-group-item">
+                <input type="checkbox"
+                       name="permisosSeleccionados"
+                       value="@permiso"
+                       @(Model.PermisosAsignados.Contains(permiso) ? "checked" : "") />
+
+                @permiso
+            </label>
+        }
+    </div>
+
+    <button class="btn btn-primary mt-3">Guardar Cambios</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Volver</a>
+</form>

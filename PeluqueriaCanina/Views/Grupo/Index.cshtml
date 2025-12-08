@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Grupos";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3 fw-bold">Grupos de Usuarios</h2>
+
+    <div class="d-flex">
+        <a asp-controller="Administrador" asp-action="Dashboard"
+           class="btn btn-outline-light me-2 shadow-sm">
+            ⬅️ Inicio
+        </a>
+
+        <a asp-action="Crear"
+           class="btn btn-primary shadow-sm">
+            ➕ Crear Grupo
+        </a>
+    </div>
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th style="width: 220px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var g in Model)
+            {
+                <tr>
+                    <td>@g.Nombre</td>
+                    <td>
+                        <a asp-action="Editar" asp-route-id="@g.Id" class="btn btn-primary btn-sm">Editar</a>
+                        <a asp-action="AsignarPermisos" asp-route-id="@g.Id" class="btn btn-warning btn-sm">Permisos</a>
+                        <a asp-action="Eliminar" asp-route-id="@g.Id" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

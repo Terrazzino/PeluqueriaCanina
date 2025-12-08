@@ -1,7 +1,12 @@
-﻿namespace PeluqueriaCanina.Models.Permisos
+﻿public class PermisoSimple : Permiso
 {
-    public class PermisoSimple:Permiso
+    public override bool TienePermiso(string nombre)
     {
-        public override bool TienePermiso(string accion) => accion == Nombre;
+        return Nombre == nombre;
+    }
+
+    public override List<string> ListarPermisos()
+    {
+        return new List<string> { Nombre };
     }
 }

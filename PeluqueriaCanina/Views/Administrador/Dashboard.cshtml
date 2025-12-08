@@ -4,6 +4,11 @@
 
 <!-- Barra superior -->
 <div class="d-flex justify-content-end p-3">
+    <a asp-controller="Perfil" asp-action="MiPerfil" class="btn btn-outline-light">
+        Mi Perfil
+    </a>
+
+
     <a asp-controller="Auth" asp-action="Logout"
        class="btn btn-outline-danger rounded-3 fw-semibold">
         <i class="bi bi-box-arrow-right"></i> Cerrar sesión
@@ -15,11 +20,6 @@
     <div class="col-md-8 col-lg-6">
         <div class="card shadow-lg border-0 bg-dark text-light rounded-4">
             <div class="card-body p-4">
-
-                <!-- Imagen o Banner -->
-                <!-- ⬇⬇⬇ OPCIONAL: PONÉ TU IMAGEN ACÁ -->
-                <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid d-block mx-auto mb-3 rounded-3" /> -->
-                <!-- ⬆⬆⬆ FIN IMAGEN -->
 
                 <h2 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">
                     Bienvenido Administrador
@@ -37,6 +37,12 @@
                         Gestionar Servicios
                     </a>
 
+                    <a asp-controller="Grupo" asp-action="Index"
+                       class="btn btn-dark btn-lg rounded-3 fw-semibold shadow-sm">
+                        Gestionar Grupos
+                    </a>
+
+
                     <a asp-action="Reportes"
                        class="btn btn-info btn-lg rounded-3 fw-semibold text-white shadow-sm">
                         Ver Reportes
@@ -44,7 +50,7 @@
 
                     <a asp-controller="Valoraciones" asp-action="ListadoGeneral"
                        class="btn btn-warning btn-lg rounded-3 fw-semibold shadow-sm">
-                        ⭐ Valoraciones de Peluqueros
+                        Valoraciones de Peluqueros
                     </a>
 
 

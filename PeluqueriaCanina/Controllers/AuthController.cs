@@ -1,83 +1,109 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Users;
-using PeluqueriaCanina.Models.Factories;
+using System.Security.Claims;
 
 namespace PeluqueriaCanina.Controllers
 {
-    public class AuthController:Controller
+    public class AuthController : Controller
     {
         private readonly ContextoAcqua _contexto;
 
-        public AuthController(ContextoAcqua context)
+        public AuthController(ContextoAcqua contexto)
         {
-            _contexto = context;
+            _contexto = contexto;
         }
 
-        // GET: /Auth/Login
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        //POST: /Auth/Login
         [HttpPost]
-        public IActionResult Login(string mail, string contraseña)
+        public async Task<IActionResult> Login(string mail, string contraseña)
         {
-            var usuario = _contexto.Personas.FirstOrDefault(u => u.Mail == mail);
+            // Buscar usuario en la tabla Personas
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                .ThenInclude(g => g.Permisos)
+                .FirstOrDefault(u => u.Mail == mail);
+
+            // Validar existencia y contraseña
             if (usuario == null || !usuario.VerificarContraseña(contraseña))
             {
                 ViewBag.Error = "Mail o contraseña incorrectos";
                 return View();
             }
-            HttpContext.Session.SetString("UsuarioId",usuario.Id.ToString());
-            usuario.Permisos = PermisoFactory.CrearPermiso(usuario.Rol);
 
-            switch (usuario.Rol)
+            // Crear claims personalizados
+            var claims = new List<Claim>
+    {
+        new Claim("UsuarioId", usuario.Id.ToString())
+    };
+
+            var identity = new ClaimsIdentity(claims, "Cookies");
+            var principal = new ClaimsPrincipal(identity);
+
+            // Iniciar sesión con cookie
+            await HttpContext.SignInAsync("Cookies", principal);
+
+            // Redirigir según tipo de usuario
+            return usuario switch
             {
-                case "Administrador":
-                    return RedirectToAction("Dashboard","Administrador");
-                case "Cliente":
-                    return RedirectToAction("Dashboard", "Cliente");
-                case "Peluquero":
-                    return RedirectToAction("Agenda","Peluquero");
-                default:
-                    throw new ArgumentException("No se identifico ningun tipo de usuario");
-            }
+                Administrador => RedirectToAction("Dashboard", "Administrador"),
+                Cliente => RedirectToAction("Dashboard", "Cliente"),
+                Peluquero => RedirectToAction("Agenda", "Peluquero"),
+                _ => RedirectToAction("Login")
+            };
         }
 
-        // GET: /Auth/Register
+
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Auth/Register
         [HttpPost]
         public IActionResult Register(string nombre, string apellido, string mail, string dni, DateTime fechaDeNacimiento, string contraseña)
         {
-            if (_contexto.Personas.Any(u=>u.Mail==mail))
+            if (_contexto.Personas.Any(u => u.Mail == mail))
             {
-                ViewBag.Error = "El mail ya esta registrado";
+                ViewBag.Error = "El mail ya está registrado";
                 return View();
             }
 
-            var nuevoUsuario = UsuarioFactory.CrearUsuario<Cliente>(nombre, apellido, mail, dni, fechaDeNacimiento, contraseña, "Cliente");
+            var nuevoUsuario = UsuarioFactory.CrearUsuario<Cliente>(
+                nombre, apellido, mail, dni, fechaDeNacimiento, contraseña);
 
+            // BUSCAR GRUPO "Cliente"
+            var grupoCliente = _contexto.Grupos.FirstOrDefault(g => g.Nombre == "Cliente");
+
+            if (grupoCliente == null)
+            {
+                ViewBag.Error = "No existe el grupo 'Cliente'. Debes crearlo antes.";
+                return View();
+            }
+
+            // ASIGNAR GRUPO AL NUEVO USUARIO
+            nuevoUsuario.Grupos.Add(grupoCliente);
+
+            // GUARDAR USUARIO
             _contexto.Personas.Add(nuevoUsuario);
             _contexto.SaveChanges();
 
             return RedirectToAction("Login");
         }
 
-        public IActionResult Logout()
+
+
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync("Cookies");
             return RedirectToAction("Login");
         }
-        
     }
 }

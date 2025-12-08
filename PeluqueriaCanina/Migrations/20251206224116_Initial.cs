@@ -6,29 +6,30 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PeluqueriaCanina.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialize : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Personas",
+                name: "Permiso",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Apellido = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Dni = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
-                    FechaDeNacimiento = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    Mail = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ContraseñaHasheada = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rol = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    PermisoCompuestoId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Personas", x => x.Id);
+                    table.PrimaryKey("PK_Permiso", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Permiso_Permiso_PermisoCompuestoId",
+                        column: x => x.PermisoCompuestoId,
+                        principalTable: "Permiso",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -48,6 +49,46 @@ namespace PeluqueriaCanina.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Usuario",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Mail = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ContraseñaHasheada = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Rol = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Apellido = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Dni = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: true),
+                    FechaDeNacimiento = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Usuario", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Grupos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PermisosId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Grupos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Grupos_Permiso_PermisosId",
+                        column: x => x.PermisosId,
+                        principalTable: "Permiso",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Jornadas",
                 columns: table => new
                 {
@@ -63,9 +104,9 @@ namespace PeluqueriaCanina.Migrations
                 {
                     table.PrimaryKey("PK_Jornadas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Jornadas_Personas_PeluqueroId",
+                        name: "FK_Jornadas_Usuario_PeluqueroId",
                         column: x => x.PeluqueroId,
-                        principalTable: "Personas",
+                        principalTable: "Usuario",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -86,9 +127,33 @@ namespace PeluqueriaCanina.Migrations
                 {
                     table.PrimaryKey("PK_Mascotas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Mascotas_Personas_ClienteId",
+                        name: "FK_Mascotas_Usuario_ClienteId",
                         column: x => x.ClienteId,
-                        principalTable: "Personas",
+                        principalTable: "Usuario",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GrupoUsuario",
+                columns: table => new
+                {
+                    GruposId = table.Column<int>(type: "int", nullable: false),
+                    UsuariosId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GrupoUsuario", x => new { x.GruposId, x.UsuariosId });
+                    table.ForeignKey(
+                        name: "FK_GrupoUsuario_Grupos_GruposId",
+                        column: x => x.GruposId,
+                        principalTable: "Grupos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GrupoUsuario_Usuario_UsuariosId",
+                        column: x => x.UsuariosId,
+                        principalTable: "Usuario",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -105,7 +170,8 @@ namespace PeluqueriaCanina.Migrations
                     FechaHora = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Duracion = table.Column<TimeSpan>(type: "time", nullable: false),
                     Estado = table.Column<int>(type: "int", nullable: false),
-                    Precio = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    Precio = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    FueValorado = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -117,15 +183,15 @@ namespace PeluqueriaCanina.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Turnos_Personas_PeluqueroId",
-                        column: x => x.PeluqueroId,
-                        principalTable: "Personas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_Turnos_Servicios_ServicioId",
                         column: x => x.ServicioId,
                         principalTable: "Servicios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Turnos_Usuario_PeluqueroId",
+                        column: x => x.PeluqueroId,
+                        principalTable: "Usuario",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -159,6 +225,52 @@ namespace PeluqueriaCanina.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Valoraciones",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PeluqueroId = table.Column<int>(type: "int", nullable: true),
+                    ClienteId = table.Column<int>(type: "int", nullable: false),
+                    TurnoId = table.Column<int>(type: "int", nullable: false),
+                    Puntuacion = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FechaValoracion = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Valoraciones", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Valoraciones_Turnos_TurnoId",
+                        column: x => x.TurnoId,
+                        principalTable: "Turnos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Valoraciones_Usuario_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Usuario",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Valoraciones_Usuario_PeluqueroId",
+                        column: x => x.PeluqueroId,
+                        principalTable: "Usuario",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Grupos_PermisosId",
+                table: "Grupos",
+                column: "PermisosId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GrupoUsuario_UsuariosId",
+                table: "GrupoUsuario",
+                column: "UsuariosId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Jornadas_PeluqueroId",
                 table: "Jornadas",
@@ -175,10 +287,9 @@ namespace PeluqueriaCanina.Migrations
                 column: "TurnoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Personas_Mail",
-                table: "Personas",
-                column: "Mail",
-                unique: true);
+                name: "IX_Permiso_PermisoCompuestoId",
+                table: "Permiso",
+                column: "PermisoCompuestoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Turnos_MascotaId",
@@ -194,11 +305,36 @@ namespace PeluqueriaCanina.Migrations
                 name: "IX_Turnos_ServicioId",
                 table: "Turnos",
                 column: "ServicioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Usuario_Mail",
+                table: "Usuario",
+                column: "Mail",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Valoraciones_ClienteId",
+                table: "Valoraciones",
+                column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Valoraciones_PeluqueroId",
+                table: "Valoraciones",
+                column: "PeluqueroId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Valoraciones_TurnoId",
+                table: "Valoraciones",
+                column: "TurnoId",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "GrupoUsuario");
+
             migrationBuilder.DropTable(
                 name: "Jornadas");
 
@@ -206,7 +342,16 @@ namespace PeluqueriaCanina.Migrations
                 name: "Pagos");
 
             migrationBuilder.DropTable(
+                name: "Valoraciones");
+
+            migrationBuilder.DropTable(
+                name: "Grupos");
+
+            migrationBuilder.DropTable(
                 name: "Turnos");
+
+            migrationBuilder.DropTable(
+                name: "Permiso");
 
             migrationBuilder.DropTable(
                 name: "Mascotas");
@@ -215,7 +360,7 @@ namespace PeluqueriaCanina.Migrations
                 name: "Servicios");
 
             migrationBuilder.DropTable(
-                name: "Personas");
+                name: "Usuario");
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PeluqueriaCanina.Models.Permisos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,10 +13,10 @@ namespace PeluqueriaCanina.Models.Users
         [Required]
         public string ContraseñaHasheada { get; set; } = string.Empty;
         [Required]
-        public string Rol { get; set; } = "Administrador";
+        public string Rol { get; set; } = string.Empty;
         [NotMapped]
         public Permiso Permisos { get; set; }
-
+        public List<Grupo> Grupos { get; set; } = new();
         public void RegistrarContraseña(string contraseña)
         {
             if (string.IsNullOrWhiteSpace(contraseña) || contraseña.Length < 8)
@@ -29,10 +28,14 @@ namespace PeluqueriaCanina.Models.Users
             return BCrypt.Net.BCrypt.Verify(contraseña, ContraseñaHasheada);
         }
 
-        public bool TienePermiso(string accion)
+        public bool TienePermiso(string permiso)
         {
-            return Permisos?.TienePermiso(accion) ?? false;
+            return Grupos
+                .SelectMany(g => g.Permisos.ListarPermisos())
+                .Any(p => p == permiso);
         }
+
+
 
     }
 }

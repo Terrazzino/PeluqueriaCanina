@@ -29,7 +29,7 @@ SELECT
     CONCAT(p.Nombre, ' ', p.Apellido) AS NombrePeluquero,
     COUNT(t.Id) AS Cantidad
 FROM Servicios s
-CROSS JOIN Personas p
+CROSS JOIN Usuario p
 LEFT JOIN Turnos t
     ON t.ServicioId = s.Id
     AND t.PeluqueroId = p.Id
@@ -45,7 +45,7 @@ SELECT
     SUM(CASE WHEN t.Estado = 3 THEN 1 ELSE 0 END) AS Cancelados,   -- Cancelados
     SUM(CASE WHEN t.Estado = 4 THEN t.Precio ELSE 0 END) AS Recaudado
 FROM Servicios s
-CROSS JOIN Personas p
+CROSS JOIN Usuario p
 LEFT JOIN Turnos t
     ON t.ServicioId = s.Id
     AND t.PeluqueroId = p.Id

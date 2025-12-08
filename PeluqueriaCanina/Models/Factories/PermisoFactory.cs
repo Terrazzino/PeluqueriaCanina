@@ -1,6 +1,4 @@
-﻿using PeluqueriaCanina.Models.Permisos;
-
-namespace PeluqueriaCanina.Models.Factories
+﻿namespace PeluqueriaCanina.Models.Factories
 {
     public class PermisoFactory
     {
@@ -9,7 +7,7 @@ namespace PeluqueriaCanina.Models.Factories
             switch(rol)
             {
                 case "Cliente":
-                    var clientePermisos = new PermisoCompuesto();
+                    var clientePermisos = new PermisoCompuesto { Nombre = "PermisosCliente" };
                     clientePermisos.AgregarPermiso(new PermisoSimple { Nombre = "AccederDashboardCliente" });
                     clientePermisos.AgregarPermiso(new PermisoSimple { Nombre = "RegistrarMascota" });
                     clientePermisos.AgregarPermiso(new PermisoSimple { Nombre = "EliminarMascota" });
@@ -29,14 +27,14 @@ namespace PeluqueriaCanina.Models.Factories
                     clientePermisos.AgregarPermiso(new PermisoSimple { Nombre = "MisTurnosVeterinaria" });
                     return clientePermisos;
                 case "Peluquero":
-                    var peluqueroPermisos = new PermisoCompuesto();
+                    var peluqueroPermisos = new PermisoCompuesto { Nombre = "PermisosPeluquero" };
                     peluqueroPermisos.AgregarPermiso(new PermisoSimple { Nombre = "AccederDashboardPeluquero" });
                     peluqueroPermisos.AgregarPermiso(new PermisoSimple { Nombre = "CambiarEstadoTurno" });
                     peluqueroPermisos.AgregarPermiso(new PermisoSimple { Nombre = "VerTurnos" });
                     peluqueroPermisos.AgregarPermiso(new PermisoSimple { Nombre = "VerValoracionDePeluqueros" });
                     return peluqueroPermisos;
                 case "Administrador":
-                    var administradorPermisos = new PermisoCompuesto();
+                    var administradorPermisos = new PermisoCompuesto { Nombre = "PermisosAdministrador" };
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "AccederDashboardAdministrador" });
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "RegistrarPeluquero" });
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "EliminarPeluquero" });

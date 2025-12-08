@@ -1,42 +1,49 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ContextoAcqua>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-// Add services to the container.
+// Configurar DbContext
+builder.Services.AddDbContext<ContextoAcqua>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Servicios MVC
 builder.Services.AddControllersWithViews();
 
+// Session
 builder.Services.AddSession();
 
+// Autenticación con cookies personalizada
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Home/AccesoDenegado";
+    });
+
+// Servicio de envío de emails
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
-
-// Agregar HttpClientFactory para Mercado Pago
+// HttpClientFactory
 builder.Services.AddHttpClient();
-
 builder.Services.AddHttpClient("VeterinariaApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7156/"); // <- ajustar
+    client.BaseAddress = new Uri("https://localhost:7156/"); // <- ajustar según tu API
 });
-
 builder.Services.AddTransient<VeterinariaApiClient>();
 
+// Usuario actual
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
 
-
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -45,14 +52,16 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();
-
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
+app.UseMiddleware<UsuarioActualMiddleware>();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
 
+// Inicializar base de datos
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

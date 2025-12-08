@@ -1,26 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using PeluqueriaCanina.Models;
 using PeluqueriaCanina.Services;
 
 public class PermisoRequeridoFilter : IAuthorizationFilter
 {
     private readonly string _permiso;
-    private readonly IUsuarioActualService _usuarioActual;
+    private readonly IUsuarioActualService _usuarioService;
 
-    public PermisoRequeridoFilter(string permiso, IUsuarioActualService usuarioActual)
+    public PermisoRequeridoFilter(string permiso, IUsuarioActualService usuarioService)
     {
         _permiso = permiso;
-        _usuarioActual = usuarioActual;
+        _usuarioService = usuarioService;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var usuario = _usuarioActual.Obtener();
-
-        if (usuario == null || !usuario.Permisos.TienePermiso(_permiso))
+        var usuario = _usuarioService.Obtener();
+        if (usuario == null)
         {
             context.Result = new RedirectToActionResult("Login", "Auth", null);
+            return;
+        }
+
+        // Recorremos todos los grupos y sus permisos
+        bool tienePermiso = usuario.Grupos.Any(g => g.Permisos.TienePermiso(_permiso));
+
+        if (!tienePermiso)
+        {
+            context.Result = new RedirectToActionResult("AccesoDenegado", "Home", null);
         }
     }
 }

@@ -1,0 +1,81 @@
+﻿@model PeluqueriaCanina.Models.ViewModels.EditarPersonaViewModel
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<div class="container mt-5" style="max-width: 600px;">
+
+    <h2 class="mb-4 text-center">Mi Perfil</h2>
+
+    @if (ViewBag.Ok != null)
+    {
+        <div class="alert alert-success text-center">@ViewBag.Ok</div>
+    }
+
+    <form asp-action="MiPerfil" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label fw-bold"></label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Apellido" class="form-label fw-bold"></label>
+            <input asp-for="Apellido" class="form-control" />
+            <span asp-validation-for="Apellido" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Dni" class="form-label fw-bold"></label>
+            <input asp-for="Dni" class="form-control" />
+            <span asp-validation-for="Dni" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FechaDeNacimiento" class="form-label fw-bold"></label>
+            <input asp-for="FechaDeNacimiento" class="form-control" type="date" />
+            <span asp-validation-for="FechaDeNacimiento" class="text-danger"></span>
+        </div>
+
+        <!-- CAMBIO DE CONTRASEÑA -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Nueva contraseña</label>
+            <div class="input-group">
+                <input type="password" name="nuevaContraseña" id="passInput" class="form-control" placeholder="Opcional">
+                <button type="button" class="btn btn-outline-secondary" id="togglePass">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <div class="form-text">Dejar vacío si no querés cambiarla.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3">
+            Guardar Cambios
+        </button>
+    </form>
+    <a href="@ViewBag.DashboardUrl" class="btn btn-secondary w-100 mt-3">
+        Volver al inicio
+    </a>
+
+</div>
+
+@section Scripts {
+    <script>
+        const passInput = document.getElementById('passInput');
+        const togglePass = document.getElementById('togglePass');
+
+        togglePass.addEventListener('click', () => {
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                togglePass.innerHTML = '<i class="bi bi-eye-slash"></i>';
+            } else {
+                passInput.type = "password";
+                togglePass.innerHTML = '<i class="bi bi-eye"></i>';
+            }
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}
