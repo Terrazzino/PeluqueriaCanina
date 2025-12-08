@@ -57,61 +57,62 @@
                                     <td>@turno.FechaHora.ToString("dd/MM/yyyy")</td>
                                     <td>@turno.FechaHora.ToString("HH:mm")</td>
 
+                                    <!-- Badge de estado usando State -->
                                     <td>
-                                        @switch (turno.Estado.ToString())
-                                        {
-                                            case "Pendiente":
-                                                <span class="badge bg-warning text-dark">Pendiente</span>
-                                                break;
-                                            case "Confirmado":
-                                                <span class="badge bg-success">Confirmado</span>
-                                                break;
-                                            case "Completado":
-                                                <span class="badge bg-info">Completado</span>
-                                                break;
-                                            case "Cancelado":
-                                                <span class="badge bg-danger">Cancelado</span>
-                                                break;
-                                            default:
-                                                <span class="badge bg-secondary">@turno.Estado</span>
-                                                break;
-                                        }
-                                    </td>
+                                        <span class="badge
+                                                    @(turno.Estado switch
+                                              {
+                                                  EstadoTurno.Pendiente => "bg-warning text-dark",
+                                                  EstadoTurno.Confirmado => "bg-success",
+                                                  EstadoTurno.Completado => "bg-info",
+                                                  EstadoTurno.Cancelado => "bg-danger",
+                                                  _ => "bg-secondary"
+                                              })">
+                                    @turno.EstadoActual.Nombre
+                                </span>
+                            </td>
 
                                     <td><strong>$@turno.Precio</strong></td>
 
+                                    <!-- Acciones usando State -->
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            @if (turno.Estado != PeluqueriaCanina.Models.ClasesDeCliente.EstadoTurno.Cancelado)
+                                    @if (turno.EstadoActual.PuedeModificar)
                                             {
                                                 <button class="btn btn-warning btn-sm"
                                                         onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId', '@turno.Duracion.TotalMinutes')">
                                                     ✏️
                                                 </button>
+                                            }
 
+                                            @if (turno.EstadoActual.PuedeCancelar)
+                                            {
                                                 <button class="btn btn-danger btn-sm"
                                                         onclick="cancelarTurno(@turno.Id)">
                                                     ❌
                                                 </button>
-                                                @if (turno.Estado == EstadoTurno.Completado)
-                                                {
-                                                    if (turno.Valoracion == null)
-                                                    {
-                                                        <a class="btn btn-sm btn-success"
-                                                           href="/Valoraciones/Crear?turnoId=@turno.Id">
-                                                            ⭐ Valorar
-                                                        </a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-primary">
-                                                            ✔ Valorado (@turno.Valoracion.Puntuacion ★)
-                                                        </span>
-                                                    }
-                                                }
-
                                             }
-                                            else
+
+                                            @if (turno.EstadoActual.PuedeValorar)
+                                            {
+                                                @if (turno.Valoracion == null)
+                                                {
+                                                    <a class="btn btn-sm btn-success"
+                                                       href="/Valoraciones/Crear?turnoId=@turno.Id">
+                                                        ⭐ Valorar
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        ✔ Valorado (@turno.Valoracion.Puntuacion ★)
+                                                    </span>
+                                                }
+                                            }
+
+                                            @if (!turno.EstadoActual.PuedeModificar &&
+                                                                                !turno.EstadoActual.PuedeCancelar &&
+                                                                                !turno.EstadoActual.PuedeValorar)
                                             {
                                                 <span class="text-muted">-</span>
                                             }
@@ -132,10 +133,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-
-        /* ============================================================
-         * 🔥 Función auxiliar para manejar errores AJAX
-         * ============================================================ */
         function handleAjaxError(xhr) {
             let msg = "Ocurrió un error inesperado.";
 
@@ -151,9 +148,6 @@
             });
         }
 
-        /* ============================================================
-         * ❌ Cancelar turno
-         * ============================================================ */
         function cancelarTurno(id) {
             Swal.fire({
                 title: "¿Cancelar turno?",
@@ -177,13 +171,8 @@
             });
         }
 
-        /* ============================================================
-         * ✏️ Modificar Turno
-         * ============================================================ */
         function modificarTurno(turnoId, peluqueroId, duracionMinutos) {
-
             duracionMinutos = Number(duracionMinutos);
-
             const horas = Math.floor(duracionMinutos / 60);
             const minutos = duracionMinutos % 60;
             const slotDuration = `${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}:00`;
@@ -213,7 +202,6 @@
                 },
 
                 didOpen: () => {
-
                     const calendarEl = document.getElementById("calendarMod");
 
                     const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -262,7 +250,6 @@
                 }
 
             }).then((result) => {
-
                 if (!result.isConfirmed) return;
 
                 Swal.fire({

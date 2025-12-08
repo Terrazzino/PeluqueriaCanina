@@ -25,28 +25,29 @@ builder.Services.AddAuthentication("Cookies")
 
 // Servicio de envío de emails
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
-//Servicios para auditoria.
+
+// Servicios para auditoría
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 
-
 // HttpClientFactory
-builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("VeterinariaApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7156/"); // <- ajustar según tu API
+    client.BaseAddress = new Uri("https://localhost:7156/");
 });
-builder.Services.AddTransient<VeterinariaApiClient>();
+
+// Registramos VeterinariaApiClient como Singleton
+builder.Services.AddSingleton<VeterinariaApiClient>();
 
 // Usuario actual
 builder.Services.AddHttpContextAccessor();
 
+// Estrategias
 builder.Services.AddTransient<AdminEntryStrategy>();
 builder.Services.AddTransient<ClienteEntryStrategy>();
 builder.Services.AddTransient<PeluqueroEntryStrategy>();
+
 builder.Services.AddScoped<AuditoriaService>();
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
-
-
 
 var app = builder.Build();
 

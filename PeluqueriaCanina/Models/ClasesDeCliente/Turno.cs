@@ -1,7 +1,7 @@
-﻿using PeluqueriaCanina.Models.Users;
+﻿using PeluqueriaCanina.Models.ClasesDeAdministrador;
 using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
-using PeluqueriaCanina.Models.ClasesDeAdministrador;
+using PeluqueriaCanina.Models.Users;
 
 namespace PeluqueriaCanina.Models.ClasesDeTurno
 {
@@ -21,17 +21,31 @@ namespace PeluqueriaCanina.Models.ClasesDeTurno
         public DateTime FechaHora { get; set; }
         public TimeSpan Duracion { get; set; }
 
-        public EstadoTurno Estado { get; set; } = EstadoTurno.Pendiente; // más adelante esto será manejado con el patrón State
+        public EstadoTurno Estado { get; set; } = EstadoTurno.Pendiente; // ahora se maneja con State
 
         public decimal Precio { get; set; }
 
-        public DateTime HoraInicio => FechaHora;
-        public DateTime HoraFin => FechaHora.Add(Duracion);
         public Valoracion? Valoracion { get; set; }
-
-
         public bool FueValorado { get; set; } = false;
 
+        public DateTime HoraInicio => FechaHora;
+        public DateTime HoraFin => FechaHora.Add(Duracion);
 
+        // ======== NUEVO: Patrón State ========
+        public IEstadoTurno EstadoActual => ObtenerEstado();
+
+        private IEstadoTurno ObtenerEstado()
+        {
+            return Estado switch
+            {
+                EstadoTurno.Pendiente => new EstadoPendiente(),
+                EstadoTurno.PendientePago => new EstadoPendientePago(),
+                EstadoTurno.Confirmado => new EstadoConfirmado(),
+                EstadoTurno.Completado => new EstadoCompletado(),
+                EstadoTurno.Cancelado => new EstadoCancelado(),
+                _ => new EstadoPendiente()
+            };
+        }
+        // =====================================
     }
 }

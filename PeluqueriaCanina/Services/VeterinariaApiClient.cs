@@ -5,8 +5,10 @@ public class VeterinariaApiClient
 {
     private readonly HttpClient _http;
 
+    // Constructor para Singleton
     public VeterinariaApiClient(IHttpClientFactory factory)
     {
+        // Se usa una sola instancia de HttpClient proveniente de HttpClientFactory
         _http = factory.CreateClient("VeterinariaApi");
     }
 
