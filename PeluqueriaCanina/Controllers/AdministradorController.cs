@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
+using PeluqueriaCanina.Models.ClasesDeAdministrador;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.Factories;
 using PeluqueriaCanina.Models.Users;
@@ -11,6 +12,8 @@ using PeluqueriaCanina.Services;
 using System.Security.Cryptography;
 using System.Text;
 
+
+
 namespace PeluqueriaCanina.Controllers
 {
     public class AdministradorController : Controller
@@ -18,13 +21,20 @@ namespace PeluqueriaCanina.Controllers
         private readonly ContextoAcqua _contexto;
         private readonly IEmailSender _emailSender;
         private readonly IUsuarioActualService _usuarioActual;
+        private readonly IAuditoriaService _auditoria;
 
-        public AdministradorController(ContextoAcqua context, IEmailSender emailSender, IUsuarioActualService usuarioActual)
+        public AdministradorController(
+            ContextoAcqua context,
+            IEmailSender emailSender,
+            IUsuarioActualService usuarioActual,
+            IAuditoriaService auditoria)
         {
             _contexto = context;
             _emailSender = emailSender;
             _usuarioActual = usuarioActual;
+            _auditoria = auditoria;
         }
+
 
         [PermisoRequerido("AccederDashboardAdministrador")]
         public IActionResult Dashboard() => View();
@@ -36,12 +46,12 @@ namespace PeluqueriaCanina.Controllers
         [HttpPost]
         [PermisoRequerido("RegistrarPeluquero")]
         public async Task<IActionResult> RegistrarPeluquero(
-    string nombre,
-    string apellido,
-    string mail,
-    string dni,
-    DateTime fechaDeNacimiento,
-    List<Jornada> jornadas)
+        string nombre,
+        string apellido,
+        string mail,
+        string dni,
+        DateTime fechaDeNacimiento,
+        List<Jornada> jornadas)
         {
             if (_contexto.Personas.Any(p => p.Mail == mail))
             {
@@ -314,5 +324,112 @@ namespace PeluqueriaCanina.Controllers
 
             return View(data);
         }
+
+        [PermisoRequerido("GestionarPermisosDeUsuarios")]
+        public IActionResult Usuarios(string tipo = "Todos")
+        {
+            var query = _contexto.Personas.AsQueryable();
+
+            ViewBag.TipoSeleccionado = tipo;
+
+            query = tipo switch
+            {
+                "Clientes" => query.OfType<Cliente>(),
+                "Peluqueros" => query.OfType<Peluquero>(),
+                "Administradores" => query.OfType<Administrador>(),
+                _ => query
+            };
+
+            var usuarios = query
+                .Include(u => u.Grupos)
+                .ThenInclude(g => g.Permisos)
+                .ToList();
+
+            return View(usuarios);
+        }
+
+        [PermisoRequerido("GestionarPermisosDeUsuarios")]
+        public IActionResult EditRoles(int id)
+        {
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                .FirstOrDefault(u => u.Id == id);
+
+            if (usuario == null) return NotFound();
+
+            // Traemos TODOS los grupos desde el DbContext (tipo correcto)
+            ViewBag.GruposDisponibles = _contexto.Grupos.ToList();
+
+            return View(usuario);
+        }
+
+
+        // POST: Agregar grupo al usuario
+        [HttpPost]
+        [PermisoRequerido("GestionarPermisosDeUsuarios")]
+        public async Task<IActionResult> AgregarGrupo(int usuarioId, int grupoId)
+        {
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                .FirstOrDefault(u => u.Id == usuarioId);
+
+            var grupo = _contexto.Grupos.Find(grupoId);
+
+            if (usuario == null || grupo == null)
+                return NotFound();
+
+            // evitar duplicados
+            if (!usuario.Grupos.Any(g => g.Id == grupo.Id))
+                usuario.Grupos.Add(grupo);
+
+            await _contexto.SaveChangesAsync();
+
+            // obtener admin actual
+            var adminActual = _usuarioActual.Obtener();
+            await _auditoria.RegistrarAsync(new Auditoria
+            {
+                AdministradorId = adminActual?.Id ?? 0,
+                AdministradorNombre = adminActual != null ? $"{adminActual.Nombre} {adminActual.Apellido}" : "Sistema",
+                UsuarioModificadoId = usuario.Id,
+                UsuarioModificadoNombre = $"{usuario.Nombre} {usuario.Apellido}",
+                Accion = "Asignó Grupo",
+                Detalle = $"Se asignó el grupo '{grupo.Nombre}' al usuario {usuario.Mail}"
+            });
+
+            return RedirectToAction("EditRoles", new { id = usuarioId });
+        }
+
+        // GET/POST para quitar
+        [HttpPost]
+        [PermisoRequerido("GestionarPermisosDeUsuarios")]
+        public async Task<IActionResult> QuitarGrupo(int usuarioId, int grupoId)
+        {
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                .FirstOrDefault(u => u.Id == usuarioId);
+
+            if (usuario == null) return NotFound();
+
+            var grupo = usuario.Grupos.FirstOrDefault(g => g.Id == grupoId);
+            if (grupo == null) return NotFound();
+
+            usuario.Grupos.Remove(grupo);
+            await _contexto.SaveChangesAsync();
+
+            var adminActual = _usuarioActual.Obtener();
+            await _auditoria.RegistrarAsync(new Auditoria
+            {
+                AdministradorId = adminActual?.Id ?? 0,
+                AdministradorNombre = adminActual != null ? $"{adminActual.Nombre} {adminActual.Apellido}" : "Sistema",
+                UsuarioModificadoId = usuario.Id,
+                UsuarioModificadoNombre = $"{usuario.Nombre} {usuario.Apellido}",
+                Accion = "Quitó Grupo",
+                Detalle = $"Se quitó el grupo '{grupo.Nombre}' del usuario {usuario.Mail}"
+            });
+
+            return RedirectToAction("EditRoles", new { id = usuarioId });
+        }
+
+
     }
 }

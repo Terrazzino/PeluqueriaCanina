@@ -10,10 +10,20 @@ namespace PeluqueriaCanina.Controllers
     public class AuthController : Controller
     {
         private readonly ContextoAcqua _contexto;
+        private readonly AdminEntryStrategy _adminStrategy;
+        private readonly ClienteEntryStrategy _clienteStrategy;
+        private readonly PeluqueroEntryStrategy _peluqueroStrategy;
 
-        public AuthController(ContextoAcqua contexto)
+
+        public AuthController(ContextoAcqua contexto,
+        AdminEntryStrategy adminStrategy,
+        ClienteEntryStrategy clienteStrategy,
+        PeluqueroEntryStrategy peluqueroStrategy)
         {
             _contexto = contexto;
+            _adminStrategy = adminStrategy;
+            _clienteStrategy = clienteStrategy;
+            _peluqueroStrategy = peluqueroStrategy;
         }
 
         [HttpGet]
@@ -25,37 +35,48 @@ namespace PeluqueriaCanina.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string mail, string contraseña)
         {
-            // Buscar usuario en la tabla Personas
             var usuario = _contexto.Personas
                 .Include(u => u.Grupos)
-                .ThenInclude(g => g.Permisos)
+                    .ThenInclude(g => g.Permisos)
                 .FirstOrDefault(u => u.Mail == mail);
 
-            // Validar existencia y contraseña
             if (usuario == null || !usuario.VerificarContraseña(contraseña))
             {
                 ViewBag.Error = "Mail o contraseña incorrectos";
                 return View();
             }
 
-            // Crear claims personalizados
+            // Guardar UsuarioId en Claims (esto reemplaza Session correctamente)
             var claims = new List<Claim>
-    {
-        new Claim("UsuarioId", usuario.Id.ToString())
-    };
+            {
+                new Claim("UsuarioId", usuario.Id.ToString())
+            };
 
             var identity = new ClaimsIdentity(claims, "Cookies");
             var principal = new ClaimsPrincipal(identity);
-
-            // Iniciar sesión con cookie
             await HttpContext.SignInAsync("Cookies", principal);
 
-            // Redirigir según tipo de usuario
-            return usuario switch
+
+            // 🔥 Si tiene más de 1 grupo → debe elegir su rol
+            if (usuario.Grupos.Count > 1)
             {
-                Administrador => RedirectToAction("Dashboard", "Administrador"),
-                Cliente => RedirectToAction("Dashboard", "Cliente"),
-                Peluquero => RedirectToAction("Agenda", "Peluquero"),
+                // Info que necesita la vista para mostrar los roles disponibles
+                ViewBag.UsuarioId = usuario.Id;
+                ViewBag.Grupos = usuario.Grupos.Select(g => g.Nombre).ToList();
+
+                // Mostrar la vista SeleccionarPerfil (tu versión del “SeleccionarRol”)
+                return View("SeleccionarPerfil");
+            }
+
+
+            // 🔥 Si solo tiene un rol → lo enviamos directo por Strategy
+            var grupoUnico = usuario.Grupos.FirstOrDefault()?.Nombre;
+
+            return grupoUnico switch
+            {
+                "Administrador" => _adminStrategy.Execute(this, usuario),
+                "Cliente" => _clienteStrategy.Execute(this, usuario),
+                "Peluquero" => _peluqueroStrategy.Execute(this, usuario),
                 _ => RedirectToAction("Login")
             };
         }
@@ -98,12 +119,30 @@ namespace PeluqueriaCanina.Controllers
             return RedirectToAction("Login");
         }
 
+        // ---- NUEVA ACCIÓN ----
+        [HttpPost]
+        public IActionResult EntrarComo(int usuarioId, string perfil)
+        {
+            var usuario = _contexto.Personas
+                .Include(u => u.Grupos)
+                .FirstOrDefault(u => u.Id == usuarioId);
 
+            if (usuario == null) return RedirectToAction("Login");
+
+            return perfil switch
+            {
+                "Administrador" => _adminStrategy.Execute(this, usuario),
+                "Cliente" => _clienteStrategy.Execute(this, usuario),
+                "Peluquero" => _peluqueroStrategy.Execute(this, usuario),
+                _ => RedirectToAction("Login")
+            };
+        }
 
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("Cookies");
             return RedirectToAction("Login");
         }
+
     }
 }

@@ -1,0 +1,48 @@
+﻿@model PeluqueriaCanina.Models.Users.Persona
+
+@{
+    ViewData["Title"] = "Editar Roles";
+    var gruposDisponibles = ViewBag.GruposDisponibles as List<PeluqueriaCanina.Models.Grupos.Grupo>;
+}
+
+<div class="container mt-4 text-light">
+    <h2 class="fw-bold">Editar Roles de @Model.Nombre @Model.Apellido</h2>
+
+    <h4 class="mt-3">Grupos Asignados</h4>
+
+    <ul class="list-group mb-3">
+        @foreach (var g in Model.Grupos)
+        {
+            <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                <span>@g.Nombre</span>
+                <form asp-action="QuitarGrupo" method="post" class="m-0">
+                    <input type="hidden" name="usuarioId" value="@Model.Id" />
+                    <input type="hidden" name="grupoId" value="@g.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Quitar</button>
+                </form>
+            </li>
+        }
+    </ul>
+
+    <h4 class="mt-3">Agregar Grupo</h4>
+
+    <form asp-action="AgregarGrupo" method="post" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="usuarioId" value="@Model.Id" />
+
+        <select name="grupoId" class="form-select w-50">
+            <option value="">-- Seleccionar grupo --</option>
+            @if (gruposDisponibles != null)
+            {
+                foreach (var g in gruposDisponibles)
+                {
+                    if (!Model.Grupos.Any(x => x.Id == g.Id))
+                    {
+                        <option value="@g.Id">@g.Nombre</option>
+                    }
+                }
+            }
+        </select>
+
+        <button type="submit" class="btn btn-success">Agregar</button>
+    </form>
+</div>

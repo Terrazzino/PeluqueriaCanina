@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Factories;
+using PeluqueriaCanina.Models.Grupos;
 
 public class GrupoController : Controller
 {

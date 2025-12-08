@@ -30,10 +30,11 @@ namespace PeluqueriaCanina.Controllers
         [PermisoRequerido("VerTurnos")]
         public IActionResult GetTurnos(DateTime start, DateTime end)
         {
-            var usuarioId = HttpContext.Session.GetString("UsuarioId");
-            if (usuarioId == null) return Unauthorized();
+            var usuarioId = int.Parse(User.FindFirst("UsuarioId")!.Value);
 
-            int peluqueroId = int.Parse(usuarioId);
+            //if (usuarioId == null) return Unauthorized();
+
+            int peluqueroId = usuarioId;
 
             var turnos = _context.Turnos
                 .Include(t => t.Mascota)

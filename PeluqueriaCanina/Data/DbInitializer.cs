@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.Factories;
+using PeluqueriaCanina.Models.Grupos;
 using PeluqueriaCanina.Models.Users;
 
 public class DbInitializer

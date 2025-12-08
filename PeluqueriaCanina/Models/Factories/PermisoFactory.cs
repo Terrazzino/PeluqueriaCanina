@@ -47,6 +47,7 @@
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "VerValoracionDePeluqueros" });
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "VerReporte" });
                     administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "ListarPuntuacionPeluquero" });
+                    administradorPermisos.AgregarPermiso(new PermisoSimple { Nombre = "GestionarPermisosDeUsuarios" });
                     return administradorPermisos;
                 default:
                     throw new ArgumentException("Rol no identificado");

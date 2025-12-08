@@ -4,6 +4,7 @@ using PeluqueriaCanina.Models.ClasesDeCliente;
 using PeluqueriaCanina.Models.ClasesDePago;
 using PeluqueriaCanina.Models.ClasesDePeluquero;
 using PeluqueriaCanina.Models.ClasesDeTurno;
+using PeluqueriaCanina.Models.Grupos;
 using PeluqueriaCanina.Models.REPORTES;
 using PeluqueriaCanina.Models.Users;
 
@@ -13,6 +14,7 @@ namespace PeluqueriaCanina.Data
     {
         public ContextoAcqua(DbContextOptions<ContextoAcqua> options) : base(options) { }
 
+        public DbSet<Auditoria> Auditorias { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Peluquero> Peluqueros { get; set; }
         public DbSet<Cliente> Clientes { get; set; }

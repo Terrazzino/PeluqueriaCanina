@@ -34,5 +34,21 @@ namespace PeluqueriaCanina.Controllers
         {
             return View();
         }
+
+        public IActionResult DashboardAdmin()
+        {
+            return View();
+        }
+
+        public IActionResult DashboardPeluquero()
+        {
+            return View();
+        }
+
+        public IActionResult DashboardCliente()
+        {
+            return View();
+        }
+
     }
 }

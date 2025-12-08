@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Seleccionar Perfil";
+    var grupos = ViewBag.Grupos as List<string>;
+    var usuarioId = ViewBag.UsuarioId as int?;
+}
+
+<h3>Elegí con qué perfil querés ingresar</h3>
+
+<form method="post" asp-action="EntrarComo">
+    <input type="hidden" name="usuarioId" value="@usuarioId" />
+    <div>
+        @foreach (var g in grupos)
+        {
+            <div>
+                <input type="radio" name="perfil" value="@g" id="@g" />
+                <label for="@g">@g</label>
+            </div>
+        }
+    </div>
+    <button class="btn btn-primary mt-2">Entrar</button>
+</form>

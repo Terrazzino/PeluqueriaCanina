@@ -35,7 +35,8 @@ namespace PeluqueriaCanina.Controllers
         [PermisoRequerido("RegistrarMascota")]
         public IActionResult Crear(Mascota mascota)
         {
-            mascota.ClienteId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+            int usuarioId = int.Parse(User.FindFirst("UsuarioId").Value);
+            mascota.ClienteId = usuarioId;
             _contexto.Mascotas.Add(mascota);
             _contexto.SaveChanges();
             return RedirectToAction("Index");

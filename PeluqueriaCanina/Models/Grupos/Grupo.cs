@@ -1,4 +1,5 @@
-﻿using PeluqueriaCanina.Models.Users;
+﻿namespace PeluqueriaCanina.Models.Grupos;
+using PeluqueriaCanina.Models.Users;
 
 public class Grupo
 {

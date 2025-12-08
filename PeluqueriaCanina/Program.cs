@@ -25,6 +25,9 @@ builder.Services.AddAuthentication("Cookies")
 
 // Servicio de envío de emails
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+//Servicios para auditoria.
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
+
 
 // HttpClientFactory
 builder.Services.AddHttpClient();
@@ -37,6 +40,11 @@ builder.Services.AddTransient<VeterinariaApiClient>();
 // Usuario actual
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
+
+builder.Services.AddTransient<AdminEntryStrategy>();
+builder.Services.AddTransient<ClienteEntryStrategy>();
+builder.Services.AddTransient<PeluqueroEntryStrategy>();
+
 
 var app = builder.Build();
 
