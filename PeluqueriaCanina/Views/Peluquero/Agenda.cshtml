@@ -2,29 +2,38 @@
     ViewData["Title"] = "Agenda del Peluquero";
 }
 
-<div class="agenda-container fade-in">
+<div class="overlay-dark p-4">
+    <div class="container">
 
-    <div class="d-flex justify-content-end mt-3">
-        <a asp-controller="Perfil" asp-action="MiPerfil" class="btn btn-outline-light">
-            Mi Perfil
-        </a>
+        <!-- Encabezado con botones -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+            <h2 class="text-light fw-bold mb-0">Mi Agenda</h2>
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <a asp-controller="Perfil" asp-action="MiPerfil"
+                   class="btn btn-outline-light btn-rounded shadow-sm">
+                    Mi Perfil
+                </a>
 
-        <a asp-controller="Auth" asp-action="Logout" class="btn btn-logout">
-            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-        </a>
-    </div>
-
-    <div class="card custom-card mt-4 shadow-lg border-0">
-        <div class="card-header custom-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">📅 Mi Agenda</h4>
-            <span id="estadoSeleccionado" class="fw-bold"></span>
+                <a asp-controller="Auth" asp-action="Logout"
+                   class="btn btn-danger btn-rounded shadow-sm">
+                    Cerrar sesión
+                </a>
+            </div>
         </div>
 
-        <div class="card-body custom-body">
-            <div id="calendar"></div>
-        </div>
-    </div>
+        <!-- Card de calendario -->
+        <div class="card card-custom glass-card text-light shadow-lg rounded-4 border-light">
+            <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-semibold">Agenda Semanal</h4>
+                <span id="estadoSeleccionado" class="fw-bold"></span>
+            </div>
 
+            <div class="card-body p-4">
+                <div id="calendar"></div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 @section Scripts {
@@ -34,6 +43,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
                 locale: 'es',
@@ -41,8 +51,36 @@
                 allDaySlot: false,
                 nowIndicator: true,
                 height: "auto",
+                themeSystem: 'standard',
 
                 events: '@Url.Action("GetTurnos", "Peluquero")',
+
+                eventContent: function(arg) {
+                    // Personaliza la apariencia de cada evento
+                    const estado = arg.event.extendedProps.estado;
+                    let bgColor = '#6c757d'; // gris por defecto
+
+                    if (estado === 'Confirmado') bgColor = '#0d6efd'; // azul
+                    else if (estado === 'Completado') bgColor = '#198754'; // verde
+                    else if (estado === 'Cancelado') bgColor = '#dc3545'; // rojo
+
+                    const customHtml = `
+                        <div style="padding:4px; border-radius:6px; background-color:${bgColor}; color:white; font-size:0.85rem; text-align:center;">
+                            ${arg.event.title}
+                        </div>
+                    `;
+                    return { html: customHtml };
+                },
+
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+
+                slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+                nowIndicatorColor: 'rgba(255,255,255,0.5)',
+                height: 'auto',
 
                 eventClick: function (info) {
                     const turnoId = info.event.id;
@@ -50,17 +88,15 @@
 
                     Swal.fire({
                         title: `Turno: ${info.event.title}`,
-                        html: `
-                            <p><b>Estado actual:</b> ${estadoActual}</p>
-                            <p>¿Qué acción desea realizar?</p>
-                        `,
+                        html: `<p><b>Estado actual:</b> ${estadoActual}</p>
+                               <p>¿Qué acción desea realizar?</p>`,
                         background: "#1c1c1c",
                         color: "#fff",
                         showCancelButton: true,
                         showDenyButton: true,
-                        confirmButtonText: '✅ Completar',
-                        denyButtonText: '📅 Confirmar',
-                        cancelButtonText: '❌ Cancelar',
+                        confirmButtonText: 'Completar',
+                        denyButtonText: 'Confirmar',
+                        cancelButtonText: 'Cancelar',
                     }).then((result) => {
                         let nuevoEstado = null;
                         if (result.isConfirmed) nuevoEstado = "Completado";

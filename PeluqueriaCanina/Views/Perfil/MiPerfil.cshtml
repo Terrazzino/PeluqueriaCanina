@@ -3,7 +3,7 @@
     ViewData["Title"] = "Mi Perfil";
 }
 
-<div class="container mt-5" style="max-width: 600px;">
+<div class="glass-card mt-5 p-4" style="max-width: 600px; margin: auto;">
 
     <h2 class="mb-4 text-center">Mi Perfil</h2>
 
@@ -16,26 +16,26 @@
         <input type="hidden" asp-for="Id" />
 
         <div class="mb-3">
-            <label asp-for="Nombre" class="form-label fw-bold"></label>
-            <input asp-for="Nombre" class="form-control" />
+            <label asp-for="Nombre" class="form-label fw-bold">Nombre</label>
+            <input asp-for="Nombre" class="form-control dark-input" />
             <span asp-validation-for="Nombre" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Apellido" class="form-label fw-bold"></label>
-            <input asp-for="Apellido" class="form-control" />
+            <label asp-for="Apellido" class="form-label fw-bold">Apellido</label>
+            <input asp-for="Apellido" class="form-control dark-input" />
             <span asp-validation-for="Apellido" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Dni" class="form-label fw-bold"></label>
-            <input asp-for="Dni" class="form-control" />
+            <label asp-for="Dni" class="form-label fw-bold">DNI</label>
+            <input asp-for="Dni" class="form-control dark-input" />
             <span asp-validation-for="Dni" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="FechaDeNacimiento" class="form-label fw-bold"></label>
-            <input asp-for="FechaDeNacimiento" class="form-control" type="date" />
+            <label asp-for="FechaDeNacimiento" class="form-label fw-bold">Fecha de Nacimiento</label>
+            <input asp-for="FechaDeNacimiento" class="form-control dark-input" type="date" />
             <span asp-validation-for="FechaDeNacimiento" class="text-danger"></span>
         </div>
 
@@ -43,7 +43,7 @@
         <div class="mb-3">
             <label class="form-label fw-bold">Nueva contraseña</label>
             <div class="input-group">
-                <input type="password" name="nuevaContraseña" id="passInput" class="form-control" placeholder="Opcional">
+                <input type="password" name="nuevaContraseña" id="passInput" class="form-control dark-input" placeholder="Opcional">
                 <button type="button" class="btn btn-outline-secondary" id="togglePass">
                     <i class="bi bi-eye"></i>
                 </button>
@@ -51,13 +51,10 @@
             <div class="form-text">Dejar vacío si no querés cambiarla.</div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mt-3">
-            Guardar Cambios
-        </button>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Guardar Cambios</button>
     </form>
-    <a href="@ViewBag.DashboardUrl" class="btn btn-secondary w-100 mt-3">
-        Volver al inicio
-    </a>
+
+    <a href="@ViewBag.DashboardUrl" class="btn btn-secondary w-100 mt-3">Volver al inicio</a>
 
 </div>
 

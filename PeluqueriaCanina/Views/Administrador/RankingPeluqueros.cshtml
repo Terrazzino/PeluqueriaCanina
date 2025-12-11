@@ -1,32 +1,56 @@
 ﻿@model List<PeluqueriaCanina.Models.VMs.PeluqueroRankingVM>
 
-@{
-    ViewData["Title"] = "Ranking Peluqueros";
-}
+<div class="overlay-dark">
+    <div class="container mt-5">
 
-<div class="card shadow-sm mt-4">
-    <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Ranking de Peluqueros</h4>
-    </div>
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Peluquero</th>
-                    <th>Promedio</th>
-                    <th>Cantidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in Model)
-                {
-                    <tr>
-                        <td>@p.NombreCompleto</td>
-                        <td>@p.Promedio.ToString("0.0") ★</td>
-                        <td>@p.Cantidad</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-light fw-bold mb-1">🏆 Ranking de Peluqueros</h2>
+                <p class="text-secondary mb-0">Promedios basados en valoraciones reales</p>
+            </div>
+
+            <a asp-controller="Administrador" asp-action="Dashboard"
+               class="btn btn-outline-light btn-rounded shadow-sm">
+                ⬅️ Volver
+            </a>
+        </div>
+
+        <!-- CARD del ranking -->
+        <div class="card card-custom text-light shadow-lg rounded-4 border-secondary">
+            <div class="card-body">
+
+                <table class="table table-ranking align-middle overflow-hidden">
+                    <thead class="table-gradient text-center">
+                        <tr>
+                            <th style="width: 50%;">Peluquero</th>
+                            <th>Promedio</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@p.NombreCompleto</td>
+
+                                <td class="text-warning fw-bold">
+                                    @p.Promedio.ToString("0.0") ★
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-secondary">
+                                        @p.Cantidad
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
     </div>
 </div>

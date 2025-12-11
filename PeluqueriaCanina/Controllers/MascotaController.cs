@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeluqueriaCanina.Data;
 using PeluqueriaCanina.Models.ClasesDeCliente;
+using PeluqueriaCanina.Models.ClasesDeTurno;
 using PeluqueriaCanina.Services;
 
 namespace PeluqueriaCanina.Controllers
@@ -9,10 +10,12 @@ namespace PeluqueriaCanina.Controllers
     {
         private readonly ContextoAcqua _contexto;
         private readonly IUsuarioActualService _usuarioActual;
-        public MascotaController(ContextoAcqua contexto, IUsuarioActualService usuarioActual)
+        private readonly IAuditoriaService _auditoria;
+        public MascotaController(ContextoAcqua contexto, IUsuarioActualService usuarioActual, IAuditoriaService auditoria)
         {
             _contexto = contexto;
             _usuarioActual = usuarioActual;
+            _auditoria = auditoria;
         }
 
         [PermisoRequerido("AccederDashboardCliente")]
@@ -39,6 +42,11 @@ namespace PeluqueriaCanina.Controllers
             mascota.ClienteId = usuarioId;
             _contexto.Mascotas.Add(mascota);
             _contexto.SaveChanges();
+            _auditoria.Registrar(
+                "Mascota Registrada",
+                mascota.ClienteId,
+                $"La mascota {mascota.Nombre} de {mascota.Cliente.Nombre} fue registrada"
+            );
             return RedirectToAction("Index");
         }
 
@@ -63,6 +71,11 @@ namespace PeluqueriaCanina.Controllers
 
             _contexto.Mascotas.Update(mascota);
             _contexto.SaveChanges();
+            _auditoria.Registrar(
+                "Mascota modificada",
+                mascota.ClienteId,
+                $"La mascota {mascota.Nombre} de {mascota.Cliente.Nombre} fue modificada"
+            );
             return RedirectToAction("Index");
         }
 
@@ -83,6 +96,11 @@ namespace PeluqueriaCanina.Controllers
             if (mascota == null) return NotFound();
             _contexto.Mascotas.Remove(mascota);
             _contexto.SaveChanges();
+            _auditoria.Registrar(
+                "Mascota eliminada",
+                mascota.ClienteId,
+                $"La mascota {mascota.Nombre} de {mascota.Cliente.Nombre} fue eliminada"
+            );
             return RedirectToAction("Index");
         }
     }

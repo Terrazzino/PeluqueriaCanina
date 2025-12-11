@@ -4,204 +4,224 @@
     ViewData["Title"] = "Reservar Turno";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary">Nuevo Turno</h2>
-    <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-secondary me-2">
-        ⬅️ Volver al Inicio
-    </a>
-</div>
+<div class="glass-card mt-4">
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <!-- PASO 1: Datos del Turno -->
-            <div class="card shadow-sm border-0" id="paso1">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">📅 Paso 1: Seleccionar Turno</h4>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-semibold">Nuevo Turno</h2>
+        <a asp-controller="Cliente" asp-action="Dashboard" class="btn-outline">Volver al Inicio</a>
+    </div>
+
+    <!-- Paso 1: Seleccionar Turno -->
+    <div class="card-step" id="paso1">
+        <div class="card-header bg-primary text-white fw-semibold">
+            Paso 1: Seleccionar Turno
+        </div>
+        <div class="card-body">
+            <form id="formTurno">
+                @Html.AntiForgeryToken()
+
+                <!-- Mascota -->
+                <div class="mb-3">
+                    <label for="mascotaId" class="form-label">Mascota *</label>
+                    <select id="mascotaId" name="MascotaId" class="form-select" required>
+                        <option value="">Seleccione una mascota</option>
+                        @{
+                            var mascotas = ViewBag.Mascotas as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                        }
+                        @foreach (var m in mascotas)
+                        {
+                            <option value="@m.Id">@m.Nombre</option>
+                        }
+                    </select>
                 </div>
-                <div class="card-body">
-                    <form id="formTurno">
-                        @Html.AntiForgeryToken()
 
-                        <!-- Mascota -->
-                        <div class="mb-3">
-                            <label for="mascotaId" class="form-label">Mascota *</label>
-                            <select id="mascotaId" name="MascotaId" class="form-select" required>
-                                <option value="">Seleccione una mascota</option>
-                                @{
-                                    var mascotas = ViewBag.Mascotas as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
-                                }
-                                @foreach (var m in mascotas)
-                                {
-                                    <option value="@m.Id">@m.Nombre</option>
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Servicio -->
-                        <div class="mb-3">
-                            <label for="servicioId" class="form-label">Servicio *</label>
-                            <select id="servicioId" name="ServicioId" class="form-select" required>
-                                <option value="">Seleccione un servicio</option>
-                                @{
-                                    var servicios = ViewBag.Servicios as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
-                                }
-                                @foreach (var s in servicios)
-                                {
-                                    <option value="@s.Id"
-                                            data-duracion="@((s.Duracion != null) ? s.Duracion.TotalMinutes : 30)"
-                                            data-precio="@s.Precio">
-                                        @((s.NombreDelServicio ?? s.Nombre) ?? "Servicio") - $@s.Precio
-                                    </option>
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Peluquero -->
-                        <div class="mb-3">
-                            <label for="peluqueroId" class="form-label">Peluquero (opcional)</label>
-                            <select id="peluqueroId" name="PeluqueroId" class="form-select">
-                                <option value="">Cualquiera</option>
-                                @{
-                                    var peluqueros = ViewBag.Peluqueros as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
-                                }
-                                @foreach (var p in peluqueros)
-                                {
-                                    <option value="@p.Id">@p.Nombre @((p.Apellido ?? ""))</option>
-                                }
-                            </select>
-                        </div>
-
-                        <input type="hidden" id="FechaHora" name="FechaHora" />
-
-                        <!-- Calendario -->
-                        <div class="mb-3">
-                            <label class="form-label">Seleccionar Horario *</label>
-                            <div id="calendar" class="border rounded" style="min-height:400px;"></div>
-                        </div>
-
-                        <!-- Resumen del turno -->
-                        <div class="alert alert-info mt-3" id="resumenTurno" style="display:none;">
-                            <h5 class="mb-2">Resumen de tu reserva</h5>
-                            <p class="mb-1"><strong>Mascota:</strong> <span id="resumenMascota">-</span></p>
-                            <p class="mb-1"><strong>Servicio:</strong> <span id="resumenServicio">-</span></p>
-                            <p class="mb-1"><strong>Fecha y Hora:</strong> <span id="resumenFechaHora">-</span></p>
-                            <p class="mb-1"><strong>Peluquero:</strong> <span id="resumenPeluquero">Cualquiera disponible</span></p>
-                            <hr>
-                            <h4 class="text-end mb-0"><strong>Total:</strong> <span class="text-success">$<span id="resumenPrecio">0</span></span></h4>
-                        </div>
-
-                        <button type="button" class="btn btn-primary btn-lg w-100 mt-3" id="btnContinuarPago">
-                            Continuar al Pago 💳
-                        </button>
-                    </form>
+                <!-- Servicio -->
+                <div class="mb-3">
+                    <label for="servicioId" class="form-label">Servicio *</label>
+                    <select id="servicioId" name="ServicioId" class="form-select" required>
+                        <option value="">Seleccione un servicio</option>
+                        @{
+                            var servicios = ViewBag.Servicios as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                        }
+                        @foreach (var s in servicios)
+                        {
+                            <option value="@s.Id"
+                                    data-duracion="@((s.Duracion != null) ? s.Duracion.TotalMinutes : 30)"
+                                    data-precio="@s.Precio">
+                                @((s.NombreDelServicio ?? s.Nombre) ?? "Servicio") - $@s.Precio
+                            </option>
+                        }
+                    </select>
                 </div>
-            </div>
 
-            <!-- PASO 2: Pago -->
-            <div class="card shadow-sm border-0 mt-4" id="paso2" style="display:none;">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0">💳 Paso 2: Confirmar Pago</h4>
+                <!-- Peluquero -->
+                <div class="mb-3">
+                    <label for="peluqueroId" class="form-label">Peluquero (opcional)</label>
+                    <select id="peluqueroId" name="PeluqueroId" class="form-select">
+                        <option value="">Cualquiera</option>
+                        @{
+                            var peluqueros = ViewBag.Peluqueros as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+                        }
+                        @foreach (var p in peluqueros)
+                        {
+                            <option value="@p.Id">@p.Nombre @((p.Apellido ?? ""))</option>
+                        }
+                    </select>
                 </div>
-                <div class="card-body">
-                    <form id="formPago">
-                        @Html.AntiForgeryToken()
 
-                        <input type="hidden" id="pagoTurnoId" name="TurnoId" />
-                        <input type="hidden" id="pagoMonto" name="Monto" />
+                <input type="hidden" id="FechaHora" name="FechaHora" />
 
-                        <!-- Resumen del pago -->
-                        <div class="alert alert-secondary mb-3 p-3">
-                            <h5 class="mb-2">Vas a pagar</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p class="mb-1"><strong>Servicio:</strong> <span id="pagoResumenServicio">-</span></p>
-                                    <p class="mb-1"><strong>Mascota:</strong> <span id="pagoResumenMascota">-</span></p>
-                                    <p class="mb-1"><strong>Fecha:</strong> <span id="pagoResumenFecha">-</span></p>
-                                </div>
-                                <div class="col-md-6 text-md-end">
-                                    <h3 class="text-success mb-0">$<span id="pagoResumenPrecio">0</span></h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Método de Pago -->
-                        <div class="mb-3">
-                            <label for="MetodoPago" class="form-label">
-                                <i class="bi bi-credit-card"></i> Método de Pago *
-                            </label>
-                            <select id="MetodoPago" name="MetodoPago" class="form-select" required>
-                                <option value="">Seleccione un método</option>
-                                <option value="0">💵 Efectivo</option>
-                                <option value="1">💳 Tarjeta de Débito</option>
-                                <option value="2">💳 Tarjeta de Crédito</option>
-                                <option value="3">📱 Mercado Pago</option>
-                                <option value="4">🏦 Transferencia Bancaria</option>
-                            </select>
-                        </div>
-
-                        <!-- Campos adicionales para tarjeta -->
-                        <div id="camposTarjeta" style="display: none;">
-                            <div class="mb-3">
-                                <label for="Ultimos4Digitos" class="form-label">Últimos 4 dígitos de la tarjeta</label>
-                                <input type="text"
-                                       id="Ultimos4Digitos"
-                                       name="Ultimos4Digitos"
-                                       class="form-control"
-                                       maxlength="4"
-                                       pattern="\d{4}"
-                                       placeholder="1234">
-                                <small class="text-muted">Solo para referencia</small>
-                            </div>
-                        </div>
-
-                        <!-- Campo para número de transacción -->
-                        <div id="campoTransaccion" style="display: none;">
-                            <div class="mb-3">
-                                <label for="NumeroTransaccion" class="form-label">Número de Transacción / Comprobante</label>
-                                <input type="text"
-                                       id="NumeroTransaccion"
-                                       name="NumeroTransaccion"
-                                       class="form-control"
-                                       maxlength="100"
-                                       placeholder="Ej: MP-12345678">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="Observaciones" class="form-label">Observaciones (opcional)</label>
-                            <textarea id="Observaciones"
-                                      name="Observaciones"
-                                      class="form-control"
-                                      rows="3"
-                                      maxlength="500"
-                                      placeholder="Agregue cualquier nota adicional"></textarea>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-check-circle"></i> Confirmar Reserva y Pago
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="btnVolverTurno">
-                                <i class="bi bi-arrow-left"></i> Volver al Paso 1
-                            </button>
-                        </div>
-                    </form>
+                <!-- Calendario -->
+                <div class="mb-3">
+                    <label class="form-label">Seleccionar Horario *</label>
+                    <div id="calendar" class="calendar-container"></div>
                 </div>
-            </div>
+
+                <!-- Resumen -->
+                <div class="alert-info mt-3 p-3 rounded" id="resumenTurno" style="display:none;">
+                    <h5 class="fw-semibold mb-2">Resumen de tu reserva</h5>
+                    <p><strong>Mascota:</strong> <span id="resumenMascota">-</span></p>
+                    <p><strong>Servicio:</strong> <span id="resumenServicio">-</span></p>
+                    <p><strong>Fecha y Hora:</strong> <span id="resumenFechaHora">-</span></p>
+                    <p><strong>Peluquero:</strong> <span id="resumenPeluquero">Cualquiera disponible</span></p>
+                    <hr>
+                    <h4 class="text-end mb-0"><strong>Total:</strong> <span class="text-success">$<span id="resumenPrecio">0</span></span></h4>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100 mt-3" id="btnContinuarPago">Continuar al Pago</button>
+            </form>
         </div>
     </div>
+
+    <!-- Paso 2: Pago -->
+    <div class="card-step mt-4" id="paso2" style="display:none;">
+        <div class="card-header bg-success text-white fw-semibold">
+            Paso 2: Confirmar Pago
+        </div>
+        <div class="card-body">
+            <form id="formPago">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="pagoTurnoId" name="TurnoId" />
+                <input type="hidden" id="pagoMonto" name="Monto" />
+
+                <!-- Resumen de pago -->
+                <div class="alert-secondary mb-3 p-3 rounded">
+                    <h5 class="fw-semibold mb-2">Resumen de Pago</h5>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p><strong>Servicio:</strong> <span id="pagoResumenServicio">-</span></p>
+                            <p><strong>Mascota:</strong> <span id="pagoResumenMascota">-</span></p>
+                            <p><strong>Fecha:</strong> <span id="pagoResumenFecha">-</span></p>
+                        </div>
+                        <h3 class="text-success">$<span id="pagoResumenPrecio">0</span></h3>
+                    </div>
+                </div>
+
+                <!-- Método de Pago -->
+                <div class="mb-3">
+                    <label for="MetodoPago" class="form-label">Método de Pago *</label>
+                    <select id="MetodoPago" name="MetodoPago" class="form-select" required>
+                        <option value="">Seleccione un método</option>
+                        <option value="0">Efectivo</option>
+                        <option value="1">Tarjeta de Débito</option>
+                        <option value="2">Tarjeta de Crédito</option>
+                        <option value="3">Mercado Pago</option>
+                        <option value="4">Transferencia Bancaria</option>
+                    </select>
+                </div>
+
+                <!-- Campos adicionales -->
+                <div id="camposTarjeta" class="mb-3" style="display:none;">
+                    <label for="Ultimos4Digitos" class="form-label">Últimos 4 dígitos de la tarjeta</label>
+                    <input type="text" id="Ultimos4Digitos" name="Ultimos4Digitos" class="form-control" maxlength="4" pattern="\d{4}" placeholder="1234">
+                    <small class="text-muted">Solo para referencia</small>
+                </div>
+
+                <div id="campoTransaccion" class="mb-3" style="display:none;">
+                    <label for="NumeroTransaccion" class="form-label">Número de Transacción / Comprobante</label>
+                    <input type="text" id="NumeroTransaccion" name="NumeroTransaccion" class="form-control" maxlength="100" placeholder="Ej: MP-12345678">
+                </div>
+
+                <div class="mb-3">
+                    <label for="Observaciones" class="form-label">Observaciones (opcional)</label>
+                    <textarea id="Observaciones" name="Observaciones" class="form-control" rows="3" maxlength="500" placeholder="Notas adicionales"></textarea>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">Confirmar Reserva y Pago</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnVolverTurno">Volver al Paso 1</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<style>
+    .glass-card {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    .card-step {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        font-size: 1.1rem;
+    }
+
+    .alert-info {
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .alert-secondary {
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .btn-outline {
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        color: #f0f0f0;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+            color: #1c1c1c;
+        }
+
+    .calendar-container {
+        min-height: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         let calendar;
         let turnoTemporal = null;
 
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
+
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
                 allDaySlot: false,
@@ -212,7 +232,7 @@
                 selectable: true,
                 nowIndicator: true,
                 validRange: { start: new Date() },
-                events: function (fetchInfo, successCallback) {
+                events: function(fetchInfo, successCallback) {
                     const servicioId = document.getElementById("servicioId").value;
                     const peluqueroId = document.getElementById("peluqueroId").value;
                     if (!servicioId) { successCallback([]); return; }
@@ -224,7 +244,7 @@
                         end: fetchInfo.endStr
                     }).done(successCallback).fail(() => successCallback([]));
                 },
-                eventClick: function (info) {
+                eventClick: function(info) {
                     if (info.event.title === "Disponible") {
                         document.getElementById("FechaHora").value = info.event.startStr;
                         calendar.getEvents().forEach(e => {
@@ -238,169 +258,94 @@
 
             calendar.render();
 
-            document.getElementById("servicioId").addEventListener("change", function () {
-                calendar.refetchEvents();
-                actualizarResumen();
-            });
-
-            document.getElementById("peluqueroId").addEventListener("change", function () {
-                calendar.refetchEvents();
-                actualizarResumen();
-            });
-
+            document.getElementById("servicioId").addEventListener("change", () => { calendar.refetchEvents(); actualizarResumen(); });
+            document.getElementById("peluqueroId").addEventListener("change", () => { calendar.refetchEvents(); actualizarResumen(); });
             document.getElementById("mascotaId").addEventListener("change", actualizarResumen);
-        });
 
-        function actualizarResumen() {
-            const mascotaSelect = document.getElementById("mascotaId");
-            const servicioSelect = document.getElementById("servicioId");
-            const peluqueroSelect = document.getElementById("peluqueroId");
-            const fechaHora = document.getElementById("FechaHora").value;
+            document.getElementById("btnContinuarPago").addEventListener("click", function() {
+                const mascota = document.getElementById("mascotaId").value;
+                const servicio = document.getElementById("servicioId").value;
+                const fechaHora = document.getElementById("FechaHora").value;
 
-            if (mascotaSelect.value && servicioSelect.value && fechaHora) {
-                document.getElementById("resumenTurno").style.display = "block";
-                document.getElementById("resumenMascota").textContent = mascotaSelect.options[mascotaSelect.selectedIndex].text;
-                document.getElementById("resumenServicio").textContent = servicioSelect.options[servicioSelect.selectedIndex].text.split(' - ')[0];
-                const fecha = new Date(fechaHora);
-                document.getElementById("resumenFechaHora").textContent = fecha.toLocaleDateString('es-AR') + ' ' + fecha.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'});
-                document.getElementById("resumenPeluquero").textContent = peluqueroSelect.value ? peluqueroSelect.options[peluqueroSelect.selectedIndex].text : "Cualquiera disponible";
-                document.getElementById("resumenPrecio").textContent = servicioSelect.options[servicioSelect.selectedIndex].getAttribute('data-precio');
-            } else {
-                document.getElementById("resumenTurno").style.display = "none";
-            }
-        }
-
-        // Funciones para mostrar/ocultar pasos con transición
-        function mostrarPaso2() {
-            const paso1 = document.getElementById("paso1");
-            const paso2 = document.getElementById("paso2");
-            paso1.style.transition = "all 0.4s ease"; paso2.style.transition = "all 0.4s ease";
-            paso1.style.opacity = 0;
-            setTimeout(() => {
-                paso1.style.display = "none";
-                paso2.style.display = "block";
-                paso2.style.opacity = 0;
-                setTimeout(() => paso2.style.opacity = 1, 10);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 400);
-        }
-
-        function mostrarPaso1() {
-            const paso1 = document.getElementById("paso1");
-            const paso2 = document.getElementById("paso2");
-            paso2.style.transition = "all 0.4s ease"; paso1.style.transition = "all 0.4s ease";
-            paso2.style.opacity = 0;
-            setTimeout(() => {
-                paso2.style.display = "none";
-                paso1.style.display = "block";
-                paso1.style.opacity = 0;
-                setTimeout(() => paso1.style.opacity = 1, 10);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 400);
-        }
-
-        // Continuar al pago
-        document.getElementById("btnContinuarPago").addEventListener("click", function() {
-            const mascota = document.getElementById("mascotaId").value;
-            const servicio = document.getElementById("servicioId").value;
-            const fechaHora = document.getElementById("FechaHora").value;
-
-            if (!mascota || !servicio || !fechaHora) {
-                Swal.fire({ icon: "warning", title: "Faltan datos", text: "Debes seleccionar una mascota, un servicio y un horario.", confirmButtonColor: "#3085d6" });
-                return;
-            }
-
-            Swal.fire({ title: 'Creando turno...', text: 'Por favor espera', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            $.ajax({
-                url: "@Url.Action("Crear", "Turno")",
-                type: "POST",
-                data: $("#formTurno").serialize(),
-                success: function (response) {
-                    Swal.close();
-                    if (response.ok) {
-                        turnoTemporal = {
-                            id: response.turnoId,
-                            mascota: document.getElementById("mascotaId").options[document.getElementById("mascotaId").selectedIndex].text,
-                            servicio: document.getElementById("servicioId").options[document.getElementById("servicioId").selectedIndex].text.split(' - ')[0],
-                            fecha: new Date(fechaHora).toLocaleDateString('es-AR'),
-                            hora: new Date(fechaHora).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}),
-                            precio: document.getElementById("servicioId").options[document.getElementById("servicioId").selectedIndex].getAttribute('data-precio')
-                        };
-
-                        document.getElementById("pagoTurnoId").value = response.turnoId;
-                        document.getElementById("pagoMonto").value = turnoTemporal.precio;
-                        document.getElementById("pagoResumenServicio").textContent = turnoTemporal.servicio;
-                        document.getElementById("pagoResumenMascota").textContent = turnoTemporal.mascota;
-                        document.getElementById("pagoResumenFecha").textContent = turnoTemporal.fecha + ' ' + turnoTemporal.hora;
-                        document.getElementById("pagoResumenPrecio").textContent = turnoTemporal.precio;
-
-                        mostrarPaso2();
-                    } else {
-                        Swal.fire({ icon: "error", title: "No se pudo crear el turno", text: response.message, confirmButtonColor: "#d33" });
-                    }
-                },
-                error: function () {
-                    Swal.close();
-                    Swal.fire({ icon: "error", title: "Error del servidor", text: "Ocurrió un problema al intentar crear el turno.", confirmButtonColor: "#d33" });
+                if (!mascota || !servicio || !fechaHora) {
+                    Swal.fire({ icon: "warning", title: "Faltan datos", text: "Debes seleccionar mascota, servicio y horario." });
+                    return;
                 }
+
+                Swal.fire({ title: 'Creando turno...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                $.ajax({
+                    url: "@Url.Action("Crear", "Turno")",
+                    type: "POST",
+                    data: $("#formTurno").serialize(),
+                    success: function(response) {
+                        Swal.close();
+                        if (response.ok) {
+                            turnoTemporal = {
+                                id: response.turnoId,
+                                mascota: document.getElementById("mascotaId").selectedOptions[0].text,
+                                servicio: document.getElementById("servicioId").selectedOptions[0].text.split(' - ')[0],
+                                fecha: new Date(fechaHora).toLocaleDateString('es-AR'),
+                                hora: new Date(fechaHora).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}),
+                                precio: document.getElementById("servicioId").selectedOptions[0].getAttribute('data-precio')
+                            };
+                            document.getElementById("pagoTurnoId").value = response.turnoId;
+                            document.getElementById("pagoMonto").value = turnoTemporal.precio;
+                            document.getElementById("pagoResumenServicio").textContent = turnoTemporal.servicio;
+                            document.getElementById("pagoResumenMascota").textContent = turnoTemporal.mascota;
+                            document.getElementById("pagoResumenFecha").textContent = turnoTemporal.fecha + ' ' + turnoTemporal.hora;
+                            document.getElementById("pagoResumenPrecio").textContent = turnoTemporal.precio;
+                            mostrarPaso2();
+                        } else {
+                            Swal.fire({ icon: "error", title: "No se pudo crear el turno", text: response.message });
+                        }
+                    },
+                    error: function() {
+                        Swal.close();
+                        Swal.fire({ icon: "error", title: "Error del servidor", text: "Ocurrió un problema al crear el turno." });
+                    }
+                });
             });
+
+            document.getElementById("btnVolverTurno").addEventListener("click", mostrarPaso1);
+
+            document.getElementById('MetodoPago').addEventListener('change', function() {
+                const metodo = parseInt(this.value);
+                document.getElementById('camposTarjeta').style.display = (metodo === 1 || metodo === 2) ? 'block' : 'none';
+                document.getElementById('campoTransaccion').style.display = (metodo === 3 || metodo === 4) ? 'block' : 'none';
+            });
+
+            function mostrarPaso2() {
+                document.getElementById("paso1").style.display = "none";
+                document.getElementById("paso2").style.display = "block";
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+
+            function mostrarPaso1() {
+                document.getElementById("paso2").style.display = "none";
+                document.getElementById("paso1").style.display = "block";
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+
+            function actualizarResumen() {
+                const mascotaSel = document.getElementById("mascotaId");
+                const servicioSel = document.getElementById("servicioId");
+                const peluqueroSel = document.getElementById("peluqueroId");
+                const fechaHora = document.getElementById("FechaHora").value;
+
+                if (mascotaSel.value && servicioSel.value && fechaHora) {
+                    document.getElementById("resumenTurno").style.display = "block";
+                    document.getElementById("resumenMascota").textContent = mascotaSel.selectedOptions[0].text;
+                    document.getElementById("resumenServicio").textContent = servicioSel.selectedOptions[0].text.split(' - ')[0];
+                    const fecha = new Date(fechaHora);
+                    document.getElementById("resumenFechaHora").textContent = fecha.toLocaleDateString('es-AR') + ' ' +
+                        fecha.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+                    document.getElementById("resumenPeluquero").textContent = peluqueroSel.value ? peluqueroSel.selectedOptions[0].text : "Cualquiera disponible";
+                    document.getElementById("resumenPrecio").textContent = servicioSel.selectedOptions[0].getAttribute('data-precio');
+                } else {
+                    document.getElementById("resumenTurno").style.display = "none";
+                }
+            }
         });
-
-        // Volver al Paso 1
-        document.getElementById("btnVolverTurno").addEventListener("click", mostrarPaso1);
-
-        // Mostrar campos según método de pago
-        document.getElementById('MetodoPago').addEventListener('change', function() {
-            const metodoPago = parseInt(this.value);
-            const camposTarjeta = document.getElementById('camposTarjeta');
-            const campoTransaccion = document.getElementById('campoTransaccion');
-            camposTarjeta.style.display = 'none';
-            campoTransaccion.style.display = 'none';
-            if (metodoPago === 1 || metodoPago === 2) camposTarjeta.style.display = 'block';
-            else if (metodoPago === 3 || metodoPago === 4) campoTransaccion.style.display = 'block';
-        });
-
-        // Procesar pago
-        document.getElementById('formPago').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const metodoPago = parseInt(document.getElementById('MetodoPago').value);
-            if (isNaN(metodoPago) || metodoPago < 0) { Swal.fire('Error', 'Debe seleccionar un método de pago', 'error'); return; }
-
-            if (metodoPago === 3) { procesarConMercadoPago(); return; }
-
-            Swal.fire({
-                title: '¿Confirmar reserva y pago?',
-                html: `<p>Estás por confirmar tu turno y realizar el pago de <strong>$${turnoTemporal.precio}</strong></p>`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, confirmar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => { if (result.isConfirmed) procesarPagoNormal(); });
-        });
-
-        function procesarConMercadoPago() {
-            Swal.fire({ title: 'Redirigiendo a Mercado Pago...', html: 'Por favor espere mientras creamos tu preferencia de pago', allowOutsideClick: false, allowEscapeKey: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
-            fetch('/Pago/CrearPreferenciaMercadoPago', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(turnoTemporal.id) })
-            .then(response => response.json())
-            .then(data => { if (data.ok && data.initPoint) window.location.href = data.initPoint; else Swal.fire('Error', data.message || 'No se pudo conectar con Mercado Pago', 'error'); })
-            .catch(error => { console.error('Error:', error); Swal.fire('Error', 'Ocurrió un error al conectar con Mercado Pago', 'error'); });
-        }
-
-        function procesarPagoNormal() {
-            Swal.fire({ title: 'Procesando pago...', text: 'Por favor espere', allowOutsideClick: false, allowEscapeKey: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
-            const formData = new FormData(document.getElementById('formPago'));
-            fetch('/Pago/Procesar', { method: 'POST', body: formData })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    Swal.fire({ icon: 'success', title: '¡Reserva Confirmada!', html: '<p>Tu turno ha sido reservado y el pago ha sido procesado correctamente.</p>', confirmButtonText: 'Ver Comprobante' })
-                    .then(() => window.location.href = '/Pago/Comprobante/' + data.pagoId);
-                } else Swal.fire('Error', data.message, 'error');
-            })
-            .catch(error => { console.error('Error:', error); Swal.fire('Error', 'Ocurrió un error al procesar el pago', 'error'); });
-        }
     </script>
 }

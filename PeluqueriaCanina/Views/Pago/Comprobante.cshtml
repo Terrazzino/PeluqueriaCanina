@@ -22,7 +22,7 @@
             <!-- Comprobante -->
             <div class="dark-card shadow-sm p-0" id="comprobante">
                 <div class="card-header text-center bg-success text-white py-4">
-                    <h3 class="mb-1">🐾 Peluquería Canina</h3>
+                    <h3 class="mb-1">Peluquería Canina</h3>
                     <small class="opacity-75">Comprobante de Pago</small>
                 </div>
 
@@ -36,28 +36,24 @@
                                 <div class="alert alert-success py-3 fw-bold">
                                     <i class="bi bi-check-circle-fill me-2"></i>PAGO APROBADO
                                 </div>
-                                ;
                                 break;
 
                             case "Procesando":
                                 <div class="alert alert-warning py-3 fw-bold">
                                     <i class="bi bi-clock-fill me-2"></i>PAGO EN PROCESO
                                 </div>
-                                ;
                                 break;
 
                             case "Pendiente":
                                 <div class="alert alert-info py-3 fw-bold">
                                     <i class="bi bi-hourglass-split me-2"></i>PAGO PENDIENTE
                                 </div>
-                                ;
                                 break;
 
                             case "Rechazado":
                                 <div class="alert alert-danger py-3 fw-bold">
                                     <i class="bi bi-x-circle-fill me-2"></i>PAGO RECHAZADO
                                 </div>
-                                ;
                                 break;
                         }
                     </div>
@@ -73,24 +69,20 @@
                                 @switch (Model.MetodoPago.ToString())
                                 {
                                     case "Efectivo":
-                                        <span>💵 Efectivo</span>
-                                        ; break;
+                                        <span>Efectivo</span>
+                                        break;
                                     case "TarjetaDebito":
-
-                                        <span>💳 Tarjeta de Débito</span>
-                                        ; break;
+                                        <span>Tarjeta de Débito</span>
+                                        break;
                                     case "TarjetaCredito":
-
-                                        <span>💳 Tarjeta de Crédito</span>
-                                        ; break;
+                                        <span>Tarjeta de Crédito</span>
+                                        break;
                                     case "MercadoPago":
-
-                                        <span>📱 Mercado Pago</span>
-                                        ; break;
+                                        <span>Mercado Pago</span>
+                                        break;
                                     case "Transferencia":
-
-                                        <span>🏦 Transferencia</span>
-                                        ; break;
+                                        <span>Transferencia</span>
+                                        break;
                                 }
                             </p>
 
@@ -177,10 +169,10 @@
     </div>
 </div>
 
-@section Styles {
+@* @section Styles {
     <style>
-/*         media print {
-            .no-print, .btn, .alert:not(.alert-success):not(.alert-danger) */
+        @media print {
+            .no-print, .btn, .alert:not(.alert-success):not(.alert-danger)
 
         {
             display: none !important;
@@ -193,4 +185,4 @@
 
         }
     </style>
-}
+} *@

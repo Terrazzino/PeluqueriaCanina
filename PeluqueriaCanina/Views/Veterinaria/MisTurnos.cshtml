@@ -4,44 +4,109 @@
     ViewData["Title"] = "Mis turnos (Veterinaria)";
 }
 
-<h3 class="mb-3">Mis turnos en la veterinaria</h3>
+<div class="glass-card mt-4">
+    <h3 class="mb-3">Mis turnos en la veterinaria</h3>
 
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">No tenés turnos reservados en la veterinaria.</div>
-}
-else
-{
-    <table class="table">
-        <thead><tr><th>Mascota</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>
-            @foreach (var t in Model)
-            {
-                <tr>
-                    <td>@t.Mascota.Nombre</td>
-                    <td>@t.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@t.Estado</td>
-                    <td>
-                        @if (t.Estado != "Cancelado")
-                        {
-                            <button class="btn btn-sm btn-danger" onclick="cancelar(@t.Id)">Cancelar</button>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">No tenés turnos reservados en la veterinaria.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mascota</th>
+                        <th>Fecha y Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td>@t.Mascota.Nombre</td>
+                            <td>@t.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (t.Estado == "Pendiente")
+                                {
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                }
+                                else if (t.Estado == "Confirmado")
+                                {
+                                    <span class="badge bg-success">Confirmado</span>
+                                }
+                                else if (t.Estado == "Cancelado")
+                                {
+                                    <span class="badge bg-danger">Cancelado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@t.Estado</span>
+                                }
+                            </td>
+                            <td>
+                                @if (t.Estado != "Cancelado")
+                                {
+                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelar(@t.Id)">
+                                        Cancelar
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+        transition: 0.2s;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+</style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function cancelar(id) {
-            Swal.fire({ title: 'Confirmar', text:'Cancelar turno?', showCancelButton:true }).then(r=>{
-                if(r.isConfirmed){
+            Swal.fire({
+                title: 'Confirmar',
+                text: '¿Cancelar turno?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, cancelar',
+                cancelButtonText: 'No'
+            }).then(r => {
+                if (r.isConfirmed) {
                     $.post('/Veterinaria/Cancelar', { id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
-                      .done(()=> location.reload())
-                      .fail(()=> Swal.fire('Error','No se pudo cancelar','error'));
+                        .done(() => location.reload())
+                        .fail(() => Swal.fire('Error','No se pudo cancelar','error'));
                 }
             });
         }

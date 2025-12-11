@@ -6,44 +6,130 @@
 
 <div class="glass-card mt-4">
 
-    <h3 class="text-success mb-4 fw-semibold">
-        🐾 Registrar Mascota
+    <h3 class="form-title mb-4 text-success">
+        Registrar Mascota
     </h3>
 
     <form asp-action="Crear" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
         <!-- Nombre -->
-        <div class="mb-3">
+        <div class="form-group">
             <label asp-for="Nombre" class="form-label text-white"></label>
             <input asp-for="Nombre" class="form-control dark-input" />
             <span asp-validation-for="Nombre" class="text-danger"></span>
         </div>
 
         <!-- Raza -->
-        <div class="mb-3">
+        <div class="form-group">
             <label asp-for="Raza" class="form-label text-white"></label>
             <input asp-for="Raza" class="form-control dark-input" />
             <span asp-validation-for="Raza" class="text-danger"></span>
         </div>
 
-        <!-- Fecha Nac -->
-        <div class="mb-3">
+        <!-- Fecha de Nacimiento -->
+        <div class="form-group">
             <label asp-for="FechaDeNacimiento" class="form-label text-white"></label>
             <input asp-for="FechaDeNacimiento" type="date" class="form-control dark-input" />
             <span asp-validation-for="FechaDeNacimiento" class="text-danger"></span>
         </div>
 
         <!-- Peso -->
-        <div class="mb-3">
+        <div class="form-group">
             <label asp-for="Peso" class="form-label text-white"></label>
             <input asp-for="Peso" type="number" step="0.1" class="form-control dark-input" />
             <span asp-validation-for="Peso" class="text-danger"></span>
         </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <a asp-action="Index" class="btn btn-outline-secondary rounded-2">↩️ Volver</a>
-            <button type="submit" class="btn btn-success rounded-2">💾 Guardar</button>
+        <div class="form-actions">
+            <a asp-action="Index" class="btn-outline">Volver</a>
+            <button type="submit" class="btn-success">Guardar</button>
         </div>
     </form>
 </div>
+
+<style>
+    /* Card estilo glass */
+    .glass-card {
+        background: rgba(28, 28, 28, 0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    /* Título del formulario */
+    .form-title {
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    /* Inputs estilo dark */
+    .dark-input {
+        background: rgba(40, 40, 40, 0.9);
+        border: 1px solid #555;
+        color: #ffffff; /* TEXTO BLANCO */
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        width: 100%;
+        transition: all 0.2s;
+    }
+
+        /* Placeholder blanco tenue */
+        .dark-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Cuando el usuario escribe y está en focus */
+        .dark-input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+            background: rgba(40, 40, 40, 1);
+            color: #ffffff; /* blanco asegurado */
+        }
+
+
+    /* Form groups */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    /* Botones */
+    .btn-outline {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        color: #f0f0f0;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+            color: #1c1c1c;
+        }
+
+    .btn-success {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: #28a745;
+        color: #f0f0f0;
+        font-weight: 600;
+        border: none;
+        transition: all 0.2s;
+    }
+
+        .btn-success:hover {
+            background: #36c157;
+        }
+</style>

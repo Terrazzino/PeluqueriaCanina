@@ -2,80 +2,217 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<!-- Botón cerrar sesión -->
-<div class="d-flex justify-content-end mt-3">
-    <a asp-controller="Perfil" asp-action="MiPerfil" class="btn btn-outline-light">
-        Mi Perfil
-    </a>
+<div class="overlay-dark fade-in">
 
+    <!-- Botones de perfil y logout -->
+    <div class="header-buttons">
+        <a asp-controller="Perfil" asp-action="MiPerfil" class="btn-outline">
+            Mi Perfil
+        </a>
 
-    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger">
-        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-    </a>
-</div>
+        <a asp-controller="Auth" asp-action="Logout" class="btn-danger">
+            Cerrar sesión
+        </a>
+    </div>
 
-<!-- CARD PRINCIPAL -->
-<div class="glass-card mt-4">
-    <div class="mb-4">
-        <h2 class="text-white fw-semibold">Bienvenido @ViewBag.Nombre 👋</h2>
-        <p class="text-secondary mb-0">
+    <!-- Saludo -->
+    <div class="welcome">
+        <h2>Bienvenido @ViewBag.Nombre</h2>
+        <p>
             Desde aquí podés manejar todo lo relacionado a tus
-            <strong class="text-white">mascotas</strong> y
-            <strong class="text-white">turnos</strong>.
+            <strong>mascotas</strong> y
+            <strong>turnos</strong>.
         </p>
     </div>
 
-    <div class="row g-4">
-
-        <!-- 🐶 Mascotas -->
-        <div class="col-md-4">
-            <div class="glass-card h-100 p-0">
-                <div class="p-3 border-bottom" style="border-color: rgba(255,255,255,0.12) !important;">
-                    <h5 class="text-info mb-0">🐶 Mis Mascotas</h5>
-                </div>
-                <div class="p-3 d-flex flex-column">
-                    <p class="text-secondary flex-grow-1">
-                        Registrar, editar o eliminar tus mascotas.
-                    </p>
-                    <a href="/Mascota/Index" class="btn btn-info text-white mt-auto rounded-2">
-                        Ir a Mascotas
-                    </a>
-                </div>
+    <!-- Cards -->
+    <div class="cards-container">
+        <div class="card-custom card-info">
+            <div class="card-header-custom">
+                <h5>Mis Mascotas</h5>
+            </div>
+            <div class="card-body">
+                <p>Registrar, editar o eliminar tus mascotas.</p>
+                <a href="/Mascota/Index" class="btn-card">
+                    Ir a Mascotas
+                </a>
             </div>
         </div>
 
-        <!-- 📅 Turnos -->
-        <div class="col-md-4">
-            <div class="glass-card h-100 p-0">
-                <div class="p-3 border-bottom" style="border-color: rgba(255,255,255,0.12) !important;">
-                    <h5 class="text-success mb-0">📅 Turnos</h5>
-                </div>
-                <div class="p-3 d-flex flex-column">
-                    <p class="text-secondary flex-grow-1">
-                        Solicitá un turno para una de tus mascotas.
-                    </p>
-                    <a href="/Turno/Index" class="btn btn-success mt-auto rounded-2">
-                        Ir a Turnos
-                    </a>
-                </div>
+        <div class="card-custom card-success">
+            <div class="card-header-custom">
+                <h5>Turnos</h5>
+            </div>
+            <div class="card-body">
+                <p>Solicitá un turno para una de tus mascotas.</p>
+                <a href="/Turno/Index" class="btn-card">
+                    Ir a Turnos
+                </a>
             </div>
         </div>
 
-        <!-- 🩺 Turnos Veterinaria -->
-        <div class="col-md-4">
-            <div class="glass-card h-100 p-0">
-                <div class="p-3 border-bottom" style="border-color: rgba(255,255,255,0.12) !important;">
-                    <h5 class="text-warning mb-0">🩺 Turnos Veterinaria</h5>
-                </div>
-                <div class="p-3 d-flex flex-column">
-                    <p class="text-secondary flex-grow-1">
-                        Reservá un turno en la veterinaria.
-                    </p>
-                    <a href="/Veterinaria/Reservar" class="btn btn-warning mt-auto rounded-2 text-white">
-                        Reservar Turno Vet
-                    </a>
-                </div>
+        <div class="card-custom card-warning">
+            <div class="card-header-custom">
+                <h5>Turnos Veterinaria</h5>
+            </div>
+            <div class="card-body">
+                <p>Reservá un turno en la veterinaria.</p>
+                <a href="/Veterinaria/Reservar" class="btn-card">
+                    Reservar Turno Vet
+                </a>
             </div>
         </div>
     </div>
+
 </div>
+
+<style>
+    /* Fondo general */
+    .overlay-dark {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        min-height: 100vh;
+        padding: 2rem;
+        color: #f0f0f0;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Botones */
+    .header-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+        .header-buttons a {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+    .btn-outline {
+        border: 1px solid #f8f9fa;
+        color: #f8f9fa;
+    }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            color: #1c1c1c;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        color: #fff;
+    }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+    /* Saludo */
+    .welcome h2 {
+        font-size: 2rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .welcome p {
+        color: #ccc;
+        font-size: 1rem;
+    }
+
+    /* Cards layout */
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    /* Cards */
+    .card-custom {
+        background: rgba(40,40,40,0.85);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+    /* Card header */
+    .card-header-custom {
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .card-info .card-header-custom {
+        color: #0dcaf0;
+    }
+
+    .card-success .card-header-custom {
+        color: #198754;
+    }
+
+    .card-warning .card-header-custom {
+        color: #ffc107;
+    }
+
+    /* Card body */
+    .card-body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: space-between;
+    }
+
+        .card-body p {
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+    /* Botón dentro de card */
+    .btn-card {
+        text-decoration: none;
+        text-align: center;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #fff;
+        transition: background 0.2s;
+    }
+
+    .card-info .btn-card {
+        background: #0dcaf0;
+        color: #1c1c1c;
+    }
+
+        .card-info .btn-card:hover {
+            background: #31d4f2;
+        }
+
+    .card-success .btn-card {
+        background: #198754;
+    }
+
+        .card-success .btn-card:hover {
+            background: #1fae5a;
+        }
+
+    .card-warning .btn-card {
+        background: #ffc107;
+        color: #1c1c1c;
+    }
+
+        .card-warning .btn-card:hover {
+            background: #ffd24d;
+        }
+</style>

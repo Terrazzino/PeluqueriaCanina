@@ -1,9 +1,10 @@
 /* ======================================================= */
-/* BASE Y TIPOGRAFÍA                                        */
+/* BASE Y TIPOGRAFÍA                                      */
 /* ======================================================= */
-
 html {
     font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -12,27 +13,44 @@ html {
     }
 }
 
-html {
-    position: relative;
-    min-height: 100%;
-}
-
 body {
-    margin-bottom: 60px;
-    background: #111;
-    color: #f0f0f0;
+    position: relative;
+    background-image: url('../img/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-/* Eliminamos glow azul default */
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: inherit;
+        filter: grayscale(60%) brightness(1.1);
+        z-index: -1;
+    }
+
+.fw-bold {
+    font-weight: 700;
 }
 
-/* Suave animación de aparición */
+.text-light {
+    color: #f8f9fa;
+}
+
+.text-secondary {
+    color: rgba(255,255,255,0.6);
+}
+
+.text-warning {
+    color: #ffc107;
+}
+
+/* ======================================================= */
+/* ANIMACIONES                                             */
+/* ======================================================= */
 .fade-in {
     animation: fadeIn 0.6s ease-in-out;
 }
@@ -50,229 +68,259 @@ body {
 }
 
 /* ======================================================= */
-/* GLASS CARD                                               */
+/* GLASS PANELES Y CARDS                                   */
 /* ======================================================= */
-
-.glass-card {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-}
-
-/* ======================================================= */
-/* INPUTS OSCUROS                                            */
-/* ======================================================= */
-
-.dark-input {
-    background: rgba(30, 30, 30, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+.glass, .glass-card, .form-container, .card-custom, .report-panel, .dashboard-panel {
+    background: rgba(25,25,25,0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 0 25px rgba(0,0,0,0.35);
+    padding: 2rem;
     color: #fff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-    .dark-input:focus {
-        background: rgba(40, 40, 40, 0.9);
-        color: #fff;
-        border-color: #ffc107;
-        box-shadow: 0 0 0 0.15rem rgba(255, 193, 7, 0.3);
+    .card-custom:hover, .glass:hover, .report-panel:hover, .dashboard-panel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 35px rgba(0,0,0,0.45);
+    }
+
+/* TÍTULOS */
+.card-title, .dashboard-title, .report-header h4, .panel-title {
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* SUBTÍTULOS */
+.dashboard-subtitle, .report-subtitle {
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+/* ======================================================= */
+/* INPUTS Y SELECTS                                        */
+/* ======================================================= */
+.form-control, .glass-input, .form-control-custom, .form-select-dark {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    border-radius: 0.65rem;
+    backdrop-filter: blur(2px);
+    transition: all 0.25s ease;
+}
+
+    .form-control:focus, .glass-input:focus, .form-control-custom:focus, .form-select-dark:focus {
+        outline: none;
+        border-color: #66b2ff;
+        box-shadow: 0 0 0 2px rgba(102,178,255,0.35);
     }
 
 /* ======================================================= */
-/* TABLAS OSCURAS                                           */
+/* BOTONES                                                 */
 /* ======================================================= */
-
-.table-container {
-    border-radius: 12px;
-    overflow: hidden;
+.btn, .btn-rounded, .btn-neo, .btn-primary, .btn-secondary, .header-btn {
+    border-radius: 0.65rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.25s ease;
+    display: inline-block;
 }
 
-.table-dark {
-    background-color: #1a1a1a !important;
-    color: #eee !important;
+.btn-primary {
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
 }
 
-    .table-dark thead tr {
-        background-color: #242424 !important;
-        border-bottom: 2px solid #333;
+    .btn-primary:hover {
+        background-color: #0a58ca;
     }
 
-    .table-dark tbody tr {
-        transition: background 0.2s ease;
-    }
-
-        .table-dark tbody tr:hover {
-            background-color: #2c2c2c;
-        }
-
-/* Imágenes en tablas */
-.table img {
-    border: 2px solid #444;
-    transition: 0.2s;
+.btn-secondary {
+    background: #f1f1f1;
+    color: #111;
+    border: 1px solid rgba(0,0,0,0.2);
 }
 
-    .table img:hover {
-        transform: scale(1.05);
-        border-color: #ffc107;
+    .btn-secondary:hover {
+        background: #e0e0e0;
     }
 
-/* ======================================================= */
-/* TARJETAS OSCURAS                                         */
-/* ======================================================= */
-
-.dark-card {
-    background: rgba(20, 20, 20, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+.btn-neo {
+    background: #111;
+    color: #fff;
+    border: none;
+    box-shadow: 6px 6px 12px rgba(0,0,0,0.55), -6px -6px 12px rgba(255,255,255,0.05);
 }
 
-    .dark-card .card-header {
-        background: rgba(40, 40, 40, 0.95) !important;
-        color: #fff;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    .btn-neo:hover {
+        box-shadow: 3px 3px 8px rgba(0,0,0,0.45), -3px -3px 8px rgba(255,255,255,0.04);
     }
 
-/* ======================================================= */
-/* BOTONES PERSONALIZADOS                                   */
-/* ======================================================= */
+    .btn-neo:active {
+        transform: scale(0.98);
+        box-shadow: inset 4px 4px 8px rgba(0,0,0,0.6), inset -4px -4px 8px rgba(255,255,255,0.03);
+    }
 
-.btn {
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-/* Botón claro contorneado */
 .btn-outline-light {
-    border-color: #ccc;
-    color: #eee;
+    color: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    background: transparent;
 }
 
     .btn-outline-light:hover {
-        background: #f8f9fa;
-        color: #000;
-    }
-
-/* Botones de Bootstrap mejorados */
-.btn-success {
-    background-color: #28a745;
-    border: none;
-}
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-.btn-warning {
-    background-color: #ffca2c;
-    color: #000;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border: none;
-}
-
-    .btn-danger:hover {
-        background-color: #bb2d3b;
+        background: rgba(248,249,250,0.1);
     }
 
 /* ======================================================= */
-/* BOTÓN LOGOUT                                             */
+/* DASHBOARD LAYOUT                                        */
 /* ======================================================= */
-
-.btn-logout {
-    background: transparent;
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
-    transition: 0.3s;
+.dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding: 40px 20px;
 }
 
-    .btn-logout:hover {
-        background: #ff4d4d;
-        color: #fff;
-    }
-
-/* ======================================================= */
-/* TARJETAS PERSONALIZADAS (AGENDA)                         */
-/* ======================================================= */
-
-.custom-card {
-    background: #1a1a1a;
-    border-radius: 12px;
+.dashboard-grid {
+    display: grid;
+    gap: 18px;
 }
 
-.custom-header {
-    background: linear-gradient(90deg, #0066ff, #0099ff);
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+.dash-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    text-decoration: none;
     color: #fff;
-    padding: 16px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-.custom-body {
-    padding: 25px;
+    .dash-card:hover {
+        background: rgba(255,255,255,0.18);
+        transform: translateY(-2px);
+    }
+
+.card-icon {
+    font-size: 1.6rem;
 }
+
+/* HEADER DASHBOARD */
+.dashboard-header {
+    display: flex;
+    justify-content: center;
+    padding: 18px 0;
+}
+
+.header-btns-container {
+    display: flex;
+    gap: 12px;
+}
+
+.header-btn {
+    padding: 8px 18px;
+    border-radius: 12px;
+    background: #fff;
+    color: #111;
+}
+
+    .header-btn:hover {
+        background: #f1f1f1;
+    }
+
+    .header-btn.logout {
+        border-color: #ff4d4d;
+        color: #ff4d4d;
+    }
+
+        .header-btn.logout:hover {
+            background: #ff4d4d;
+            color: #fff;
+        }
 
 /* ======================================================= */
-/* FULLCALENDAR DARK MODE                                   */
+/* TABLAS OSCURAS                                          */
 /* ======================================================= */
-
-.fc-theme-standard td,
-.fc-theme-standard th {
-    border-color: #333;
-}
-
-.fc-scrollgrid,
-.fc .fc-timegrid-slot,
-.fc .fc-timegrid-axis {
-    background: #141414 !important;
+.table-dark, .table-ranking {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: linear-gradient(135deg, #1f1f1f, #333);
     color: #ddd;
 }
 
-.fc .fc-toolbar-title {
-    color: #fff;
-}
-
-.fc-button-primary {
-    background: #007bff !important;
-    border: none !important;
-}
-
-    .fc-button-primary:hover {
-        background: #3399ff !important;
+    .table-dark tbody tr:hover, .table-ranking tbody tr:hover {
+        background-color: rgba(255,255,255,0.07);
     }
 
-/* Eventos */
-.fc-event {
-    background: #0066ff;
+/* ======================================================= */
+/* OVERLAY OSCURO                                          */
+/* ======================================================= */
+.overlay-dark {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    min-height: 100vh;
+    padding: 30px 20px 50px 20px;
+}
+
+/* ======================================================= */
+/* LISTAS Y BADGES                                         */
+/* ======================================================= */
+.list-group-item {
+    background: rgba(50,50,50,0.75);
     border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     color: #fff;
-    border-radius: 6px;
-    padding: 4px 6px;
 }
 
-    .fc-event:hover {
-        filter: brightness(1.15);
+    .list-group-item:last-child {
+        border-bottom: none;
     }
 
-/* Indicador de hora actual */
-.fc .fc-timegrid-now-indicator-line {
-    border-color: #ff4d4d !important;
+    .list-group-item:hover {
+        background: rgba(255,255,255,0.07);
+    }
+
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.75em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 0.65rem;
+    background-color: rgba(255,255,255,0.15);
+    color: white;
 }
 
-/* Transición suave para los pasos */
-#paso1, #paso2 {
-    transition: all 0.4s ease;
-    opacity: 1;
-}
-
-.oculto {
-    opacity: 0;
-    height: 0;
+/* ======================================================= */
+/* IMÁGENES REDONDEADAS                                     */
+/* ======================================================= */
+.peluquero-img-wrapper, .peluquero-img {
+    border-radius: 50%;
     overflow: hidden;
-    padding: 0 !important;
-    margin: 0 !important;
+    object-fit: cover;
+}
+
+/* ======================================================= */
+/* RESPONSIVE                                              */
+/* ======================================================= */
+@media(max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+
+    .report-panel, .card-custom, .dashboard-panel {
+        padding: 20px;
+    }
 }

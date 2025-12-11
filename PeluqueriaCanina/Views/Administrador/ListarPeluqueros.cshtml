@@ -1,113 +1,101 @@
 ﻿@model IEnumerable<dynamic>
 
-<div class="container mt-5">
+<div class="overlay-dark p-4">
+    <div class="container">
 
-    <!-- Encabezado con estilo moderno -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="text-light fw-bold mb-1">📋 Listado de Peluqueros</h2>
-            <p class="text-secondary mb-0">Gestión del personal y horarios</p>
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+            <div>
+                <h2 class="text-light fw-bold mb-1">Listado de Peluqueros</h2>
+                <p class="text-secondary mb-0">Gestión del personal y horarios</p>
+            </div>
+
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <a asp-controller="Administrador" asp-action="Dashboard"
+                   class="btn btn-outline-light btn-rounded shadow-sm">
+                    Volver
+                </a>
+
+                <a asp-action="RegistrarPeluquero"
+                   class="btn btn-primary btn-rounded shadow-sm">
+                    Registrar Peluquero
+                </a>
+            </div>
         </div>
 
-        <div class="d-flex">
-            <a asp-controller="Administrador" asp-action="Dashboard"
-               class="btn btn-outline-light me-2 shadow-sm">
-                ⬅️ Inicio
-            </a>
+        <!-- Card contenedora -->
+        <div class="card card-custom text-light">
+            <div class="card-body p-0">
 
-            <a asp-action="RegistrarPeluquero"
-               class="btn btn-primary shadow-sm">
-                ➕ Registrar Peluquero
-            </a>
-        </div>
-    </div>
-
-    <!-- Card contenedora -->
-    <div class="card shadow-lg bg-dark text-light rounded-4 border-secondary">
-        <div class="card-body">
-
-            <!-- Tabla con estilo oscuro -->
-            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden">
-                <thead class="table-gradient text-center">
-                    <tr>
-                        <th style="width: 60px;">Foto</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Mail</th>
-                        <th>Jornadas</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var p in Model)
-                    {
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-header-gradient text-center">
                         <tr>
-
-                            <!-- IMAGEN DEL PELUQUERO -->
-                            <td class="text-center">
-                                <!-- 🔵 Poné acá la URL de la imagen del peluquero -->
-                                <img src="../Multimedia/Peluquero.jpg"
-                                     class="rounded-circle border border-secondary"
-                                     style="width:45px;height:45px;object-fit:cover;">
-                            </td>
-
-                            <td class="fw-bold">@p.Nombre</td>
-                            <td>@p.Apellido</td>
-                            <td class="text-info">@p.Mail</td>
-
-                            <td>
-                                <ul class="list-unstyled mb-0 small">
-                                    @foreach (var j in p.Jornadas)
-                                    {
-                                        if (j.HoraDeInicio != j.HoraDeFin && j.Activo == true)
-                                        {
-                                            <li class="mb-1">
-                                                <span class="fw-bold text-light">@j.Dia:</span>
-                                                <span class="text-secondary">
-                                                    @j.HoraDeInicio - @j.HoraDeFin
-                                                </span>
-                                                <span class="badge bg-success ms-2">Activo</span>
-                                            </li>
-                                        }
-                                    }
-                                </ul>
-                            </td>
-
-                            <td class="text-center">
-
-                                <a asp-action="EditarPeluquero"
-                                   asp-route-id="@p.Id"
-                                   class="btn btn-sm btn-outline-warning me-2 shadow-sm">
-                                    ✏️ Editar
-                                </a>
-
-                                <a asp-action="EliminarPeluquero"
-                                   asp-route-id="@p.Id"
-                                   class="btn btn-sm btn-outline-danger shadow-sm"
-                                   onclick="return confirm('¿Seguro que deseas eliminar a este peluquero?');">
-                                    🗑️ Eliminar
-                                </a>
-
-                            </td>
+                            <th style="width: 65px;">Foto</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Mail</th>
+                            <th>Jornadas</th>
+                            <th style="width: 160px;">Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
 
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <!-- Foto -->
+                                <td class="text-center">
+                                    <div class="peluquero-img-wrapper">
+                                        <img src="/Multimedia/Peluquero.jpg"
+                                             class="peluquero-img shadow-sm" />
+                                    </div>
+                                </td>
+
+                                <td class="fw-bold">@p.Nombre</td>
+                                <td>@p.Apellido</td>
+                                <td class="text-info">@p.Mail</td>
+
+                                <!-- Jornadas como mini-tabla -->
+                                <td>
+                                    <table class="table table-sm table-borderless mb-0 text-light">
+                                        <tbody>
+                                            @foreach (var j in p.Jornadas)
+                                            {
+                                                if (j.HoraDeInicio != j.HoraDeFin && j.Activo)
+                                                {
+                                                    <tr>
+                                                        <td class="fw-semibold">@j.Dia</td>
+                                                        <td>@j.HoraDeInicio - @j.HoraDeFin</td>
+                                                        <td><span class="badge bg-success">Activo</span></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+
+                                <!-- Acciones -->
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a asp-action="EditarPeluquero" asp-route-id="@p.Id"
+                                           class="btn btn-sm btn-outline-warning btn-rounded shadow-sm w-100">
+                                            Editar
+                                        </a>
+
+                                        <a asp-action="EliminarPeluquero" asp-route-id="@p.Id"
+                                           class="btn btn-sm btn-outline-danger btn-rounded shadow-sm w-100"
+                                           onclick="return confirm('¿Seguro que deseas eliminar a este peluquero?');">
+                                            Eliminar
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
         </div>
+
     </div>
 </div>
-
-<style>
-    /* Gradiente sutil del header de tabla */
-    .table-gradient {
-        background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
-    }
-
-    /* Hover más moderno */
-    table.table-dark tbody tr:hover {
-        background-color: #2d3238 !important;
-        transition: 0.2s ease-in-out;
-    }
-</style>

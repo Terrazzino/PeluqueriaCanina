@@ -4,32 +4,90 @@
     ViewData["Title"] = "Eliminar Mascota";
 }
 
-<div class="glass-card mt-4 border border-danger">
+<div class="glass-card mt-4 border-danger">
 
-    <h3 class="text-danger mb-4 fw-semibold">
-        🗑️ Eliminar Mascota
+    <h3 class="form-title mb-4 text-danger">
+        Eliminar Mascota
     </h3>
 
-    <div class="alert alert-danger bg-opacity-75">
-        ⚠️ ¿Estás seguro que querés eliminar a <strong>@Model.Nombre</strong>?
+    <div class="alert-danger">
+        ¿Estás seguro que querés eliminar a <strong>@Model.Nombre</strong>?
     </div>
 
     <form asp-action="Eliminar" method="post">
 
         <input type="hidden" asp-for="Id" />
 
-        <div class="d-flex justify-content-between mt-4">
-
-            <a asp-action="Index" class="btn btn-outline-secondary rounded-2">
-                ↩️ Cancelar
-            </a>
-
-            <button type="submit" class="btn btn-danger rounded-2 fw-semibold">
-                🗑️ Eliminar
-            </button>
-
+        <div class="form-actions">
+            <a asp-action="Index" class="btn-outline">Cancelar</a>
+            <button type="submit" class="btn-danger">Eliminar</button>
         </div>
 
     </form>
 
 </div>
+
+<style>
+    /* Card estilo glass */
+    .glass-card {
+        background: rgba(28, 28, 28, 0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    /* Título */
+    .form-title {
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    /* Alerta de eliminación */
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.2);
+        border-left: 4px solid #dc3545;
+        color: #f0f0f0;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    /* Botones */
+    .btn-outline {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        color: #f0f0f0;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+            color: #1c1c1c;
+        }
+
+    .btn-danger {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: #dc3545;
+        color: #f0f0f0;
+        font-weight: 600;
+        border: none;
+        transition: all 0.2s;
+    }
+
+        .btn-danger:hover {
+            background: #e55361;
+        }
+</style>

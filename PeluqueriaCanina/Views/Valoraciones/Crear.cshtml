@@ -32,7 +32,7 @@
                 <textarea asp-for="Comentario" class="form-control" rows="3"></textarea>
             </div>
 
-            <button class="btn btn-success">Enviar valoración</button>
+            <button type="submit" class="btn btn-success">Enviar valoración</button>
         </form>
     </div>
 </div>
@@ -53,11 +53,35 @@
             color: #ccc;
             cursor: pointer;
             padding: 0 4px;
+            transition: color 0.2s;
         }
 
-            .star-rating input:checked ~ label,
+            /* Hover y selección */
             .star-rating label:hover,
             .star-rating label:hover ~ label {
                 color: gold;
             }
+
+        .star-rating input:checked ~ label {
+            color: gold;
+        }
 </style>
+
+@section Scripts {
+    <script>
+        // Mantener la estrella seleccionada al hacer hover en otra
+        const stars = document.querySelectorAll('.star-rating input');
+        stars.forEach(star => {
+            star.addEventListener('change', function() {
+                stars.forEach(s => {
+                    const label = document.querySelector(`label[for='${s.id}']`);
+                    if(s.checked){
+                        label.style.color = 'gold';
+                    } else {
+                        label.style.color = '#ccc';
+                    }
+                });
+            });
+        });
+    </script>
+}

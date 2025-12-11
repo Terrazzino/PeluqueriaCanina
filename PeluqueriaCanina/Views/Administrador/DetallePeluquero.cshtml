@@ -2,56 +2,48 @@
     ViewData["Title"] = "Detalle de " + ViewBag.Peluquero;
 }
 
-<div class="container mt-5">
-    <div class="card bg-dark text-light rounded-4 shadow-lg border-0">
+<div class="overlay-dark p-4">
+    <div class="container d-flex justify-content-center">
 
-        <!-- Header -->
-        <div class="card-header bg-gradient rounded-top-4 p-4"
-             style="background: linear-gradient(135deg, #ffc107, #ffdd57); color: #222;">
-            <h4 class="text-center fw-bold m-0" style="letter-spacing:1px;">
-                💈 Reporte de @ViewBag.Peluquero (@ViewBag.Servicio)
-            </h4>
-        </div>
+        <!-- Card principal -->
+        <div class="card card-custom text-light shadow-lg rounded-4 p-4 w-100" style="max-width: 800px;">
 
-        <!-- Imagen opcional -->
-        <!-- ⬇⬇⬇ PONÉ TU IMAGEN ACÁ (foto del peluquero o banner del servicio) -->
-        <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid mx-auto d-block my-3 rounded-3"
-             style="max-height:200px; object-fit:cover;" /> -->
-        <!-- ⬆⬆⬆ FIN IMAGEN OPCIONAL -->
-        <!-- Body -->
-        <div class="card-body text-center">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div class="text-center w-100">
+                    <h2 class="text-light fw-bold mb-1">Reporte de @ViewBag.Peluquero</h2>
+                    <p class="text-secondary mb-0">Servicio: @ViewBag.Servicio</p>
+                </div>
+            </div>
 
-            <canvas id="graficoTurnos" style="max-height:400px"></canvas>
+            <!-- Gráfico -->
+            <div class="table-responsive mt-3">
+                <canvas id="graficoTurnos" style="max-height: 400px; width: 100%;"></canvas>
+            </div>
 
-            <div class="mt-4">
-
+            <!-- Resumen -->
+            <div class="mt-4 text-center">
                 @{
                     var recaudado = ViewBag.Recaudado as decimal? ?? 0m;
-                    string claseColor = recaudado < 40000 ? "text-danger fw-bold" :
-                    recaudado < 50000 ? "text-warning fw-bold" : "text-success fw-bold";
+                    string claseColor =
+                    recaudado < 40000 ? "text-danger" :
+                    recaudado < 50000 ? "text-warning" :
+                    "text-success";
                 }
-
-                <h5 class="mt-3">
-                    💵 Total Recaudado:
-                    <span class="@claseColor">$@String.Format("{0:N2}", recaudado)</span>
-                </h5>
-
+                <h5>Total Recaudado: <span class="@claseColor">$@String.Format("{0:N2}", recaudado)</span></h5>
+                <p class="text-secondary small mt-1">Basado en los turnos del período seleccionado.</p>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="card-footer bg-dark text-center rounded-bottom-4">
-
-            <a asp-action="DetalleServicio"
-               asp-route-servicio="@(Html.Raw(ViewBag.Servicio))"
-               class="btn btn-outline-light rounded-3 me-2">
-                ⬅ Volver al servicio
-            </a>
-
-            <a asp-action="Reportes"
-               class="btn btn-primary rounded-3 fw-semibold">
-                🏠 Inicio de reportes
-            </a>
+            <!-- Botones -->
+            <div class="d-flex justify-content-center gap-2 mt-4">
+                <a asp-action="DetalleServicio" asp-route-servicio="@(Html.Raw(ViewBag.Servicio))"
+                   class="btn btn-outline-light btn-rounded shadow-sm">
+                    Volver
+                </a>
+                <a asp-action="Reportes" class="btn btn-primary btn-rounded shadow-sm">
+                    Reportes
+                </a>
+            </div>
 
         </div>
 
@@ -68,11 +60,12 @@
                 label: "Turnos de @ViewBag.Peluquero",
                 data: [@(ViewBag.Realizados ?? 0), @(ViewBag.Cancelados ?? 0)],
                 backgroundColor: [
-                    "rgba(54, 162, 235, 0.7)",
-                    "rgba(255, 99, 132, 0.7)"
+                    "rgba(54, 162, 235, 0.75)",
+                    "rgba(255, 99, 132, 0.75)"
                 ],
                 borderColor: "white",
-                borderWidth: 2
+                borderWidth: 2,
+                hoverOffset: 12
             }]
         };
 
@@ -83,12 +76,16 @@
             data: datos,
             options: {
                 plugins: {
-                    legend: { position: "bottom", labels: { color: "white" } },
+                    legend: {
+                        position: "bottom",
+                        labels: { color: "white", padding: 20 }
+                    },
                     title: {
                         display: true,
                         text: "Distribución de Turnos",
                         color: "white",
-                        font: { size: 16 }
+                        font: { size: 18, weight: "bold" },
+                        padding: 20
                     }
                 }
             }

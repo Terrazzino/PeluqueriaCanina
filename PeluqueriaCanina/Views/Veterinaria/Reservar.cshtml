@@ -6,7 +6,7 @@
 }
 
 <div class="glass-card mt-4 p-4">
-    <h3 class="text-white mb-4">🩺 Reservar Turno en Veterinaria</h3>
+    <h3 class="text-white mb-4">Reservar Turno en Veterinaria</h3>
 
     <form id="formReservar">
         @Html.AntiForgeryToken()
@@ -31,9 +31,31 @@
 
         <hr class="mt-4" />
 
-        <div id="horariosContainer"></div>
+        <div id="horariosContainer" class="d-flex flex-wrap gap-2"></div>
     </form>
 </div>
+
+<style>
+    .glass-card {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    .horario-btn {
+        flex: 0 0 auto;
+        min-width: 90px;
+        margin: 2px;
+        transition: 0.2s;
+    }
+
+        .horario-btn:hover {
+            transform: scale(1.05);
+        }
+</style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -54,12 +76,11 @@
                         return;
                     }
 
-                    let html = "<h5 class='text-white mb-3'>Horarios disponibles:</h5><div class='d-flex flex-wrap gap-2'>";
+                    let html = "<h5 class='text-white mb-3 w-100'>Horarios disponibles:</h5>";
                     data.forEach(h => {
                         const hora = new Date(h).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         html += `<button type="button" class="btn btn-sm btn-success horario-btn" data-hora="${h}">${hora}</button>`;
                     });
-                    html += "</div>";
                     $("#horariosContainer").html(html);
 
                     $(".horario-btn").click(function () {
@@ -68,12 +89,13 @@
                         Swal.fire({
                             title: "Confirmar turno",
                             text: "¿Querés reservar este horario?",
+                            icon: "question",
                             showCancelButton: true,
-                            confirmButtonText: "Confirmar"
+                            confirmButtonText: "Confirmar",
+                            cancelButtonText: "Cancelar"
                         }).then(result => {
                             if (result.isConfirmed) {
 
-                                // 🔥 NUEVO POST CORRECTO CON ANTIFORGERY POR HEADER
                                 $.ajax({
                                     url: "/Veterinaria/ReservarTurno",
                                     method: "POST",
@@ -109,5 +131,4 @@
                 .fail(() => Swal.fire("Error", "No se pudo obtener disponibilidad", "error"));
         });
     </script>
-
 }

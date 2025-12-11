@@ -6,8 +6,8 @@
 
 <div class="glass-card mt-4">
 
-    <h3 class="text-warning mb-4 fw-semibold">
-        ✏️ Editar Mascota
+    <h3 class="form-title mb-4">
+        Editar Mascota
     </h3>
 
     <form asp-action="Editar" method="post">
@@ -15,39 +15,128 @@
         <input type="hidden" asp-for="Id" />
 
         <!-- Nombre -->
-        <div class="mb-3">
-            <label asp-for="Nombre" class="form-label text-white"></label>
-            <input asp-for="Nombre" class="form-control dark-input" />
-            <span asp-validation-for="Nombre" class="text-danger"></span>
+        <div class="form-group">
+            <label asp-for="Nombre"></label>
+            <input asp-for="Nombre" class="dark-input" />
+            <span asp-validation-for="Nombre" class="validation-text"></span>
         </div>
 
         <!-- Raza -->
-        <div class="mb-3">
-            <label asp-for="Raza" class="form-label text-white"></label>
-            <input asp-for="Raza" class="form-control dark-input" />
-            <span asp-validation-for="Raza" class="text-danger"></span>
+        <div class="form-group">
+            <label asp-for="Raza"></label>
+            <input asp-for="Raza" class="dark-input" />
+            <span asp-validation-for="Raza" class="validation-text"></span>
         </div>
 
         <!-- Fecha de Nacimiento -->
-        <div class="mb-3">
-            <label asp-for="FechaDeNacimiento" class="form-label text-white"></label>
-            <input asp-for="FechaDeNacimiento" type="date" class="form-control dark-input" />
-            <span asp-validation-for="FechaDeNacimiento" class="text-danger"></span>
+        <div class="form-group">
+            <label asp-for="FechaDeNacimiento"></label>
+            <input asp-for="FechaDeNacimiento" type="date" class="dark-input" />
+            <span asp-validation-for="FechaDeNacimiento" class="validation-text"></span>
         </div>
 
         <!-- Peso -->
-        <div class="mb-3">
-            <label asp-for="Peso" class="form-label text-white"></label>
-            <input asp-for="Peso" type="number" step="0.1" class="form-control dark-input" />
-            <span asp-validation-for="Peso" class="text-danger"></span>
+        <div class="form-group">
+            <label asp-for="Peso"></label>
+            <input asp-for="Peso" type="number" step="0.1" class="dark-input" />
+            <span asp-validation-for="Peso" class="validation-text"></span>
         </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <a asp-action="Index" class="btn btn-outline-secondary rounded-2">↩️ Volver</a>
-            <button type="submit" class="btn btn-warning text-dark rounded-2 fw-semibold">
-                💾 Guardar Cambios
-            </button>
+        <div class="form-actions">
+            <a asp-action="Index" class="btn-outline">Volver</a>
+            <button type="submit" class="btn-warning">Guardar Cambios</button>
         </div>
 
     </form>
 </div>
+
+<style>
+    /* Card estilo glass */
+    .glass-card {
+        background: rgba(28, 28, 28, 0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
+
+    /* Título */
+    .form-title {
+        font-weight: 600;
+        color: #ffc107;
+    }
+
+    /* Formulario */
+    .form-group {
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #f0f0f0;
+        }
+
+    .dark-input {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(40,40,40,0.8);
+        color: #f0f0f0;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+        .dark-input:focus {
+            outline: none;
+            border-color: #ffc107;
+            box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        }
+
+    /* Validaciones */
+    .validation-text {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    /* Botones */
+    .btn-outline {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        color: #f0f0f0;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+            color: #1c1c1c;
+        }
+
+    .btn-warning {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: #ffc107;
+        color: #1c1c1c;
+        font-weight: 600;
+        border: none;
+        transition: all 0.2s;
+    }
+
+        .btn-warning:hover {
+            background: #ffd24d;
+        }
+</style>

@@ -5,281 +5,271 @@
     ViewData["Title"] = "Mis Turnos";
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">📅 Mis Turnos</h4>
-            <div>
-                <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-secondary me-2">
-                    ⬅️ Volver al Inicio
-                </a>
-                <a href="/Pago/MisPagos" class="btn btn-light btn-sm me-2">
-                    💳 Mis Pagos
-                </a>
-                <a href="/Turno/Crear" class="btn btn-light btn-sm">
-                    ➕ Reservar Turno
-                </a>
-            </div>
-        </div>
+<div class="glass-card mt-4">
 
-        <div class="card-body">
-            @Html.AntiForgeryToken()
-
-            @if (Model == null || Model.Count == 0)
-            {
-                <div class="alert alert-info text-center mb-0">
-                    Todavía no tenés turnos reservados.
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-success">
-                            <tr>
-                                <th>Mascota</th>
-                                <th>Peluquero</th>
-                                <th>Servicio</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Estado</th>
-                                <th>Precio</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var turno in Model)
-                            {
-                                <tr>
-                                    <td>@turno.Mascota.Nombre</td>
-                                    <td>@turno.Peluquero.Nombre @turno.Peluquero.Apellido</td>
-                                    <td>@turno.Servicio.NombreDelServicio</td>
-                                    <td>@turno.FechaHora.ToString("dd/MM/yyyy")</td>
-                                    <td>@turno.FechaHora.ToString("HH:mm")</td>
-
-                                    <!-- Badge de estado usando State -->
-                                    <td>
-                                        <span class="badge
-                                              @(turno.Estado switch
-                                              {
-                                                  EstadoTurno.Pendiente => "bg-warning text-dark",
-                                                  EstadoTurno.Confirmado => "bg-success",
-                                                  EstadoTurno.Completado => "bg-info",
-                                                  EstadoTurno.Cancelado => "bg-danger",
-                                                  _ => "bg-secondary"
-                                              })">
-                                    @turno.EstadoActual.Nombre
-                                </span>
-                            </td>
-
-                                    <td><strong>$@turno.Precio</strong></td>
-
-                                    <!-- Acciones usando State -->
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                    @if (turno.EstadoActual.PuedeModificar)
-                                            {
-                                                <button class="btn btn-warning btn-sm"
-                                                        onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId', '@turno.Duracion.TotalMinutes')">
-                                                    ✏️
-                                                </button>
-                                            }
-
-                                            @if (turno.EstadoActual.PuedeCancelar)
-                                            {
-                                                <button class="btn btn-danger btn-sm"
-                                                        onclick="cancelarTurno(@turno.Id)">
-                                                    ❌
-                                                </button>
-                                            }
-
-                                            @if (turno.EstadoActual.PuedeValorar)
-                                            {
-                                                @if (turno.Valoracion == null)
-                                                {
-                                                    <a class="btn btn-sm btn-success"
-                                                       href="/Valoraciones/Crear?turnoId=@turno.Id">
-                                                        ⭐ Valorar
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-primary">
-                                                        ✔ Valorado (@turno.Valoracion.Puntuacion ★)
-                                                    </span>
-                                                }
-                                            }
-
-                                            @if (!turno.EstadoActual.PuedeModificar &&
-                                                                                !turno.EstadoActual.PuedeCancelar &&
-                                                                                !turno.EstadoActual.PuedeValorar)
-                                            {
-                                                <span class="text-muted">-</span>
-                                            }
-                                        </div>
-                                    </td>
-
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+    <!-- Header -->
+    <div class="header d-flex justify-content-between align-items-center mb-4">
+        <h3 class="title text-success">Mis Turnos</h3>
+        <div class="actions">
+            <a asp-controller="Cliente" asp-action="Dashboard" class="btn-outline">Volver al Inicio</a>
+            <a href="/Pago/MisPagos" class="btn-light-sm">Mis Pagos</a>
+            <a href="/Turno/Crear" class="btn-light-sm">Reservar Turno</a>
         </div>
     </div>
+
+    @Html.AntiForgeryToken()
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert-info text-center mb-0">
+            Todavía no tenés turnos reservados.
+        </div>
+    }
+    else
+    {
+        <div class="table-container">
+            <table class="table-dark table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Mascota</th>
+                        <th>Peluquero</th>
+                        <th>Servicio</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Precio</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var turno in Model)
+                    {
+                        <tr>
+                            <td>@turno.Mascota.Nombre</td>
+                            <td>@turno.Peluquero.Nombre @turno.Peluquero.Apellido</td>
+                            <td>@turno.Servicio.NombreDelServicio</td>
+                            <td>@turno.FechaHora.ToString("dd/MM/yyyy")</td>
+                            <td>@turno.FechaHora.ToString("HH:mm")</td>
+                            <td>
+                                <span class="badge-estado @(turno.Estado switch
+                                      {
+                                          EstadoTurno.Pendiente => "pendiente",
+                                          EstadoTurno.Confirmado => "confirmado",
+                                          EstadoTurno.Completado => "completado",
+                                          EstadoTurno.Cancelado => "cancelado",
+                                          _ => "otro"
+                                      })">
+                            @turno.EstadoActual.Nombre
+                        </span>
+                    </td>
+                    <td><strong>$@turno.Precio</strong></td>
+                    <td class="text-center">
+                        <div class="btn-group">
+                            @if (turno.EstadoActual.PuedeModificar)
+                                    {
+                                        <button class="btn-warning-sm" onclick="modificarTurno(@turno.Id, '@turno.PeluqueroId', '@turno.Duracion.TotalMinutes')">
+                                            Editar
+                                        </button>
+                                    }
+                                    @if (turno.EstadoActual.PuedeCancelar)
+                                    {
+                                        <button class="btn-danger-sm" onclick="cancelarTurno(@turno.Id)">
+                                            Cancelar
+                                        </button>
+                                    }
+                                    @if (turno.EstadoActual.PuedeValorar)
+                                    {
+                                        @if (turno.Valoracion == null)
+                                        {
+                                            <a class="btn-success-sm" href="/Valoraciones/Crear?turnoId=@turno.Id">Valorar</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-estado valorado">Valorado (@turno.Valoracion.Puntuacion ★)</span>
+                                        }
+                                    }
+                                    @if (!turno.EstadoActual.PuedeModificar &&
+                                                                !turno.EstadoActual.PuedeCancelar &&
+                                                                !turno.EstadoActual.PuedeValorar)
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    /* Card estilo glass */
+    .glass-card {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #f0f0f0;
+    }
 
-    <script>
-        function handleAjaxError(xhr) {
-            let msg = "Ocurrió un error inesperado.";
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-            if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
-            else if (xhr.status === 400) msg = "El turno se superpone con otro existente.";
-            else if (xhr.status === 404) msg = "El turno no existe.";
-            else if (xhr.status === 500) msg = "Error interno del servidor.";
+    .title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
 
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: msg
-            });
+    .actions a {
+        margin-left: 0.5rem;
+        text-decoration: none;
+    }
+
+    /* Botones */
+    .btn-outline {
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        color: #f0f0f0;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+            color: #1c1c1c;
         }
 
-        function cancelarTurno(id) {
-            Swal.fire({
-                title: "¿Cancelar turno?",
-                text: "Esta acción no se puede deshacer.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#6c757d",
-                confirmButtonText: "Sí, cancelar"
-            }).then((result) => {
-                if (!result.isConfirmed) return;
+    .btn-light-sm {
+        padding: 0.3rem 0.6rem;
+        border-radius: 8px;
+        background: #ddd;
+        color: #1c1c1c;
+        font-size: 0.85rem;
+        margin-left: 0.5rem;
+        transition: all 0.2s;
+    }
 
-                $.post(`/Turno/Cancelar/${id}`, function (response) {
-                    if (response.ok) {
-                        Swal.fire("Cancelado", response.message, "success")
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire("Error", response.message, "error");
-                    }
-                }).fail(handleAjaxError);
-            });
+        .btn-light-sm:hover {
+            background: #ccc;
         }
 
-        function modificarTurno(turnoId, peluqueroId, duracionMinutos) {
-            duracionMinutos = Number(duracionMinutos);
-            const horas = Math.floor(duracionMinutos / 60);
-            const minutos = duracionMinutos % 60;
-            const slotDuration = `${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}:00`;
+    .btn-warning-sm {
+        background: #ffc107;
+        color: #1c1c1c;
+        border: none;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        margin-right: 0.25rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
 
-            Swal.fire({
-                title: "Seleccioná un nuevo horario",
-                html: `<div id="calendarMod" style="min-height:400px;border:1px solid #ddd;"></div>`,
-                width: "800px",
-                showCancelButton: true,
-                confirmButtonText: "Guardar",
-                cancelButtonText: "Cancelar",
-
-                preConfirm: () => {
-                    const selected = window.calendarMod?.selectedStart;
-
-                    if (!selected) {
-                        Swal.showValidationMessage("Debés seleccionar un horario.");
-                        return false;
-                    }
-
-                    if (selected.getTime() < new Date().getTime()) {
-                        Swal.showValidationMessage("No podés elegir una fecha pasada.");
-                        return false;
-                    }
-
-                    return true;
-                },
-
-                didOpen: () => {
-                    const calendarEl = document.getElementById("calendarMod");
-
-                    const calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: "timeGridWeek",
-                        slotDuration: slotDuration,
-                        slotLabelInterval: slotDuration,
-                        allDaySlot: false,
-                        slotMinTime: "09:00:00",
-                        slotMaxTime: "18:00:00",
-                        locale: "es",
-                        selectable: true,
-                        nowIndicator: true,
-                        validRange: { start: new Date() },
-
-                        events: function(fetchInfo, successCallback) {
-                            $.getJSON('/Turno/GetDisponibilidad', {
-                                peluqueroId: peluqueroId,
-                                start: fetchInfo.startStr,
-                                end: fetchInfo.endStr,
-                                duracion: duracionMinutos
-                            })
-                            .done(successCallback)
-                            .fail(() => {
-                                Swal.fire("Error", "No se pudo cargar la disponibilidad.", "error");
-                                successCallback([]);
-                            });
-                        },
-
-                        eventClick: function(info) {
-                            if (info.event.title !== "Disponible") return;
-
-                            calendar.getEvents().forEach(e => {
-                                if (e.title === "Disponible") {
-                                    e.setProp("backgroundColor", "#28a745");
-                                }
-                            });
-
-                            info.event.setProp("backgroundColor", "#007bff");
-
-                            calendar.selectedStart = info.event.start;
-                        }
-                    });
-
-                    calendar.render();
-                    window.calendarMod = calendar;
-                }
-
-            }).then((result) => {
-                if (!result.isConfirmed) return;
-
-                Swal.fire({
-                    title: "Guardando...",
-                    text: "Por favor esperá",
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => Swal.showLoading()
-                });
-
-                $.ajax({
-                    url: "/Turno/Modificar",
-                    method: "POST",
-                    data: {
-                        id: turnoId,
-                        fechaHora: window.calendarMod.selectedStart.toISOString(),
-                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                    },
-
-                    success: function (response) {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Turno modificado",
-                            text: response.message || "El turno fue actualizado."
-                        }).then(() => location.reload());
-                    },
-
-                    error: handleAjaxError
-                });
-            });
+        .btn-warning-sm:hover {
+            background: #e0a800;
         }
-    </script>
-}
+
+    .btn-danger-sm {
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        margin-right: 0.25rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+        .btn-danger-sm:hover {
+            background: #c82333;
+        }
+
+    .btn-success-sm {
+        background: #28a745;
+        color: #fff;
+        border: none;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .btn-success-sm:hover {
+            background: #36c157;
+        }
+
+    /* Table dark */
+    .table-dark {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-dark th, .table-dark td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #444;
+        }
+
+        .table-dark thead {
+            background: #198754;
+            color: #fff;
+            font-weight: 600;
+        }
+
+    .table-hover tbody tr:hover {
+        background: rgba(40,40,40,0.7);
+    }
+
+    /* Badges de estado */
+    .badge-estado {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 70px;
+        text-align: center;
+    }
+
+        .badge-estado.pendiente {
+            background: #ffc107;
+            color: #1c1c1c;
+        }
+
+        .badge-estado.confirmado {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .badge-estado.completado {
+            background: #17a2b8;
+            color: #fff;
+        }
+
+        .badge-estado.cancelado {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .badge-estado.otro {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .badge-estado.valorado {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+    /* Table container para scroll si es necesario */
+    .table-container {
+        overflow-x: auto;
+    }
+</style>

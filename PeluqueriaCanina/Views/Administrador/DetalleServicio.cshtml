@@ -2,37 +2,34 @@
     ViewData["Title"] = "Detalle del servicio " + ViewBag.Servicio;
 }
 
-<div class="container mt-5">
+<div class="overlay-dark p-4">
+    <div class="container d-flex justify-content-center">
 
-    <div class="card bg-dark text-light shadow-lg rounded-4 border-0">
+        <!-- Card principal centrada -->
+        <div class="card card-custom text-light shadow-lg rounded-4 p-4 w-100" style="max-width: 800px;">
 
-        <!-- Header -->
-        <div class="card-header rounded-top-4 p-4 text-center"
-             style="background: linear-gradient(135deg, #17a2b8, #5bc0de);">
-            <h4 class="fw-bold mb-0" style="letter-spacing:1px;">
-                💈 Peluqueros que más realizaron @ViewBag.Servicio
-            </h4>
-        </div>
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <h2 class="text-light fw-bold mb-1 text-center w-100">
+                    Peluqueros que más realizaron @ViewBag.Servicio
+                </h2>
 
-        <!-- Imagen opcional -->
-        <!-- ⬇⬇⬇ PONÉ TU IMAGEN ACA (foto del servicio) -->
-        <!-- <img src="RUTA_DE_TU_IMAGEN" class="img-fluid mx-auto d-block my-3 rounded-3"
-             style="max-height:200px; object-fit:cover;" /> -->
-        <!-- ⬆⬆⬆ FIN IMAGEN -->
-        <!-- Gráfico -->
-        <div class="card-body text-center">
-            <canvas id="graficoPeluqueros" style="max-height:400px"></canvas>
-        </div>
+                <div class="d-flex justify-content-center mt-2 w-100">
+                    <a asp-action="Reportes"
+                       class="btn btn-outline-light btn-rounded shadow-sm">
+                        Volver al reporte principal
+                    </a>
+                </div>
+            </div>
 
-        <!-- Footer -->
-        <div class="card-footer bg-dark text-center rounded-bottom-4">
-            <a asp-action="Reportes" class="btn btn-outline-light rounded-3 px-4">
-                ⬅ Volver al reporte principal
-            </a>
+            <!-- Gráfico -->
+            <div class="table-responsive mt-3">
+                <canvas id="graficoPeluqueros" style="max-height: 420px; width: 100%;"></canvas>
+            </div>
+
         </div>
 
     </div>
-
 </div>
 
 @section Scripts {
@@ -52,7 +49,7 @@
                 datasets: [{
                     label: 'Cantidad de ' + servicio,
                     data: cantidades,
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
@@ -67,12 +64,18 @@
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1, color: 'white' } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: 'white' }
+                    },
                     x: { ticks: { color: 'white' } }
                 },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { titleColor: 'black', bodyColor: 'black' }
+                    tooltip: {
+                        titleColor: '#000',
+                        bodyColor: '#000'
+                    }
                 }
             }
         });

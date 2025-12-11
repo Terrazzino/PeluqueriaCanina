@@ -1,5 +1,4 @@
-﻿SCRIPTS PARA VISTAS EN BASE DE DATOS DE REPORTES
-
+﻿//VIEWS DE REPORTES DE SERVICIOS TOTALES
 CREATE OR ALTER VIEW vw_ReporteServiciosTotales AS
 SELECT
     s.Id,
@@ -11,6 +10,11 @@ LEFT JOIN Turnos t
     AND t.Estado = 4   -- Completado
 GROUP BY s.Id, s.NombreDelServicio;
 
+
+
+
+
+//VIEWS DE REPORTES DE PELUQUEROS POR SERVICIO
 CREATE OR ALTER VIEW vw_ReportePeluquerosPorServicio AS
 SELECT
     s.NombreDelServicio AS NombreServicio,
@@ -25,6 +29,11 @@ LEFT JOIN Turnos t
 WHERE p.Discriminator = 'Peluquero'
 GROUP BY s.NombreDelServicio, p.Nombre, p.Apellido;
 
+
+
+
+
+//VIEWS DE REPORTES DE DETALLES DE PELUQUEROS
 CREATE OR ALTER VIEW vw_ReporteDetallePeluquero AS
 SELECT
     s.NombreDelServicio AS NombreServicio,

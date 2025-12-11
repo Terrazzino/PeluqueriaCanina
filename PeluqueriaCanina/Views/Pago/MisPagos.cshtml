@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <div class="glass-card">
         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-            <h3 class="text-warning mb-0">💳 Mis Pagos</h3>
+            <h3 class="text-warning mb-0">Mis Pagos</h3>
 
             <a href="/Turno/Index" class="btn btn-outline-light btn-sm rounded-pill px-3">
                 <i class="bi bi-arrow-left"></i> Volver
@@ -41,43 +41,34 @@
                         @foreach (var pago in Model)
                         {
                             <tr>
-                                <td class="fw-bold text-warning">
-                                    #@pago.Id.ToString("D6")
-                                </td>
-
+                                <td class="fw-bold text-warning">#@pago.Id.ToString("D6")</td>
                                 <td>
                                     @pago.FechaPago.ToString("dd/MM/yyyy")<br>
                                     <small class="text-muted">@pago.FechaPago.ToString("HH:mm")</small>
                                 </td>
-
                                 <td>@pago.Turno.Servicio.NombreDelServicio</td>
                                 <td>@pago.Turno.Mascota.Nombre</td>
-
                                 <td>
                                     @switch (pago.MetodoPago.ToString())
                                     {
                                         case "Efectivo":
-                                            <span>💵 Efectivo</span>
+                                            <span>Efectivo</span>
                                             ; break;
                                         case "TarjetaDebito":
-                                            <span>💳 Débito</span>
+                                            <span>Débito</span>
                                             ; break;
                                         case "TarjetaCredito":
-                                            <span>💳 Crédito</span>
+                                            <span>Crédito</span>
                                             ; break;
                                         case "MercadoPago":
-                                            <span>📱 MP</span>
+                                            <span>MP</span>
                                             ; break;
                                         case "Transferencia":
-                                            <span>🏦 Transf.</span>
+                                            <span>Transferencia</span>
                                             ; break;
                                     }
                                 </td>
-
-                                <td class="fw-bold text-success">
-                                    $@pago.Monto.ToString("N2")
-                                </td>
-
+                                <td class="fw-bold text-success">$@pago.Monto.ToString("N2")</td>
                                 <td>
                                     @switch (pago.Estado.ToString())
                                     {
@@ -98,7 +89,6 @@
                                             ; break;
                                     }
                                 </td>
-
                                 <td>
                                     <a href="/Pago/Comprobante/@pago.Id"
                                        class="btn btn-sm btn-outline-warning rounded-pill px-3">
@@ -112,7 +102,7 @@
             </div>
 
             <!-- Resumen -->
-            <div class="glass-card mt-4">
+            <div class="glass-card mt-4 p-3">
                 <div class="row text-center">
                     <div class="col-md-3">
                         <h4 class="text-success">
@@ -138,12 +128,12 @@
                     <div class="col-md-3">
                         <h4 class="text-success">
                             $@(Model.Where(p => p.Estado == PeluqueriaCanina.Models.ClasesDePago.EstadoPago.Aprobado)
-                            .Sum(p => p.Monto).ToString("N2"))
-                        </h4>
-                        <p class="text-muted mb-0">Total Pagado</p>
-                    </div>
+                                                    .Sum(p => p.Monto).ToString("N2"))
+                    </h4>
+                    <p class="text-muted mb-0">Total Pagado</p>
                 </div>
             </div>
-        }
+        </div>
+                }
     </div>
 </div>

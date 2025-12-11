@@ -4,18 +4,29 @@
     var usuarioId = ViewBag.UsuarioId as int?;
 }
 
-<h3>Elegí con qué perfil querés ingresar</h3>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg rounded-4 p-4 bg-dark bg-opacity-75 text-light backdrop-blur"
+             style="backdrop-filter: blur(6px);">
 
-<form method="post" asp-action="EntrarComo">
-    <input type="hidden" name="usuarioId" value="@usuarioId" />
-    <div>
-        @foreach (var g in grupos)
-        {
-            <div>
-                <input type="radio" name="perfil" value="@g" id="@g" />
-                <label for="@g">@g</label>
-            </div>
-        }
+            <h3 class="text-center mb-4 fw-bold">Elegí con qué perfil querés ingresar</h3>
+
+            <form method="post" asp-action="EntrarComo">
+                <input type="hidden" name="usuarioId" value="@usuarioId" />
+
+                <div class="mb-3">
+                    @foreach (var g in grupos)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="perfil" value="@g" id="@g" required />
+                            <label class="form-check-label" for="@g">@g</label>
+                        </div>
+                    }
+                </div>
+                <div class="text-center mt-2">
+                    <button class="btn-neo">Entrar</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <button class="btn btn-primary mt-2">Entrar</button>
-</form>
+</div>

@@ -4,34 +4,37 @@
     ViewData["Title"] = "Mis Mascotas";
 }
 
-<div class="card shadow-sm mt-4 dark-card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">🐾 Mis Mascotas</h4>
+<div class="dark-card mt-4">
 
-        <div class="d-flex gap-2">
-            <a asp-controller="Cliente" asp-action="Dashboard" class="btn btn-outline-light">
-                ⬅️ Volver
+    <!-- Header -->
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h4>Mis Mascotas</h4>
+
+        <div class="header-actions">
+            <a asp-controller="Cliente" asp-action="Dashboard" class="btn-outline">
+                Volver
             </a>
 
-            <a asp-action="Crear" class="btn btn-success">
-                ➕ Nueva Mascota
+            <a asp-action="Crear" class="btn-success">
+                Nueva Mascota
             </a>
         </div>
     </div>
 
-    <div class="card-body">
+    <!-- Body -->
+    <div class="card-body-custom">
 
         @if (!Model.Any())
         {
-            <div class="text-center py-5 text-muted">
-                <h5 class="mb-3">Todavía no registraste ninguna mascota.</h5>
+            <div class="empty-state">
+                <h5>Todavía no registraste ninguna mascota.</h5>
                 <p>Podés agregar una usando el botón “Nueva Mascota”.</p>
             </div>
         }
         else
         {
             <div class="table-container">
-                <table class="table table-hover table-dark table-striped align-middle rounded">
+                <table class="table-custom">
                     <thead>
                         <tr>
                             <th>Foto</th>
@@ -40,7 +43,7 @@
                             <th>Nacimiento</th>
                             <th>Peso</th>
                             <th>Edad</th>
-                            <th class="text-center">Acciones</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,33 +52,25 @@
                             var edad = DateTime.Today.Year - mascota.FechaDeNacimiento.Year;
                             if (mascota.FechaDeNacimiento.Date > DateTime.Today.AddYears(-edad)) edad--;
 
-                            <!-- Placeholder temporal cuando todavía no tenés imagen -->
 @*                             var foto = string.IsNullOrEmpty(mascota.FotoUrl)
                             ? "/img/pet-default.png"
                             : mascota.FotoUrl; *@
 
                             <tr>
-                                <td style="width: 80px;">
-                                    <img src=""
-                                         class="rounded-circle shadow-sm"
-                                         style="width: 60px; height: 60px; object-fit: cover;" />
+                                <td>
+                                    <img src="" class="pet-img" />
                                 </td>
-
                                 <td>@mascota.Nombre</td>
                                 <td>@mascota.Raza</td>
                                 <td>@mascota.FechaDeNacimiento.ToShortDateString()</td>
                                 <td>@mascota.Peso kg</td>
                                 <td>@edad años</td>
-
-                                <td class="text-center">
-                                    <a asp-action="Editar" asp-route-id="@mascota.Id"
-                                       class="btn btn-warning btn-sm me-2">
-                                        ✏️ Editar
+                                <td class="actions-cell">
+                                    <a asp-action="Editar" asp-route-id="@mascota.Id" class="btn-warning btn-sm">
+                                        Editar
                                     </a>
-
-                                    <a asp-action="Eliminar" asp-route-id="@mascota.Id"
-                                       class="btn btn-danger btn-sm">
-                                        🗑️ Eliminar
+                                    <a asp-action="Eliminar" asp-route-id="@mascota.Id" class="btn-danger btn-sm">
+                                        Eliminar
                                     </a>
                                 </td>
                             </tr>
@@ -86,3 +81,157 @@
         }
     </div>
 </div>
+
+<style>
+    /* Card general */
+    .dark-card {
+        background: rgba(28,28,28,0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Header */
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #f0f0f0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .header-actions a {
+        text-decoration: none;
+        margin-left: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    /* Botones */
+    .btn-outline {
+        border: 1px solid #f8f9fa;
+        color: #f8f9fa;
+        background: transparent;
+    }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            color: #1c1c1c;
+        }
+
+    .btn-success {
+        background: #198754;
+        color: #fff;
+    }
+
+        .btn-success:hover {
+            background: #1fae5a;
+        }
+
+    /* Body */
+    .card-body-custom {
+        padding: 1.5rem;
+        color: #ccc;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 0;
+        color: #aaa;
+    }
+
+        .empty-state h5 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+    /* Tabla */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        min-width: 700px;
+    }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            color: #f0f0f0;
+        }
+
+        .table-custom thead th {
+            color: #ccc;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .table-custom tbody tr {
+            background: rgba(40,40,40,0.85);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .table-custom tbody tr:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            }
+
+    /* Imagen mascota */
+    .pet-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    /* Acciones */
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+        .actions-cell .btn-warning {
+            background: #ffc107;
+            color: #1c1c1c;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+            .actions-cell .btn-warning:hover {
+                background: #ffd24d;
+            }
+
+        .actions-cell .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+            .actions-cell .btn-danger:hover {
+                background: #c82333;
+            }
+</style>
